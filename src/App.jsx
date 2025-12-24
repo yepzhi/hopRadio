@@ -56,10 +56,11 @@ function App() {
         {/* Header / Logo */}
         <div className="mb-12 text-center">
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-2">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-400 to-white">hop</span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-600 to-red-800">Radio</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-500 to-blue-400">hop</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-400">Radio</span>
           </h1>
-          <p className="text-gray-400 italic tracking-widest text-sm md:text-base uppercase">We don't play what you want, we play what you need</p>
+          <p className="text-gray-400 italic tracking-widest text-sm md:text-base uppercase mb-1">We don't play what you want, we play what you need</p>
+          <p className="text-blue-500 font-bold tracking-wider text-xs md:text-sm uppercase">Straight from New York to the H City!</p>
         </div>
 
         {/* Player Card */}
@@ -153,10 +154,14 @@ function App() {
         </div>
 
         {/* Footer Ad / Info */}
-        <div className="mt-8 flex flex-col items-center gap-4">
+        <div className="mt-8 flex flex-col items-center gap-2">
           <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-900/50 px-4 py-2 rounded-full border border-gray-800">
             <Zap size={12} className="text-yellow-500" />
             <span>Powered by hopRadio Engine v1.0</span>
+          </div>
+
+          <div className="text-[10px] text-gray-500 mt-2">
+            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-blue-500 hover:text-white transition-colors">@yepzhi</a>
           </div>
         </div>
 

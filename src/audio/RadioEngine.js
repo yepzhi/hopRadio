@@ -147,6 +147,16 @@ class RadioEngine {
                 continue;
             }
             this.queue.push(randomTrack);
+
+            // 3. Random DJ Drop / Jingle Injection (e.g. 30% chance after a song)
+            if (Math.random() < 0.3) {
+                const jingles = this.playlist.filter(t => t.type === 'jingle');
+                if (jingles.length > 0) {
+                    const randomJingle = jingles[Math.floor(Math.random() * jingles.length)];
+                    // Don't play jingle if next is Ad (optional rule)
+                    this.queue.push(randomJingle);
+                }
+            }
         }
     }
 }
