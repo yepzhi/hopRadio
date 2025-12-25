@@ -41,6 +41,15 @@ class RadioEngine {
             adFrequency: 4, // Play ad every 4 songs
             songsSinceAd: 0
         };
+
+        // Audio Graph Components
+        this.context = null;
+        this.masterGain = null;
+        this.analyser = null;
+        this.filters = {};
+        this.isGraphInit = false;
+        this.inputGain = null; // New input gain node for our graph
+        this.masterGainHooked = false; // To track if Howler.masterGain has been redirected
     }
 
     // --- Public API ---
@@ -48,11 +57,56 @@ class RadioEngine {
     init() {
         // Prepare initial queue
         this._fillQueue();
+        // Defer graph creation until interaction/play to ensure Context exists
+    }
+
+    _initAudioGraph() {
+        if (this.isGraphInit) return;
+        if (!Howler.ctx) return;
+
+        console.log("RadioEngine: Initializing Static Audio Graph...");
+        const ctx = Howler.ctx;
+        this.context = ctx;
+
+        // Create EQ Filters
+        const lowBass = ctx.createBiquadFilter();
+        lowBass.type = 'lowshelf';
+        lowBass.frequency.value = 60;
+        lowBass.gain.value = 7.5;
+
+        const mid = ctx.createBiquadFilter();
+        mid.type = 'peaking';
+        mid.frequency.value = 1000;
+        mid.gain.value = 0;
+        mid.Q.value = 1;
+
+        const treble = ctx.createBiquadFilter();
+        treble.type = 'highshelf';
+        treble.frequency.value = 8000;
+        treble.gain.value = 9.1;
+
+        // Analyser
+        this.analyser = ctx.createAnalyser();
+        this.analyser.fftSize = 128;
+        this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+
+        // Input Point (for routing sources into)
+        this.inputGain = ctx.createGain();
+
+        // Connect Chain: input -> lowBass -> mid -> treble -> analyser -> destination
+        this.inputGain.connect(lowBass);
+        lowBass.connect(mid);
+        mid.connect(treble);
+        treble.connect(this.analyser);
+        this.analyser.connect(ctx.destination);
+
+        this.isGraphInit = true;
     }
 
     play() {
-        // Attempt to setup EQ on user interaction (when context resumes)
-        this.setupEqualizer();
+        // Attempt to setup EQ on user interaction
+        this._initAudioGraph();
+        this.resumeContext();
 
         if (!this.currentTrack && this.queue.length === 0) {
             this._fillQueue();
@@ -61,7 +115,6 @@ class RadioEngine {
         if (this.howl && !this.howl.playing()) {
             this.howl.play();
         } else if (!this.howl) {
-            // First time playing? Tune In (simulate live)
             this._playNext(true);
         }
 
@@ -138,8 +191,9 @@ class RadioEngine {
                     console.log(`RadioEngine: Tuning in live... skipping to ${randomSeek.toFixed(1)}s`);
                     this.howl.seek(randomSeek);
                 }
-                // Ensure EQ is attached
-                this.setupEqualizer();
+
+                // Connect Audio to Graph
+                this._connectToGraph();
 
                 // Preload next track for gapless feel
                 this._preloadNext();
@@ -172,96 +226,89 @@ class RadioEngine {
     }
 
     _fillQueue() {
-        // ... (Queue filling logic remains same, implicit via replace boundaries if I narrow correctly)
-        // Actually I am replacing the whole block from _playNext to setupEqualizer start to update html5: true
-    }
-    // Wait, replacing chunks is better.
+        // Simple weighted random selection
+        if (this.rules.songsSinceAd >= this.rules.adFrequency) {
+            const ads = this.playlist.filter(t => t.type === 'ad');
+            if (ads.length > 0) {
+                this.queue.push(ads[Math.floor(Math.random() * ads.length)]);
+                this.rules.songsSinceAd = 0;
+                return;
+            }
+        }
 
-    // --- Equalizer Logic ---
-    setupEqualizer() {
-        // Only run once and if audio context exists
-        // With HTML5, we might need to re-hook if the audio element changes? 
-        // Howler might reuse the same pool of Audio elements.
-        if (this.equalizerSetup && this.analyser) return;
+        const music = this.playlist.filter(t => t.type === 'music');
+        let pool = [];
+        music.forEach(track => {
+            for (let i = 0; i < track.weight; i++) pool.push(track);
+        });
+
+        for (let i = 0; i < 5; i++) {
+            const randomTrack = pool[Math.floor(Math.random() * pool.length)];
+            if (this.queue.length > 0 && this.queue[this.queue.length - 1].id === randomTrack.id) {
+                i--; continue;
+            }
+            this.queue.push(randomTrack);
+
+            if (Math.random() < 0.3) {
+                const jingles = this.playlist.filter(t => t.type === 'jingle');
+                if (jingles.length > 0) {
+                    this.queue.push(jingles[Math.floor(Math.random() * jingles.length)]);
+                }
+            }
+        }
+    }
+
+    // --- Equalizer & Graph Connection ---
+    _connectToGraph() {
+        this._initAudioGraph(); // Ensure graph exists
+        if (!this.inputGain) return; // Should exist
 
         try {
             const ctx = Howler.ctx;
-            if (!ctx) return;
-
-            // Get the HTML5 Audio Node
-            let source;
+            // 1. Get HTML5 Node
+            let sourceNode = null;
             if (this.howl && this.howl._sounds.length > 0) {
                 const sound = this.howl._sounds[0];
                 if (sound._node && sound._node.tagName === 'AUDIO') {
-                    // Enable processing
-                    sound._node.crossOrigin = "anonymous";
-                    // Create source
-                    // Note: You can only call createMediaElementSource ONCE per element.
-                    // Howler recycles elements. This is tricky.
-                    // We check if it already has a source attached? No easy way.
-                    // We try catch.
-                    try {
-                        source = ctx.createMediaElementSource(sound._node);
-                    } catch (err) {
-                        // Already connected?
-                        console.log("Source likely already connected", err);
-                        return;
+                    // Check if we already attached a source to this element
+                    if (!sound._node._webAudioSource) {
+                        sound._node.crossOrigin = "anonymous";
+                        try {
+                            sound._node._webAudioSource = ctx.createMediaElementSource(sound._node);
+                        } catch (e) {
+                            console.warn("RadioEngine: Failed to create source (already exists?)", e);
+                        }
                     }
+                    sourceNode = sound._node._webAudioSource;
                 }
             }
 
-            if (!source) {
-                // Fallback or WebAudio mode
-                source = Howler.masterGain;
-                // If html5=true, this won't work for visualizer unless we routed it.
-                // If we fail to get source, visualizer will be flat.
-            }
-
-            // Create Filters
-            // ... (keep filters)
-            const lowBass = ctx.createBiquadFilter();
-            lowBass.type = 'lowshelf';
-            lowBass.frequency.value = 60;
-            lowBass.gain.value = 7.5;
-
-            const mid = ctx.createBiquadFilter();
-            mid.type = 'peaking';
-            mid.frequency.value = 1000;
-            mid.gain.value = 0;
-            mid.Q.value = 1;
-
-            const treble = ctx.createBiquadFilter();
-            treble.type = 'highshelf';
-            treble.frequency.value = 8000;
-            treble.gain.value = 9.1;
-
-            // Analyser for Visualizer
-            this.analyser = ctx.createAnalyser();
-            this.analyser.fftSize = 128; // 64 bars
-            this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
-
-            // Chain: source -> lowBass -> mid -> treble -> analyser -> destination
-
-            // If we are using HTML5 source, we define the chain.
-            // If Web Audio masterGain, we disconnect first.
-
-            if (source === Howler.masterGain) {
-                Howler.masterGain.disconnect();
-                Howler.masterGain.connect(lowBass);
+            // 2. Connect
+            if (sourceNode) {
+                // Connect to our graph
+                // Note: MediaElementSource can fan out, but we just need one connection to our InputGain.
+                // We disconnect first to be safe? No, disconnect() disconnects ALL.
+                // It's safe to connect multiple times, but let's avoid it.
+                // We can't easily check connection.
+                try {
+                    sourceNode.connect(this.inputGain);
+                } catch (e) {
+                    // ignore
+                }
             } else {
-                source.connect(lowBass);
+                // Web Audio Mode fallback (Howler.masterGain)
+                // If we are in Web Audio mode (html5: false), sound flows through masterGain.
+                // We want to redirect masterGain -> our graph.
+                if (!this.masterGainHooked) {
+                    Howler.masterGain.disconnect();
+                    Howler.masterGain.connect(this.inputGain);
+                    this.masterGainHooked = true;
+                }
             }
-
-            lowBass.connect(mid);
-            mid.connect(treble);
-            treble.connect(this.analyser);
-            this.analyser.connect(ctx.destination);
-
-            this.equalizerSetup = true;
-            console.log("Equalizer & Analyser Initialized (HTML5 Mode)");
+            // console.log("RadioEngine: Connected to Graph");
 
         } catch (e) {
-            console.error("Equalizer setup failed:", e);
+            console.error("RadioEngine: Audio Graph Error:", e);
         }
     }
 
