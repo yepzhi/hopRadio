@@ -1,4 +1,5 @@
 import { Howl, Howler } from 'howler';
+import { getSilentAudioDataUrl } from './silentAudio.js';
 
 // Initial mocked playlist for development
 // Helper to generate full path based on environment
@@ -50,6 +51,9 @@ class RadioEngine {
         this.isGraphInit = false;
         this.inputGain = null; // New input gain node for our graph
         this.masterGainHooked = false; // To track if Howler.masterGain has been redirected
+
+        // iOS Silent Audio Persistence
+        this.silentHowl = null;
     }
 
     // --- Public API ---
@@ -108,6 +112,9 @@ class RadioEngine {
         // Attempt to setup EQ on user interaction
         this._initAudioGraph();
         this.resumeContext();
+
+        // iOS 26: Start silent audio loop to keep audio session alive
+        this._startSilentLoop();
 
         if (!this.currentTrack && this.queue.length === 0) {
             this._fillQueue();
@@ -370,6 +377,29 @@ class RadioEngine {
                 this.resumeContext();
             }
         }, 5000); // Every 5 seconds
+    }
+
+    // iOS 26: Silent audio loop to trick iOS into keeping audio session alive
+    _startSilentLoop() {
+        if (this.silentHowl) return; // Already running
+
+        console.log("RadioEngine: Starting silent audio loop for iOS 26 persistence");
+        this.silentHowl = new Howl({
+            src: [getSilentAudioDataUrl()],
+            html5: true,
+            loop: true,
+            volume: 0.001, // Nearly inaudible but not zero (iOS may ignore zero volume)
+            preload: true
+        });
+        this.silentHowl.play();
+    }
+
+    _stopSilentLoop() {
+        if (this.silentHowl) {
+            this.silentHowl.stop();
+            this.silentHowl.unload();
+            this.silentHowl = null;
+        }
     }
 }
 
