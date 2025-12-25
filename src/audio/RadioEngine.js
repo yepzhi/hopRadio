@@ -57,7 +57,8 @@ class RadioEngine {
     init() {
         // Prepare initial queue
         this._fillQueue();
-        // Defer graph creation until interaction/play to ensure Context exists
+        // Setup iOS-specific audio persistence
+        this._setupIOSAudioPersistence();
     }
 
     _initAudioGraph() {
@@ -331,21 +332,44 @@ class RadioEngine {
                 ]
             });
 
+            // CRITICAL for iOS: Set playback state explicitly
+            navigator.mediaSession.playbackState = 'playing';
+
             navigator.mediaSession.setActionHandler('play', () => {
                 this.play();
-                if (this.onPlay) this.onPlay(); // Sync UI
+                if (this.onPlay) this.onPlay();
             });
             navigator.mediaSession.setActionHandler('pause', () => {
                 this.pause();
-                if (this.onLoadStart) this.onLoadStart(); // Sync UI (Reuse loading state as catch-all or just pause ui)
-                // Actually play/pause syncs via isPlaying state in App.jsx usually, but we need to ensure the App knows.
-                // Since App.jsx doesn't subscribe to onPause, we might need to add it or just rely on react state toggle if user clicks button.
-                // But for lockscreen control, we need to handle it.
-                // ideally dispatch an event.
             });
-            navigator.mediaSession.setActionHandler('previoustrack', null); // Disable previous
+            navigator.mediaSession.setActionHandler('previoustrack', null);
             navigator.mediaSession.setActionHandler('nexttrack', () => this.next());
+            // iOS sometimes requires these to be explicitly set
+            navigator.mediaSession.setActionHandler('seekbackward', null);
+            navigator.mediaSession.setActionHandler('seekforward', null);
+            navigator.mediaSession.setActionHandler('seekto', null);
         }
+    }
+
+    // iOS-specific: Keep audio context alive
+    _setupIOSAudioPersistence() {
+        // Resume context on visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && this.isPlaying) {
+                this.resumeContext();
+                // Try to resume playback if it was interrupted
+                if (this.howl && !this.howl.playing()) {
+                    this.howl.play();
+                }
+            }
+        });
+
+        // Periodic keepalive to prevent iOS from killing the audio context
+        setInterval(() => {
+            if (this.isPlaying && Howler.ctx) {
+                this.resumeContext();
+            }
+        }, 5000); // Every 5 seconds
     }
 }
 
