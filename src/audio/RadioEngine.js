@@ -30,6 +30,8 @@ class RadioEngine {
         this.volume = 0.8;
         this.onTrackChange = null;
         this.onTimeUpdate = null;
+        this.onLoadStart = null;
+        this.onPlay = null;
 
         // Howl instance
         this.howl = null;
@@ -110,7 +112,8 @@ class RadioEngine {
             this.rules.songsSinceAd = 0;
         }
 
-        // Notify UI
+        // Notify UI: Loading started
+        if (this.onLoadStart) this.onLoadStart();
         if (this.onTrackChange) this.onTrackChange(track);
 
         // Load Audio
@@ -118,19 +121,25 @@ class RadioEngine {
 
         this.howl = new Howl({
             src: [track.src],
-            html5: false, // Must be false for Web Audio API (Analyser/Visualizer) to work
+            html5: false, // Web Audio API
             volume: this.volume,
+            preload: true,
             onplay: () => {
-                // If this is the first "Tune In", seek to a random point to simulate live radio
+                // Notify UI: Playing started
+                if (this.onPlay) this.onPlay();
+
+                // If this is the first "Tune In", seek to a random point
                 if (isTuneIn && track.type === 'music') {
                     const duration = this.howl.duration();
-                    // Seek to random point between 10% and 80%
                     const randomSeek = duration * (0.1 + Math.random() * 0.7);
                     console.log(`RadioEngine: Tuning in live... skipping to ${randomSeek.toFixed(1)}s`);
                     this.howl.seek(randomSeek);
                 }
                 // Ensure EQ is attached
                 this.setupEqualizer();
+
+                // Preload next track for gapless feel
+                this._preloadNext();
             },
             onend: () => {
                 this._playNext();
@@ -142,6 +151,21 @@ class RadioEngine {
         });
 
         this.howl.play();
+    }
+
+    _preloadNext() {
+        if (this.queue.length === 0) return;
+        const nextTrack = this.queue[0];
+        console.log("RadioEngine: Preloading next:", nextTrack.title);
+        // Create a temporary Howl just to load the buffer
+        const nextHowl = new Howl({
+            src: [nextTrack.src],
+            html5: false,
+            preload: true,
+            volume: 0 // Muted, just loading
+        });
+        // We don't play it, just let it load into cache
+        // Howler caches by URL, so the next 'new Howl' with same SRC should be instant.
     }
 
     _fillQueue() {

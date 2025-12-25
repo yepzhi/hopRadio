@@ -8,7 +8,12 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [track, setTrack] = useState(null);
   const [isLive, setIsLive] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Download State
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
   // PWA State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -44,10 +49,71 @@ function App() {
     // Initialize Audio Engine
     radio.init();
 
-    // ... (rest of useEffect)
+    radio.onTrackChange = (newTrack) => {
+      setTrack(newTrack);
+    };
+
+    // Buffering Events
+    radio.onLoadStart = () => {
+      setIsBuffering(true);
+      setIsLive(false);
+    };
+
+    radio.onPlay = () => {
+      setIsBuffering(false);
+      setIsLive(true);
+    };
+
+    // Visualizer Loop
+    const renderVisualizer = () => {
+      if (!canvasRef.current) return;
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      // Get Data
+      const data = radio.getAudioData();
+
+      ctx.clearRect(0, 0, width, height);
+
+      // Force draw something if we expect to be playing but data is silent (browser issue debug)
+      if (isPlaying && !isBuffering && (!data || data[0] === 0)) {
+        // Draw faint idle line
+        ctx.beginPath();
+        ctx.moveTo(0, height / 2);
+        ctx.lineTo(width, height / 2);
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.1)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      if (data && isPlaying && !isBuffering) {
+        const barWidth = (width / 40) * 1.5; // Show first 40 bins
+        let x = width / 2; // Start center
+
+        // Draw symmetrical from center
+        for (let i = 0; i < 40; i++) {
+          const barHeight = (data[i] / 255) * height * 0.6;
+
+          ctx.fillStyle = i < 5 ? '#ef4444' : '#fbbf24'; // Red Bass, Gold Highs
+
+          // Right side
+          ctx.fillRect(x + (i * (barWidth + 1)), (height - barHeight) / 2, barWidth, barHeight);
+          // Left side
+          ctx.fillRect(x - (i * (barWidth + 1)) - barWidth, (height - barHeight) / 2, barWidth, barHeight);
+        }
+      }
+
+      animationRef.current = requestAnimationFrame(renderVisualizer);
+    };
+
+    renderVisualizer();
 
     return () => {
       // ... (cleanup)
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
@@ -66,8 +132,25 @@ function App() {
   };
 
   const handleDownload = () => {
-    // Mock download action
-    alert("Starting download: hopRadio Mock Mix (84MB)...");
+    if (isDownloading) return;
+    setIsDownloading(true);
+    setDownloadProgress(0);
+
+    // Simulate Download
+    const interval = setInterval(() => {
+      setDownloadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setIsDownloading(false);
+            setDownloadProgress(0);
+            alert("Download Completed: hopRadio Mix saved!");
+          }, 500);
+          return 100;
+        }
+        return prev + 5;
+      });
+    }, 100);
   };
 
   const handleInstallClick = async () => {
@@ -107,23 +190,23 @@ function App() {
       <div className="glass-panel rounded-[30px] p-8 md:p-10 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-5 mb-6 transition-all duration-500 relative overflow-hidden">
 
         {/* Real-Time Visualizer (Canvas Background) */}
-        {/* Placed behind content but inside glass card for depth */}
-        <div className="absolute inset-0 pointer-events-none opacity-60 z-0">
-          <canvas ref={canvasRef} width={450} height={100} className="w-full h-full object-cover"></canvas>
+        {/* Centered Vertically */}
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-60 z-0 h-32">
+          <canvas ref={canvasRef} width={450} height={150} className="w-full h-full object-contain"></canvas>
         </div>
 
         {/* Live Status - Upper Right */}
         <div className={`absolute top-6 right-6 text-xs uppercase tracking-[2px] font-bold flex items-center gap-2 z-20 ${isLive ? 'text-red-500' : 'text-gray-500'}`}>
           {isPlaying && isLive && <span className="w-2 h-2 rounded-full bg-red-600 live-dot-anim"></span>}
-          {isPlaying ? (isLive ? 'LIVE' : 'BUFFERING...') : ''}
+          {isPlaying ? (isBuffering ? 'BUFFERING...' : 'LIVE') : ''}
         </div>
 
         {/* Play Button */}
         <button
           onClick={togglePlay}
-          className="play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 text-5xl transition-colors cursor-pointer relative group mt-4 z-10"
+          className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 text-5xl transition-colors cursor-pointer relative group mt-4 z-10 ${isBuffering ? 'animate-pulse' : ''}`}
         >
-          <span className="ml-2">{isPlaying ? '⏸' : '▶'}</span>
+          <span className="ml-2">{isPlaying ? (isBuffering ? '⏳' : '⏸') : '▶'}</span>
         </button>
 
         {/* Now Playing Info */}
@@ -169,18 +252,35 @@ function App() {
         <AdSpace />
       </div>
 
-      {/* Offline Mix Button (New Feature) */}
+      {/* Offline Mix Button / Progress */}
       <button
         onClick={handleDownload}
-        className="glass-panel px-8 py-4 rounded-full flex items-center gap-3 text-sm font-medium hover:bg-white/5 hover:border-red-500/30 hover:text-white transition-all group"
+        disabled={isDownloading}
+        className="glass-panel px-8 py-4 rounded-full flex items-center gap-3 text-sm font-medium hover:bg-white/5 hover:border-red-500/30 hover:text-white transition-all group relative overflow-hidden"
       >
-        <Download size={18} className="text-gray-400 group-hover:text-red-400 transition-colors" />
-        <span className="text-gray-300">Download Offline Mix (84MB)</span>
+        {isDownloading ? (
+          <>
+            <div className="absolute inset-0 bg-red-900/40 transition-all duration-100" style={{ width: `${downloadProgress}%` }}></div>
+            <span className="relative z-10">{downloadProgress === 100 ? 'Completed!' : `Downloading Mix... ${downloadProgress}%`}</span>
+          </>
+        ) : (
+          <>
+            <Download size={18} className="text-gray-400 group-hover:text-red-400 transition-colors" />
+            <span className="text-gray-300">Download Offline Mix (84MB)</span>
+          </>
+        )}
       </button>
 
       {/* Footer */}
-      <div className="absolute bottom-6 right-8 text-xs text-gray-600 font-medium">
-        Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-600 hover:text-red-400 transition-colors">@yepzhi</a>
+      <div className="w-full max-w-4xl flex justify-between items-center absolute bottom-6 px-8 text-xs font-medium">
+        <div className="flex items-center gap-4">
+          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-white transition-colors flex items-center gap-1">
+            Do you like this? <span className="text-red-500 font-bold">Invest in this Project</span>
+          </a>
+        </div>
+        <div className="text-gray-600">
+          Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-600 hover:text-red-400 transition-colors">@yepzhi</a>
+        </div>
       </div>
 
     </div>
