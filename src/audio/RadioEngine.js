@@ -1,21 +1,23 @@
 import { Howl, Howler } from 'howler';
 
 // Initial mocked playlist for development
-// Weights: 1 (rare) to 10 (frequent)
+// Helper to generate full path based on environment
+const getPath = (filename) => `${import.meta.env.BASE_URL}tracks/${filename}`;
+
 const INITIAL_PLAYLIST = [
-    { id: 1, type: 'music', artist: 'T-Pain', title: "Can't Believe It", src: '/hopRadio/tracks/CantBelieveItTPain.mp3', weight: 8 },
-    { id: 2, type: 'music', artist: 'Pop Smoke', title: 'Dior', src: '/hopRadio/tracks/POPSMOKEDIOR.mp3', weight: 9 },
-    { id: 3, type: 'music', artist: 'GloRilla', title: 'Typa', src: '/hopRadio/tracks/GloRillaTypa.mp3', weight: 7 },
-    { id: 4, type: 'music', artist: 'Lil Uzi Vert', title: 'Just Wanna Rock', src: '/hopRadio/tracks/JustWannaR.mp3', weight: 8 },
-    { id: 5, type: 'music', artist: 'Unknown', title: '30 For 30', src: '/hopRadio/tracks/30For30.mp3', weight: 6 },
-    { id: 6, type: 'music', artist: 'Unknown', title: 'Help Me', src: '/hopRadio/tracks/HelpMe.mp3', weight: 6 },
-    { id: 7, type: 'music', artist: 'Unknown', title: 'Holy Blindfold', src: '/hopRadio/tracks/HolyBlindfold.mp3', weight: 6 },
-    { id: 8, type: 'music', artist: 'Unknown', title: 'Jan 31st', src: '/hopRadio/tracks/Jan31st.mp3', weight: 6 },
-    { id: 9, type: 'music', artist: 'Unknown', title: 'Ring Ring Ring', src: '/hopRadio/tracks/RingRingRing.mp3', weight: 5 },
-    { id: 10, type: 'music', artist: 'Unknown', title: 'She Ready', src: '/hopRadio/tracks/SheReady.mp3', weight: 6 },
-    { id: 11, type: 'music', artist: 'Unknown', title: 'Went Legit', src: '/hopRadio/tracks/WentLegit.mp3', weight: 6 },
-    // Keep placeholder Jingle/Ad for logic to not break, but point to a real file or leave as mock for now (logic handles error)
-    { id: 99, type: 'jingle', artist: 'hopRadio', title: 'Station ID', src: '/hopRadio/tracks/Intro.mp3', weight: 0 },
+    { id: 1, type: 'music', artist: 'T-Pain', title: "Can't Believe It", src: getPath('CantBelieveItTPain.mp3'), weight: 8 },
+    { id: 2, type: 'music', artist: 'Pop Smoke', title: 'Dior', src: getPath('POPSMOKEDIOR.mp3'), weight: 9 },
+    { id: 3, type: 'music', artist: 'GloRilla', title: 'Typa', src: getPath('GloRillaTypa.mp3'), weight: 7 },
+    { id: 4, type: 'music', artist: 'Lil Uzi Vert', title: 'Just Wanna Rock', src: getPath('JustWannaR.mp3'), weight: 8 },
+    { id: 5, type: 'music', artist: 'Unknown', title: '30 For 30', src: getPath('30For30.mp3'), weight: 6 },
+    { id: 6, type: 'music', artist: 'Unknown', title: 'Help Me', src: getPath('HelpMe.mp3'), weight: 6 },
+    { id: 7, type: 'music', artist: 'Unknown', title: 'Holy Blindfold', src: getPath('HolyBlindfold.mp3'), weight: 6 },
+    { id: 8, type: 'music', artist: 'Unknown', title: 'Jan 31st', src: getPath('Jan31st.mp3'), weight: 6 },
+    { id: 9, type: 'music', artist: 'Unknown', title: 'Ring Ring Ring', src: getPath('RingRingRing.mp3'), weight: 5 },
+    { id: 10, type: 'music', artist: 'Unknown', title: 'She Ready', src: getPath('SheReady.mp3'), weight: 6 },
+    { id: 11, type: 'music', artist: 'Unknown', title: 'Went Legit', src: getPath('WentLegit.mp3'), weight: 6 },
+    // Mock Jingle - ensuring it points to a file that might exist or handling failure gracefully
+    { id: 99, type: 'jingle', artist: 'hopRadio', title: 'Station ID', src: getPath('Intro.mp3'), weight: 0 },
 ];
 
 class RadioEngine {
@@ -105,8 +107,9 @@ class RadioEngine {
         if (this.onTrackChange) this.onTrackChange(track);
 
         // Load Audio
-        // Note: For now using placeholders or real files if they exist
-        // We will catch load errors to simulate generic radio if files missing
+        // Log the src being attempted for debugging
+        console.log("RadioEngine: Attempting to play:", track.src);
+
         this.howl = new Howl({
             src: [track.src],
             html5: true,
@@ -115,8 +118,8 @@ class RadioEngine {
                 this._playNext();
             },
             onloaderror: (id, err) => {
-                console.warn("Load Error, skipping:", track.title, err);
-                // Simulate playing for 2 seconds then skip (so UI doesn't crash in loop)
+                console.error("RadioEngine: Load Error for:", track.title, "Path:", track.src, "Error:", err);
+                // Simulate playing for 2 seconds then skip (so UI doesn't crash in loop if all fail)
                 setTimeout(() => this._playNext(), 2000);
             }
         });
@@ -220,3 +223,4 @@ class RadioEngine {
 }
 
 export const radio = new RadioEngine();
+
