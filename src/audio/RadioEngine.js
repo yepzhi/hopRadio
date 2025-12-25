@@ -72,7 +72,7 @@ class RadioEngine {
         const lowBass = ctx.createBiquadFilter();
         lowBass.type = 'lowshelf';
         lowBass.frequency.value = 60;
-        lowBass.gain.value = 7.5;
+        lowBass.gain.value = 4.0; // Reduced from 7.5 to prevent distortion on Android
 
         const mid = ctx.createBiquadFilter();
         mid.type = 'peaking';

@@ -192,11 +192,8 @@ function App() {
       setDownloadProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
-          setTimeout(() => {
-            setIsDownloading(false);
-            setDownloadProgress(0);
-            alert("Download Completed: hopRadio Mix saved!");
-          }, 500);
+          // Don't reset immediately, keep "Offline Ready" state active
+          setIsDownloading(false);
           return 100;
         }
         return prev + 5;
