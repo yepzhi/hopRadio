@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { radio } from './audio/RadioEngine';
-// Remove unused icons if we switch to the minimal HTML style, but keeping some for logic if needed
-import { Radio, Scan, WifiOff, Download, Smartphone } from 'lucide-react';
+import { WifiOff, Download } from 'lucide-react';
 import AdSpace from './components/AdSpace';
 import './App.css';
 
@@ -14,6 +13,10 @@ function App() {
   // PWA State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  // Visualizer Ref
+  const canvasRef = useRef(null);
+  const animationRef = useRef(null);
 
   useEffect(() => {
     // Network Status
@@ -43,12 +46,66 @@ function App() {
 
     setTimeout(() => setIsLive(true), 1500);
 
+    // Visualizer Loop
+    const renderVisualizer = () => {
+      if (!canvasRef.current) return;
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      // Get Data
+      const data = radio.getAudioData();
+
+      ctx.clearRect(0, 0, width, height);
+
+      if (!data || !isPlaying) {
+        // Draw flat line or idle animation (faint heartbeat)
+        ctx.beginPath();
+        ctx.moveTo(0, height - 10);
+        ctx.lineTo(width, height - 10);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else {
+        // Draw Frequency Bars
+        // We have 128 bins (fftSize 256). Usually upper bins are empty for music. Use first ~40-50.
+        // Let's draw centered mirrored bars for high tech look
+        const barWidth = (width / data.length) * 2;
+        let x = 0;
+
+        for (let i = 0; i < data.length; i++) {
+          const barHeight = (data[i] / 255) * height * 0.8;
+
+          // Gradient: Gold to Red
+          // We can vary color based on frequency
+          // Bass (low i) -> Red, Highs (high i) -> Gold
+          const hue = i < 10 ? 0 : 45; // Red then Gold
+          ctx.fillStyle = i < 20 ? '#ef4444' : '#fbbf24'; // Simple switch
+          // Actually use a nice gradient fill for the whole bar?
+
+          // Let's stick to the Red/Gold theme gradient
+          // ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+
+          // Draw Bar
+          ctx.fillRect(x, height - barHeight, barWidth, barHeight);
+
+          x += barWidth + 2;
+        }
+      }
+
+      animationRef.current = requestAnimationFrame(renderVisualizer);
+    };
+
+    renderVisualizer();
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, []);
+  }, [isPlaying]);
 
   const togglePlay = () => {
     if (isPlaying) {
@@ -98,10 +155,17 @@ function App() {
       </div>
 
       {/* Player Card (Glass) */}
-      <div className="glass-panel rounded-[30px] p-8 md:p-10 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-5 mb-6 transition-all duration-500 relative">
+      <div className="glass-panel rounded-[30px] p-8 md:p-10 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-5 mb-6 transition-all duration-500 relative overflow-hidden">
+
+        {/* Real-Time Visualizer (Canvas Background) */}
+        {/* Placed behind content but inside glass card for depth */}
+        <div className="absolute inset-0 pointer-events-none opacity-40 z-0 flex items-end justify-center">
+          {/* Canvas needs to scale properly */}
+          <canvas ref={canvasRef} width={450} height={150} className="w-full h-full object-cover"></canvas>
+        </div>
 
         {/* Live Status - Upper Right */}
-        <div className={`absolute top-6 right-6 text-xs uppercase tracking-[2px] font-bold flex items-center gap-2 ${isLive ? 'text-red-500' : 'text-gray-500'}`}>
+        <div className={`absolute top-6 right-6 text-xs uppercase tracking-[2px] font-bold flex items-center gap-2 z-20 ${isLive ? 'text-red-500' : 'text-gray-500'}`}>
           {isPlaying && isLive && <span className="w-2 h-2 rounded-full bg-red-600 live-dot-anim"></span>}
           {isPlaying ? (isLive ? 'LIVE' : 'BUFFERING...') : ''}
         </div>
@@ -109,13 +173,13 @@ function App() {
         {/* Play Button */}
         <button
           onClick={togglePlay}
-          className="play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 text-5xl transition-colors cursor-pointer relative group mt-4"
+          className="play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 text-5xl transition-colors cursor-pointer relative group mt-4 z-10"
         >
           <span className="ml-2">{isPlaying ? '⏸' : '▶'}</span>
         </button>
 
         {/* Now Playing Info */}
-        <div className="text-center min-h-[60px] flex flex-col items-center justify-center">
+        <div className="text-center min-h-[60px] flex flex-col items-center justify-center z-10">
 
           {/* Status Text (Click to Start) - Only show if NOT playing */}
           {!isPlaying && (

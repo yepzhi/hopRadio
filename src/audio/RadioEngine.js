@@ -203,7 +203,13 @@ class RadioEngine {
             treble.frequency.value = 8000;
             treble.gain.value = 9.1; // Crystal Clear
 
-            // Chain: masterGain -> lowBass -> mid -> treble -> destination
+            // Analyser for Visualizer
+            this.analyser = ctx.createAnalyser();
+            this.analyser.fftSize = 128; // 64 bars
+            const bufferLength = this.analyser.frequencyBinCount;
+            this.dataArray = new Uint8Array(bufferLength);
+
+            // Chain: masterGain -> lowBass -> mid -> treble -> analyser -> destination
             // First, disconnect masterGain from destination
             Howler.masterGain.disconnect();
 
@@ -211,14 +217,23 @@ class RadioEngine {
             Howler.masterGain.connect(lowBass);
             lowBass.connect(mid);
             mid.connect(treble);
-            treble.connect(ctx.destination);
+            treble.connect(this.analyser);
+            this.analyser.connect(ctx.destination);
 
             this.equalizerSetup = true;
-            console.log("Equalizer Initialized: Punchy Bass & Crystal Clear Highs");
+            console.log("Equalizer & Analyser Initialized");
 
         } catch (e) {
             console.error("Equalizer setup failed:", e);
         }
+    }
+
+    getAudioData() {
+        if (this.analyser && this.dataArray) {
+            this.analyser.getByteFrequencyData(this.dataArray);
+            return this.dataArray;
+        }
+        return null;
     }
 }
 
