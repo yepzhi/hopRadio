@@ -335,8 +335,8 @@ function App() {
       {/* Footer */}
       <div className="absolute bottom-6 w-full flex flex-col md:flex-row justify-between items-end px-8 z-20 pointer-events-none">
         <div className="pointer-events-auto">
-          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700/70 hover:text-red-500 transition-colors text-xs font-medium block max-w-md text-left leading-tight">
-            Do you like this? 💙 <span className="font-bold">Invest in this project, lets make this a real radio station or more+ click here to know more.</span>
+          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-400 transition-colors text-xs font-medium block max-w-md text-left leading-tight">
+            Do you like this? 💙 <span className="text-red-700 hover:text-red-500 font-bold transition-colors">Invest in this project, make this a real radio station. click here to know more.</span>
           </a>
         </div>
         <div className="pointer-events-auto mt-2 md:mt-0">
