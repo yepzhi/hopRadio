@@ -206,6 +206,22 @@ class RadioEngine {
                 // Preload next track for gapless feel
                 this._preloadNext();
             },
+            onload: () => {
+                // DIRECT DOM MANIPULATION FOR iOS 26
+                // Howler creates an HTML5 Audio element but doesn't expose strict attributes we need for background video-like behavior
+                try {
+                    const audioNode = this.howl._sounds[0]._node;
+                    if (audioNode) {
+                        audioNode.setAttribute('playsinline', 'true');
+                        audioNode.setAttribute('webkit-playsinline', 'true');
+                        audioNode.setAttribute('x-webkit-airplay', 'allow');
+                        audioNode.preload = 'auto'; // Force buffer
+                        console.log("RadioEngine: Injected iOS attributes into audio node");
+                    }
+                } catch (e) {
+                    console.warn("RadioEngine: Failed to inject iOS attributes", e);
+                }
+            },
             onend: () => {
                 this._playNext();
             },

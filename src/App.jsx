@@ -16,6 +16,9 @@ function App() {
   const [downloadProgress, setDownloadProgress] = useState(0);
 
   // PWA State
+  const [offlineTime, setOfflineTime] = useState(3600); // 1 hour in seconds
+
+  // PWA State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
@@ -23,6 +26,38 @@ function App() {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const particles = useRef([]);
+
+  // Countdown Timer Logic
+  useEffect(() => {
+    let timer;
+    if (downloadProgress === 100 && isPlaying) {
+      timer = setInterval(() => {
+        setOfflineTime(prev => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [downloadProgress, isPlaying]);
+
+  const handleGoLive = () => {
+    // Reset Verification: Stop simulated offline, go back to live stream
+    setDownloadProgress(0);
+    setOfflineTime(3600);
+
+    // Stop current playback (which user thinks is offline)
+    if (isPlaying) {
+      radio.pause(); // Stop engine
+      setIsPlaying(false);
+    }
+
+    // Slight delay then restart live (optional, or let user press play)
+    // User requested "button to go back to live music or restart player".
+    // We'll reset to initial state so they see "CLICK TO START" or auto-play.
+    // Let's reset fully.
+    setTimeout(() => {
+      // Optional: Auto-start live? Let's verify user preference. "restart player".
+      // Just stopping resets the UI to "Live" (since downloadProgress is 0)
+    }, 100);
+  };
 
   useEffect(() => {
     // Network Status
@@ -244,11 +279,25 @@ function App() {
         </div>
 
         {/* Top Left Status / Countdown */}
+        {/* Top Left Status / Countdown */}
         <div className="absolute top-6 left-6 z-20 flex flex-col items-start">
           {downloadProgress === 100 && (
-            <div className="text-xs font-bold tracking-[2px] text-green-400 animate-pulse">
-              OFFLINE MODE <br />
-              <span className="text-white text-base">59:59 REMAINING</span>
+            <div className="flex flex-col gap-2">
+              <div className="text-xs font-bold tracking-[2px] text-green-400 animate-pulse">
+                OFFLINE MODE <br />
+                <span className="text-white text-base">
+                  {Math.floor(offlineTime / 60)}:{(offlineTime % 60).toString().padStart(2, '0')} REMAINING
+                </span>
+              </div>
+
+              {/* Go Back Live Button */}
+              <button
+                onClick={handleGoLive}
+                className="flex items-center gap-1 text-[10px] font-bold bg-zinc-800/80 hover:bg-zinc-700 text-white px-2 py-1 rounded-full border border-gray-600 transition-all uppercase tracking-wider"
+              >
+                <WifiOff size={10} className="text-red-500" />
+                <span>Go Live</span>
+              </button>
             </div>
           )}
         </div>
@@ -348,7 +397,7 @@ function App() {
         </div>
         <div className="pointer-events-auto">
           <div className="text-gray-600 text-[10px] tracking-wide">
-            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v1.3.1</span>
+            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v1.3.2</span>
           </div>
         </div>
       </div>
