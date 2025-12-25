@@ -1,6 +1,44 @@
 import { useState, useEffect, useRef } from 'react';
 import { radio } from './audio/RadioEngine';
-import { WifiOff, Download } from 'lucide-react';
+import { WifiOff, Download, Play, Pause } from 'lucide-react';
+
+// ... (keep existing code until button)
+
+// ... inside the component ...
+
+{/* Play Button */ }
+<button
+  onClick={togglePlay}
+  className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 transition-colors cursor-pointer relative group mt-4 z-10 ${isBuffering ? 'animate-pulse' : ''}`}
+>
+  {/* Spinner Ring if buffering */}
+  {isBuffering && isPlaying ? (
+    <div className="absolute inset-0 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
+  ) : null}
+  <div className="relative z-10">
+    {isPlaying ? (
+      isBuffering ? null : <Pause size={48} fill="currentColor" />
+    ) : (
+      <Play size={48} fill="currentColor" className="ml-2" />
+    )}
+  </div>
+</button>
+
+// ... (keep existing code) ...
+
+{/* Footer */ }
+<div className="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center absolute bottom-6 px-8 text-xs font-medium gap-2">
+  <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700/70 hover:text-red-500 transition-colors text-center md:text-left">
+    Do you like this? 💙 <span className="font-bold">Invest in this project, lets make this a real radio station or more+ click here to know more.</span>
+  </a>
+  <div className="text-gray-600">
+    Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-600 hover:text-red-400 transition-colors">@yepzhi</a>
+  </div>
+</div>
+
+    </div >
+  );
+}
 import AdSpace from './components/AdSpace';
 import './App.css';
 
