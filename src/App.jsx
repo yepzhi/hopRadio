@@ -1,44 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { radio } from './audio/RadioEngine';
 import { WifiOff, Download, Play, Pause } from 'lucide-react';
-
-// ... (keep existing code until button)
-
-// ... inside the component ...
-
-{/* Play Button */ }
-<button
-  onClick={togglePlay}
-  className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 transition-colors cursor-pointer relative group mt-4 z-10 ${isBuffering ? 'animate-pulse' : ''}`}
->
-  {/* Spinner Ring if buffering */}
-  {isBuffering && isPlaying ? (
-    <div className="absolute inset-0 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
-  ) : null}
-  <div className="relative z-10">
-    {isPlaying ? (
-      isBuffering ? null : <Pause size={48} fill="currentColor" />
-    ) : (
-      <Play size={48} fill="currentColor" className="ml-2" />
-    )}
-  </div>
-</button>
-
-// ... (keep existing code) ...
-
-{/* Footer */ }
-<div className="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center absolute bottom-6 px-8 text-xs font-medium gap-2">
-  <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700/70 hover:text-red-500 transition-colors text-center md:text-left">
-    Do you like this? 💙 <span className="font-bold">Invest in this project, lets make this a real radio station or more+ click here to know more.</span>
-  </a>
-  <div className="text-gray-600">
-    Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-600 hover:text-red-400 transition-colors">@yepzhi</a>
-  </div>
-</div>
-
-    </div >
-  );
-}
 import AdSpace from './components/AdSpace';
 import './App.css';
 
@@ -80,8 +42,6 @@ function App() {
     // Initial check for PWA button visibility (Legacy behavior)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     if (!isStandalone) {
-      // Even if we don't have the prompt event yet, we want to show the banner 
-      // so user can click it and get instructions (iOS) or prompt (if ready)
       setShowInstallBanner(true);
     }
 
@@ -203,7 +163,6 @@ function App() {
     renderVisualizer();
 
     return () => {
-      // ... (cleanup)
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -296,13 +255,19 @@ function App() {
         {/* Play Button */}
         <button
           onClick={togglePlay}
-          className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 text-5xl transition-colors cursor-pointer relative group mt-4 z-10 ${isBuffering ? 'animate-pulse' : ''}`}
+          className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 transition-colors cursor-pointer relative group mt-4 z-10 ${isBuffering ? 'animate-pulse' : ''}`}
         >
           {/* Spinner Ring if buffering */}
           {isBuffering && isPlaying ? (
             <div className="absolute inset-0 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
           ) : null}
-          <span className="ml-2 relative z-10">{isPlaying ? (isBuffering ? '' : '⏸') : '▶'}</span>
+          <div className="relative z-10">
+            {isPlaying ? (
+              isBuffering ? null : <Pause size={48} fill="currentColor" />
+            ) : (
+              <Play size={48} fill="currentColor" className="ml-2" />
+            )}
+          </div>
         </button>
 
         {/* Now Playing Info */}
@@ -368,12 +333,16 @@ function App() {
       </button>
 
       {/* Footer */}
-      <div className="absolute bottom-6 w-full text-center flex flex-col items-center gap-3 z-20">
-        <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-white transition-colors text-xs font-medium px-4">
-          Do you like this? 💙 <span className="text-red-400 font-bold hover:text-gold-400">Make this a real radio station or more+ click here to know more.</span>
-        </a>
-        <div className="text-gray-700 text-[10px] uppercase tracking-widest">
-          Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a>
+      <div className="absolute bottom-6 w-full flex flex-col md:flex-row justify-between items-end px-8 z-20 pointer-events-none">
+        <div className="pointer-events-auto">
+          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700/70 hover:text-red-500 transition-colors text-xs font-medium block max-w-md text-left leading-tight">
+            Do you like this? 💙 <span className="font-bold">Invest in this project, lets make this a real radio station or more+ click here to know more.</span>
+          </a>
+        </div>
+        <div className="pointer-events-auto mt-2 md:mt-0">
+          <div className="text-gray-600 text-[10px] tracking-wide">
+            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a>
+          </div>
         </div>
       </div>
 
