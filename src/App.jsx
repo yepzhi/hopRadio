@@ -330,14 +330,12 @@ function App() {
       </button>
 
       {/* Footer */}
-      <div className="w-full max-w-4xl flex justify-between items-center absolute bottom-6 px-8 text-xs font-medium">
-        <div className="flex items-center gap-4">
-          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-white transition-colors flex items-center gap-1">
-            Do you like this? <span className="text-red-500 font-bold">Invest in this Project</span>
-          </a>
-        </div>
-        <div className="text-gray-600">
-          Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-600 hover:text-red-400 transition-colors">@yepzhi</a>
+      <div className="absolute bottom-6 w-full text-center flex flex-col items-center gap-3 z-20">
+        <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-gray-500 hover:text-white transition-colors text-xs font-medium px-4">
+          Do you like this? 💙 <span className="text-red-400 font-bold hover:text-gold-400">Make this a real radio station or more+ click here to know more.</span>
+        </a>
+        <div className="text-gray-700 text-[10px] uppercase tracking-widest">
+          Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a>
         </div>
       </div>
 
