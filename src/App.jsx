@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { radio } from './audio/RadioEngine';
-import { Play, Pause, Download, WifiOff } from 'lucide-react';
+// Remove unused icons if we switch to the minimal HTML style, but keeping some for logic if needed
+import { Radio, Scan, WifiOff, Download, Smartphone } from 'lucide-react';
 import AdSpace from './components/AdSpace';
 import './App.css';
 
@@ -25,7 +26,7 @@ function App() {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Check if already in standalone mode
+      // Check if not standalone
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
       if (!isStandalone) {
         setShowInstallBanner(true);
@@ -59,6 +60,7 @@ function App() {
   };
 
   const handleDownload = () => {
+    // Mock download action
     alert("Starting download: hopRadio Mock Mix (84MB)...");
   };
 
@@ -71,7 +73,7 @@ function App() {
       }
       setDeferredPrompt(null);
     } else {
-      // Manual instructions fallback
+      // Manual instructions for iOS or if prompt unavailable
       alert('Para instalar:\n\niOS: Toca el botón Compartir y selecciona "Agregar a pantalla de inicio"\n\nAndroid: Toca el menú (⋮) y selecciona "Instalar app"');
     }
   };
@@ -88,30 +90,39 @@ function App() {
       )}
 
       {/* Logo Section */}
-      <div className="text-center mb-4">
-        <h1 className="logo-text text-6xl md:text-8xl font-black tracking-tighter mb-4">hopRadio</h1>
-        <div className="text-gray-400 font-light tracking-widest text-sm md:text-base max-w-lg mx-auto mb-12">
+      <div className="text-center mb-2">
+        <h1 className="logo-text text-6xl md:text-8xl font-black tracking-tighter mb-2">hopRadio</h1>
+        <div className="text-gray-400 font-light tracking-widest text-sm md:text-base max-w-lg mx-auto mb-6">
           We don't play what you want, we play what you need
         </div>
       </div>
 
       {/* Player Card (Glass) */}
-      <div className="glass-panel rounded-[30px] p-10 md:p-14 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-8 mb-10 transition-all duration-500">
+      <div className="glass-panel rounded-[30px] p-8 md:p-10 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-5 mb-6 transition-all duration-500 relative">
+
+        {/* Live Status - Upper Right */}
+        <div className={`absolute top-6 right-6 text-xs uppercase tracking-[2px] font-bold flex items-center gap-2 ${isLive ? 'text-red-500' : 'text-gray-500'}`}>
+          {isPlaying && isLive && <span className="w-2 h-2 rounded-full bg-red-600 live-dot-anim"></span>}
+          {isPlaying ? (isLive ? 'LIVE' : 'BUFFERING...') : ''}
+        </div>
 
         {/* Play Button */}
         <button
           onClick={togglePlay}
-          className="play-btn-glow w-32 h-32 md:w-36 md:h-36 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 text-5xl transition-colors cursor-pointer relative group"
+          className="play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 text-5xl transition-colors cursor-pointer relative group mt-4"
         >
           <span className="ml-2">{isPlaying ? '⏸' : '▶'}</span>
         </button>
 
         {/* Now Playing Info */}
-        <div className="text-center min-h-[80px] flex flex-col items-center justify-center">
-          <div className={`text-sm uppercase tracking-[2px] mb-2 font-medium flex items-center gap-2 ${isLive ? 'text-red-500' : 'text-gray-500'}`}>
-            {isPlaying && isLive && <span className="w-2 h-2 rounded-full bg-red-600 live-dot-anim"></span>}
-            {isPlaying ? (isLive ? 'ON AIR' : 'BUFFERING...') : 'CLICK TO START'}
-          </div>
+        <div className="text-center min-h-[60px] flex flex-col items-center justify-center">
+
+          {/* Status Text (Click to Start) - Only show if NOT playing */}
+          {!isPlaying && (
+            <div className="text-sm uppercase tracking-[2px] mb-2 font-medium text-gray-500">
+              CLICK TO START
+            </div>
+          )}
 
           <div className={`transition-all duration-500 ${isPlaying ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-2'}`}>
             <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-md">
@@ -126,7 +137,7 @@ function App() {
 
       {/* PWA Install Banner */}
       {showInstallBanner && (
-        <div className="w-full max-w-[550px] mb-8 bg-red-900/10 backdrop-blur-md border border-red-500/20 rounded-2xl p-4 md:px-6 md:py-4 flex flex-col md:flex-row items-center gap-4 shadow-lg animate-pulse-slow">
+        <div className="w-full max-w-[550px] mb-6 bg-red-900/10 backdrop-blur-md border border-red-500/20 rounded-2xl p-4 md:px-6 md:py-4 flex flex-col md:flex-row items-center gap-4 shadow-lg animate-pulse-slow">
           <div className="text-2xl filter drop-shadow-[0_0_10px_rgba(220,20,60,0.6)]">📱</div>
           <div className="flex-1 text-center md:text-left">
             <div className="font-bold text-sm text-white mb-0.5">Instala la App en tu pantalla de inicio</div>
@@ -146,7 +157,7 @@ function App() {
         <AdSpace />
       </div>
 
-      {/* Offline Mix Button */}
+      {/* Offline Mix Button (New Feature) */}
       <button
         onClick={handleDownload}
         className="glass-panel px-8 py-4 rounded-full flex items-center gap-3 text-sm font-medium hover:bg-white/5 hover:border-red-500/30 hover:text-white transition-all group"
