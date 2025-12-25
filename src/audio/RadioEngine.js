@@ -39,6 +39,9 @@ class RadioEngine {
     }
 
     play() {
+        // Attempt to setup EQ on user interaction (when context resumes)
+        this.setupEqualizer();
+
         if (!this.currentTrack && this.queue.length === 0) {
             this._fillQueue();
         }
@@ -157,6 +160,53 @@ class RadioEngine {
                     this.queue.push(randomJingle);
                 }
             }
+        }
+    }
+    // --- Equalizer Logic ---
+    setupEqualizer() {
+        // Only run once and if audio context exists
+        if (this.equalizerSetup || !Howler.ctx) return;
+
+        try {
+            const ctx = Howler.ctx;
+
+            // Create Filters
+            // Bass: LowShelf @ 60Hz. User asked for 4.5/6. 
+            // Scale: 6 -> ~10dB. 4.5 -> ~7.5dB
+            const lowBass = ctx.createBiquadFilter();
+            lowBass.type = 'lowshelf';
+            lowBass.frequency.value = 60;
+            lowBass.gain.value = 7.5; // Punchy Bass
+
+            // Mids: Peaking @ 1000Hz. User asked for 0.
+            const mid = ctx.createBiquadFilter();
+            mid.type = 'peaking';
+            mid.frequency.value = 1000;
+            mid.gain.value = 0;
+            mid.Q.value = 1;
+
+            // Highs: HighShelf @ 8000Hz. User asked for 5.5/6.
+            // Scale: 6 -> ~10dB. 5.5 -> ~9.1dB
+            const treble = ctx.createBiquadFilter();
+            treble.type = 'highshelf';
+            treble.frequency.value = 8000;
+            treble.gain.value = 9.1; // Crystal Clear
+
+            // Chain: masterGain -> lowBass -> mid -> treble -> destination
+            // First, disconnect masterGain from destination
+            Howler.masterGain.disconnect();
+
+            // Connect chain
+            Howler.masterGain.connect(lowBass);
+            lowBass.connect(mid);
+            mid.connect(treble);
+            treble.connect(ctx.destination);
+
+            this.equalizerSetup = true;
+            console.log("Equalizer Initialized: Punchy Bass & Crystal Clear Highs");
+
+        } catch (e) {
+            console.error("Equalizer setup failed:", e);
         }
     }
 }
