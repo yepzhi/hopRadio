@@ -293,7 +293,7 @@ function App() {
 
       {/* PWA Install Banner */}
       {showInstallBanner && (
-        <div className="w-full max-w-[550px] mb-6 bg-red-900/10 backdrop-blur-md border border-red-500/20 rounded-2xl p-4 md:px-6 md:py-4 flex flex-col md:flex-row items-center gap-4 shadow-lg animate-pulse-slow">
+        <div className="w-full max-w-[550px] mb-3 bg-red-900/10 backdrop-blur-md border border-red-500/20 rounded-2xl p-4 md:px-6 md:py-4 flex flex-col md:flex-row items-center gap-4 shadow-lg animate-pulse-slow">
           <div className="text-2xl filter drop-shadow-[0_0_10px_rgba(220,20,60,0.6)]">📱</div>
           <div className="flex-1 text-center md:text-left">
             <div className="font-bold text-sm text-white mb-0.5">Instala la App en tu pantalla de inicio</div>
@@ -309,7 +309,7 @@ function App() {
       )}
 
       {/* AdSpace */}
-      <div className="w-full flex justify-center mb-6">
+      <div className="w-full flex justify-center mb-3">
         <AdSpace />
       </div>
 
@@ -317,7 +317,7 @@ function App() {
       <button
         onClick={handleDownload}
         disabled={isDownloading}
-        className="glass-panel px-8 py-4 rounded-full flex items-center gap-3 text-sm font-medium hover:bg-white/5 hover:border-red-500/30 hover:text-white transition-all group relative overflow-hidden"
+        className="glass-panel px-8 py-4 rounded-full flex items-center gap-3 text-sm font-medium hover:bg-white/5 hover:border-red-500/30 hover:text-white transition-all group relative overflow-hidden mb-12"
       >
         {isDownloading ? (
           <>
@@ -333,13 +333,13 @@ function App() {
       </button>
 
       {/* Footer */}
-      <div className="absolute bottom-6 w-full flex flex-col md:flex-row justify-between items-end px-8 z-20 pointer-events-none">
+      <div className="absolute bottom-4 w-full flex flex-col md:flex-row justify-between items-end px-8 z-20 pointer-events-none gap-4 md:gap-0">
         <div className="pointer-events-auto">
           <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-400 transition-colors text-xs font-medium block max-w-md text-left leading-tight">
-            Do you like this? 💙 <span className="text-red-700 hover:text-red-500 font-bold transition-colors">Invest in this project, make this a real radio station. click here to know more.</span>
+            Do you like this? 💙 <span className="text-red-700 hover:text-red-500 font-normal transition-colors">Invest in this project, make this a real radio station. click here to know more.</span>
           </a>
         </div>
-        <div className="pointer-events-auto mt-2 md:mt-0">
+        <div className="pointer-events-auto">
           <div className="text-gray-600 text-[10px] tracking-wide">
             Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a>
           </div>

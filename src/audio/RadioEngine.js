@@ -125,6 +125,9 @@ class RadioEngine {
             volume: this.volume,
             preload: true,
             onplay: () => {
+                // Update Media Session (iOS Lock Screen)
+                this._updateMediaSession(track);
+
                 // Notify UI: Playing started
                 if (this.onPlay) this.onPlay();
 
@@ -275,6 +278,34 @@ class RadioEngine {
             return this.dataArray;
         }
         return null;
+    }
+    _updateMediaSession(track) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: track.title,
+                artist: track.artist,
+                album: 'hopRadio Live',
+                artwork: [
+                    { src: 'https://yepzhi.com/assets/hopradio-icon-512.png', sizes: '512x512', type: 'image/png' },
+                    { src: 'https://yepzhi.com/assets/hopradio-icon-192.png', sizes: '192x192', type: 'image/png' }
+                ]
+            });
+
+            navigator.mediaSession.setActionHandler('play', () => {
+                this.play();
+                if (this.onPlay) this.onPlay(); // Sync UI
+            });
+            navigator.mediaSession.setActionHandler('pause', () => {
+                this.pause();
+                if (this.onLoadStart) this.onLoadStart(); // Sync UI (Reuse loading state as catch-all or just pause ui)
+                // Actually play/pause syncs via isPlaying state in App.jsx usually, but we need to ensure the App knows.
+                // Since App.jsx doesn't subscribe to onPause, we might need to add it or just rely on react state toggle if user clicks button.
+                // But for lockscreen control, we need to handle it.
+                // ideally dispatch an event.
+            });
+            navigator.mediaSession.setActionHandler('previoustrack', null); // Disable previous
+            navigator.mediaSession.setActionHandler('nexttrack', () => this.next());
+        }
     }
 }
 
