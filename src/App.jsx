@@ -64,6 +64,24 @@ function App() {
       setIsLive(true);
     };
 
+    // Initialize Particles
+    const particles = useRef([]);
+    const initParticles = (width, height) => {
+      const count = 60;
+      const newParticles = [];
+      for (let i = 0; i < count; i++) {
+        newParticles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          baseRadius: Math.random() * 2 + 0.5,
+          speedX: (Math.random() - 0.5) * 0.5,
+          speedY: (Math.random() - 0.5) * 0.5,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+      particles.current = newParticles;
+    };
+
     // Visualizer Loop
     const renderVisualizer = () => {
       if (!canvasRef.current) return;
@@ -72,38 +90,74 @@ function App() {
       const width = canvas.width;
       const height = canvas.height;
 
+      // Init particles on first run or resize
+      if (particles.current.length === 0) {
+        initParticles(width, height);
+      }
+
       // Get Data
       const data = radio.getAudioData();
 
+      // Calculate Bass Energy (reaction factor)
+      let bassEnergy = 0;
+      if (data) {
+        // Sum first 10 bins (low freq)
+        for (let i = 0; i < 10; i++) bassEnergy += data[i];
+        bassEnergy /= 10; // Average 0-255
+        bassEnergy /= 255; // Normalize 0-1
+      }
+
+      // Idle movement if no audio
+      const reaction = isPlaying && !isBuffering ? bassEnergy : 0.05;
+
       ctx.clearRect(0, 0, width, height);
 
-      // Force draw something if we expect to be playing but data is silent (browser issue debug)
-      if (isPlaying && !isBuffering && (!data || data[0] === 0)) {
-        // Draw faint idle line
+      // Draw Particles
+      particles.current.forEach(p => {
+        // Update Position
+        p.x += p.speedX;
+        p.y += p.speedY;
+
+        // Wrap around
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        // React to Audio
+        // Size pulses with bass
+        const boost = reaction * 3;
+        const radius = p.baseRadius + boost;
+
+        // Color based on intensity
+        // Idle: White/Gold faint. Active: Red/Gold bright.
+        const alpha = 0.3 + reaction * 0.7;
+
         ctx.beginPath();
-        ctx.moveTo(0, height / 2);
-        ctx.lineTo(width, height / 2);
-        ctx.strokeStyle = 'rgba(255, 0, 0, 0.1)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`; // Gold stars
+        ctx.shadowBlur = reaction * 10;
+        ctx.shadowColor = '#ef4444'; // Red glow
+        ctx.fill();
 
-      if (data && isPlaying && !isBuffering) {
-        const barWidth = (width / 40) * 1.5; // Show first 40 bins
-        let x = width / 2; // Start center
-
-        // Draw symmetrical from center
-        for (let i = 0; i < 40; i++) {
-          const barHeight = (data[i] / 255) * height * 0.6;
-
-          ctx.fillStyle = i < 5 ? '#ef4444' : '#fbbf24'; // Red Bass, Gold Highs
-
-          // Right side
-          ctx.fillRect(x + (i * (barWidth + 1)), (height - barHeight) / 2, barWidth, barHeight);
-          // Left side
-          ctx.fillRect(x - (i * (barWidth + 1)) - barWidth, (height - barHeight) / 2, barWidth, barHeight);
+        // Draw connections for "Antigravity" web effect
+        // Only connect nearby particles if loud enough
+        if (reaction > 0.2) {
+          particles.current.forEach(p2 => {
+            const dx = p.x - p2.x;
+            const dy = p.y - p2.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 50) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(239, 68, 68, ${0.1 + reaction * 0.2})`; // faint red lines
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          });
         }
-      }
+      });
 
       animationRef.current = requestAnimationFrame(renderVisualizer);
     };
@@ -206,7 +260,11 @@ function App() {
           onClick={togglePlay}
           className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 text-5xl transition-colors cursor-pointer relative group mt-4 z-10 ${isBuffering ? 'animate-pulse' : ''}`}
         >
-          <span className="ml-2">{isPlaying ? (isBuffering ? '⏳' : '⏸') : '▶'}</span>
+          {/* Spinner Ring if buffering */}
+          {isBuffering && isPlaying ? (
+            <div className="absolute inset-0 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
+          ) : null}
+          <span className="ml-2 relative z-10">{isPlaying ? (isBuffering ? '' : '⏸') : '▶'}</span>
         </button>
 
         {/* Now Playing Info */}
