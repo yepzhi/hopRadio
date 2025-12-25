@@ -59,7 +59,8 @@ class RadioEngine {
         if (this.howl && !this.howl.playing()) {
             this.howl.play();
         } else if (!this.howl) {
-            this._playNext();
+            // First time playing? Tune In (simulate live)
+            this._playNext(true);
         }
 
         this.isPlaying = true;
@@ -83,7 +84,13 @@ class RadioEngine {
 
     // --- Scheduler Logic ---
 
-    _playNext() {
+    resumeContext() {
+        if (Howler.ctx && Howler.ctx.state === 'suspended') {
+            Howler.ctx.resume();
+        }
+    }
+
+    _playNext(isTuneIn = false) {
         if (this.howl) {
             this.howl.unload();
         }
@@ -107,19 +114,29 @@ class RadioEngine {
         if (this.onTrackChange) this.onTrackChange(track);
 
         // Load Audio
-        // Log the src being attempted for debugging
-        console.log("RadioEngine: Attempting to play:", track.src);
+        console.log("RadioEngine: Playing:", track.src);
 
         this.howl = new Howl({
             src: [track.src],
-            html5: true,
+            html5: false, // Must be false for Web Audio API (Analyser/Visualizer) to work
             volume: this.volume,
+            onplay: () => {
+                // If this is the first "Tune In", seek to a random point to simulate live radio
+                if (isTuneIn && track.type === 'music') {
+                    const duration = this.howl.duration();
+                    // Seek to random point between 10% and 80%
+                    const randomSeek = duration * (0.1 + Math.random() * 0.7);
+                    console.log(`RadioEngine: Tuning in live... skipping to ${randomSeek.toFixed(1)}s`);
+                    this.howl.seek(randomSeek);
+                }
+                // Ensure EQ is attached
+                this.setupEqualizer();
+            },
             onend: () => {
                 this._playNext();
             },
             onloaderror: (id, err) => {
-                console.error("RadioEngine: Load Error for:", track.title, "Path:", track.src, "Error:", err);
-                // Simulate playing for 2 seconds then skip (so UI doesn't crash in loop if all fail)
+                console.error("RadioEngine: Load Error:", err);
                 setTimeout(() => this._playNext(), 2000);
             }
         });
