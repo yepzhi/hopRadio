@@ -22,6 +22,7 @@ function App() {
   // Visualizer Ref
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
+  const particles = useRef([]);
 
   useEffect(() => {
     // Network Status
@@ -64,8 +65,7 @@ function App() {
       setIsLive(true);
     };
 
-    // Initialize Particles
-    const particles = useRef([]);
+    // Initialize Particles Logic
     const initParticles = (width, height) => {
       const count = 60;
       const newParticles = [];
