@@ -3,11 +3,19 @@ import { Howl, Howler } from 'howler';
 // Initial mocked playlist for development
 // Weights: 1 (rare) to 10 (frequent)
 const INITIAL_PLAYLIST = [
-    { id: 1, type: 'music', artist: 'Neon Dreams', title: 'Cyber Pulse', src: '/tracks/song1.mp3', weight: 8 },
-    { id: 2, type: 'music', artist: 'Retro Wave', title: 'Night Drive', src: '/tracks/song2.mp3', weight: 5 },
-    { id: 3, type: 'music', artist: 'Synth City', title: 'Mainframe Access', src: '/tracks/song3.mp3', weight: 3 },
-    { id: 4, type: 'jingle', artist: 'hopRadio', title: 'Station ID', src: '/tracks/jingle1.mp3', weight: 0 }, // Jingles handled separately usually, or low weight
-    { id: 5, type: 'ad', artist: 'Sponsor', title: 'Tech Store', src: '/tracks/ad1.mp3', weight: 0 },
+    { id: 1, type: 'music', artist: 'T-Pain', title: "Can't Believe It", src: '/hopRadio/tracks/CantBelieveItTPain.mp3', weight: 8 },
+    { id: 2, type: 'music', artist: 'Pop Smoke', title: 'Dior', src: '/hopRadio/tracks/POPSMOKEDIOR.mp3', weight: 9 },
+    { id: 3, type: 'music', artist: 'GloRilla', title: 'Typa', src: '/hopRadio/tracks/GloRillaTypa.mp3', weight: 7 },
+    { id: 4, type: 'music', artist: 'Lil Uzi Vert', title: 'Just Wanna Rock', src: '/hopRadio/tracks/JustWannaR.mp3', weight: 8 },
+    { id: 5, type: 'music', artist: 'Unknown', title: '30 For 30', src: '/hopRadio/tracks/30For30.mp3', weight: 6 },
+    { id: 6, type: 'music', artist: 'Unknown', title: 'Help Me', src: '/hopRadio/tracks/HelpMe.mp3', weight: 6 },
+    { id: 7, type: 'music', artist: 'Unknown', title: 'Holy Blindfold', src: '/hopRadio/tracks/HolyBlindfold.mp3', weight: 6 },
+    { id: 8, type: 'music', artist: 'Unknown', title: 'Jan 31st', src: '/hopRadio/tracks/Jan31st.mp3', weight: 6 },
+    { id: 9, type: 'music', artist: 'Unknown', title: 'Ring Ring Ring', src: '/hopRadio/tracks/RingRingRing.mp3', weight: 5 },
+    { id: 10, type: 'music', artist: 'Unknown', title: 'She Ready', src: '/hopRadio/tracks/SheReady.mp3', weight: 6 },
+    { id: 11, type: 'music', artist: 'Unknown', title: 'Went Legit', src: '/hopRadio/tracks/WentLegit.mp3', weight: 6 },
+    // Keep placeholder Jingle/Ad for logic to not break, but point to a real file or leave as mock for now (logic handles error)
+    { id: 99, type: 'jingle', artist: 'hopRadio', title: 'Station ID', src: '/hopRadio/tracks/Intro.mp3', weight: 0 },
 ];
 
 class RadioEngine {
