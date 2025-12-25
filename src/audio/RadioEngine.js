@@ -1,5 +1,6 @@
 import { Howl, Howler } from 'howler';
 import { getSilentAudioDataUrl } from './silentAudio.js';
+import { set, get, keys } from 'idb-keyval'; // Persistent storage for blobs
 
 // Initial mocked playlist for development
 // Helper to generate full path based on environment
@@ -65,6 +66,30 @@ class RadioEngine {
         this._fillQueue();
         // Setup iOS-specific audio persistence
         this._setupIOSAudioPersistence();
+    }
+
+    // New Method: Real Offline Download
+    async downloadOfflineMix(onProgress) {
+        let completed = 0;
+        const total = this.playlist.length;
+        console.log(`RadioEngine: Starting offline download for ${total} tracks...`);
+
+        for (const track of this.playlist) {
+            try {
+                // Check if already exists
+                const existing = await get(track.src);
+                if (!existing) {
+                    const response = await fetch(track.src);
+                    const blob = await response.blob();
+                    await set(track.src, blob);
+                }
+                completed++;
+                if (onProgress) onProgress(Math.floor((completed / total) * 100));
+            } catch (err) {
+                console.error(`RadioEngine: Failed to download ${track.title}`, err);
+            }
+        }
+        console.log("RadioEngine: Offline download complete!");
     }
 
     _initAudioGraph() {
@@ -155,9 +180,12 @@ class RadioEngine {
         }
     }
 
-    _playNext(isTuneIn = false) {
+    async _playNext(isTuneIn = false) {
         if (this.howl) {
             this.howl.unload();
+            if (this.currentTrack && this.currentTrack.blobUrl) {
+                URL.revokeObjectURL(this.currentTrack.blobUrl); // Cleanup
+            }
         }
 
         if (this.queue.length === 0) {
@@ -179,11 +207,24 @@ class RadioEngine {
         if (this.onLoadStart) this.onLoadStart();
         if (this.onTrackChange) this.onTrackChange(track);
 
-        // Load Audio
-        console.log("RadioEngine: Playing:", track.src);
+        // Load Audio - Check Offline Cache First
+        let src = track.src;
+        try {
+            const blob = await get(track.src);
+            if (blob) {
+                const blobUrl = URL.createObjectURL(blob);
+                src = blobUrl;
+                track.blobUrl = blobUrl; // Tracking for cleanup
+                console.log("RadioEngine: Playing from Offline Cache!", track.title);
+            } else {
+                console.log("RadioEngine: Playing from Network:", track.src);
+            }
+        } catch (e) {
+            console.warn("RadioEngine: Cache check failed, using network", e);
+        }
 
         this.howl = new Howl({
-            src: [track.src],
+            src: [src],
             html5: true, // Native HTML5 Audio (Better for iOS Background)
             volume: this.volume,
             preload: true,
