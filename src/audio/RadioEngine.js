@@ -392,6 +392,46 @@ class RadioEngine {
             preload: true
         });
         this.silentHowl.play();
+
+        // iOS 26 Extra: Create a MediaStream video element trick
+        this._setupMediaStreamVideoTrick();
+    }
+
+    // iOS 26: Route audio through MediaStreamDestination -> video element
+    // Safari treats video media elements more favorably for background audio
+    _setupMediaStreamVideoTrick() {
+        if (this.videoTrickElement) return; // Already setup
+
+        try {
+            const ctx = Howler.ctx;
+            if (!ctx) return;
+
+            // Create a MediaStreamDestination
+            const destination = ctx.createMediaStreamDestination();
+
+            // Connect our audio graph output to it (in addition to speakers)
+            if (this.analyser) {
+                this.analyser.connect(destination);
+            }
+
+            // Create a hidden video element and set its srcObject to the stream
+            const video = document.createElement('video');
+            video.setAttribute('playsinline', '');
+            video.setAttribute('webkit-playsinline', '');
+            video.muted = false; // Important: NOT muted
+            video.srcObject = destination.stream;
+            video.style.display = 'none';
+            document.body.appendChild(video);
+
+            // Start the video (this registers as "media playback" to iOS)
+            video.play().catch(e => console.log("Video trick play failed:", e));
+
+            this.videoTrickElement = video;
+            console.log("RadioEngine: MediaStream video trick initialized for iOS 26");
+
+        } catch (e) {
+            console.warn("RadioEngine: MediaStream video trick failed:", e);
+        }
     }
 
     _stopSilentLoop() {
@@ -400,8 +440,12 @@ class RadioEngine {
             this.silentHowl.unload();
             this.silentHowl = null;
         }
+        if (this.videoTrickElement) {
+            this.videoTrickElement.pause();
+            this.videoTrickElement.remove();
+            this.videoTrickElement = null;
+        }
     }
 }
 
 export const radio = new RadioEngine();
-
