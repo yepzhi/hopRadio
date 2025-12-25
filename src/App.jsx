@@ -29,85 +29,34 @@ function App() {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Check if not standalone
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-      if (!isStandalone) {
-        setShowInstallBanner(true);
-      }
+      setShowInstallBanner(true);
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Initial check for PWA button visibility (Legacy behavior)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (!isStandalone) {
+      // Even if we don't have the prompt event yet, we want to show the banner 
+      // so user can click it and get instructions (iOS) or prompt (if ready)
+      setShowInstallBanner(true);
+    }
 
     // Initialize Audio Engine
     radio.init();
 
-    radio.onTrackChange = (newTrack) => {
-      setTrack(newTrack);
-    };
-
-    setTimeout(() => setIsLive(true), 1500);
-
-    // Visualizer Loop
-    const renderVisualizer = () => {
-      if (!canvasRef.current) return;
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      const width = canvas.width;
-      const height = canvas.height;
-
-      // Get Data
-      const data = radio.getAudioData();
-
-      ctx.clearRect(0, 0, width, height);
-
-      if (!data || !isPlaying) {
-        // Draw flat line or idle animation (faint heartbeat)
-        ctx.beginPath();
-        ctx.moveTo(0, height - 10);
-        ctx.lineTo(width, height - 10);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      } else {
-        // Draw Frequency Bars
-        // We have 128 bins (fftSize 256). Usually upper bins are empty for music. Use first ~40-50.
-        // Let's draw centered mirrored bars for high tech look
-        const barWidth = (width / data.length) * 2;
-        let x = 0;
-
-        for (let i = 0; i < data.length; i++) {
-          const barHeight = (data[i] / 255) * height * 0.8;
-
-          // Gradient: Gold to Red
-          // We can vary color based on frequency
-          // Bass (low i) -> Red, Highs (high i) -> Gold
-          const hue = i < 10 ? 0 : 45; // Red then Gold
-          ctx.fillStyle = i < 20 ? '#ef4444' : '#fbbf24'; // Simple switch
-          // Actually use a nice gradient fill for the whole bar?
-
-          // Let's stick to the Red/Gold theme gradient
-          // ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-
-          // Draw Bar
-          ctx.fillRect(x, height - barHeight, barWidth, barHeight);
-
-          x += barWidth + 2;
-        }
-      }
-
-      animationRef.current = requestAnimationFrame(renderVisualizer);
-    };
-
-    renderVisualizer();
+    // ... (rest of useEffect)
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      // ... (cleanup)
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
   }, [isPlaying]);
 
   const togglePlay = () => {
+    // Resume Audio Context (Browser Policy)
+    radio.resumeContext();
+
     if (isPlaying) {
       radio.pause();
     } else {
@@ -231,7 +180,7 @@ function App() {
 
       {/* Footer */}
       <div className="absolute bottom-6 right-8 text-xs text-gray-600 font-medium">
-        Developed by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-600 hover:text-red-400 transition-colors">@yepzhi</a>
+        Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-600 hover:text-red-400 transition-colors">@yepzhi</a>
       </div>
 
     </div>
