@@ -54,6 +54,8 @@ class RadioEngine {
 
         // iOS Silent Audio Persistence
         this.silentHowl = null;
+        this.videoTrickElement = null;
+        this.pipStreamDestination = null;
     }
 
     // --- Public API ---
@@ -424,19 +426,28 @@ class RadioEngine {
 
             // Create a MediaStreamDestination
             const destination = ctx.createMediaStreamDestination();
+            this.pipStreamDestination = destination; // Store for cleanup
 
             // Connect our audio graph output to it (in addition to speakers)
             if (this.analyser) {
                 this.analyser.connect(destination);
             }
 
-            // Create a hidden video element and set its srcObject to the stream
+            // Create a video element and set its srcObject to the stream
+            // We make it 1x1 pixel and visible (opacity 0) so it's technically "visible" to the DOM, which helps PiP
             const video = document.createElement('video');
+            video.width = 1;
+            video.height = 1;
+            video.style.position = 'fixed';
+            video.style.bottom = '0';
+            video.style.right = '0';
+            video.style.opacity = '0.01'; // Not display:none
+            video.style.pointerEvents = 'none';
             video.setAttribute('playsinline', '');
             video.setAttribute('webkit-playsinline', '');
             video.muted = false; // Important: NOT muted
             video.srcObject = destination.stream;
-            video.style.display = 'none';
+
             document.body.appendChild(video);
 
             // Start the video (this registers as "media playback" to iOS)
@@ -456,10 +467,33 @@ class RadioEngine {
             this.silentHowl.unload();
             this.silentHowl = null;
         }
+
+        // Cleanup Video Trick to prevents feedback loops
         if (this.videoTrickElement) {
             this.videoTrickElement.pause();
+            this.videoTrickElement.srcObject = null;
             this.videoTrickElement.remove();
             this.videoTrickElement = null;
+        }
+
+        // Disconnect analyser from destination
+        if (this.analyser && this.pipStreamDestination) {
+            try {
+                this.analyser.disconnect(this.pipStreamDestination);
+            } catch (e) {
+                console.warn("RadioEngine: Failed to disconnect analyser", e);
+            }
+            this.pipStreamDestination = null;
+        }
+    }
+
+    // Public method for UI to trigger PiP (Must be called from user gesture)
+    requestPiP() {
+        if (this.videoTrickElement && this.videoTrickElement.requestPictureInPicture) {
+            this.videoTrickElement.requestPictureInPicture()
+                .catch(e => console.error("PiP failed:", e));
+        } else {
+            console.warn("RadioEngine: PiP not supported or video element missing");
         }
     }
 }

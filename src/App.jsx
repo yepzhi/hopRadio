@@ -231,9 +231,9 @@ function App() {
           setIsDownloading(false);
           return 100;
         }
-        return prev + 5;
+        return prev + 1; // 1% per tick is slower (previously 5)
       });
-    }, 100);
+    }, 150); // 150ms per tick (previously 100ms) -> total ~15s
   };
 
   const handleInstallClick = async () => {
@@ -344,6 +344,16 @@ function App() {
               {track ? track.artist : 'HQ Audio Stream'}
             </p>
           </div>
+
+          {/* iOS Background PiP Trigger */}
+          {isPlaying && (
+            <button
+              onClick={() => radio.requestPiP()}
+              className="mt-4 text-[10px] text-gray-500 hover:text-white transition-colors border border-gray-700/50 rounded-full px-3 py-1 bg-black/20 backdrop-blur-sm"
+            >
+              Enable Background Mode (iOS)
+            </button>
+          )}
         </div>
       </div>
 
@@ -397,7 +407,7 @@ function App() {
         </div>
         <div className="pointer-events-auto">
           <div className="text-gray-600 text-[10px] tracking-wide">
-            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v1.3.2</span>
+            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v1.3.3</span>
           </div>
         </div>
       </div>
