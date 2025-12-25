@@ -159,9 +159,8 @@ function App() {
 
         {/* Real-Time Visualizer (Canvas Background) */}
         {/* Placed behind content but inside glass card for depth */}
-        <div className="absolute inset-0 pointer-events-none opacity-40 z-0 flex items-end justify-center">
-          {/* Canvas needs to scale properly */}
-          <canvas ref={canvasRef} width={450} height={150} className="w-full h-full object-cover"></canvas>
+        <div className="absolute inset-0 pointer-events-none opacity-60 z-0">
+          <canvas ref={canvasRef} width={450} height={100} className="w-full h-full object-cover"></canvas>
         </div>
 
         {/* Live Status - Upper Right */}
