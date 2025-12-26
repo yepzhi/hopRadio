@@ -1,469 +1,97 @@
 import { Howl, Howler } from 'howler';
-import { getSilentAudioDataUrl } from './silentAudio.js';
-import { set, get } from 'idb-keyval'; // Persistent storage for blobs
 
-// Initial mocked playlist for development
-// Helper to generate full path based on environment
-const BASE = import.meta.env.BASE_URL || '/';
-const getPath = (filename) => `${BASE}tracks/${filename}`;
-
-const INITIAL_PLAYLIST = [
-    { id: 1, type: 'music', artist: 'T-Pain', title: "Can't Believe It", src: getPath('CantBelieveItTPain.mp3'), weight: 8 },
-    { id: 2, type: 'music', artist: 'Pop Smoke', title: 'Dior', src: getPath('POPSMOKEDIOR.mp3'), weight: 9 },
-    { id: 3, type: 'music', artist: 'GloRilla', title: 'Typa', src: getPath('GloRillaTypa.mp3'), weight: 7 },
-    { id: 4, type: 'music', artist: 'Lil Uzi Vert', title: 'Just Wanna Rock', src: getPath('JustWannaR.mp3'), weight: 8 },
-    { id: 5, type: 'music', artist: 'Unknown', title: '30 For 30', src: getPath('30For30.mp3'), weight: 6 },
-    { id: 6, type: 'music', artist: 'Unknown', title: 'Help Me', src: getPath('HelpMe.mp3'), weight: 6 },
-    { id: 7, type: 'music', artist: 'Unknown', title: 'Holy Blindfold', src: getPath('HolyBlindfold.mp3'), weight: 6 },
-    { id: 8, type: 'music', artist: 'Unknown', title: 'Jan 31st', src: getPath('Jan31st.mp3'), weight: 6 },
-    { id: 9, type: 'music', artist: 'Unknown', title: 'Ring Ring Ring', src: getPath('RingRingRing.mp3'), weight: 5 },
-    { id: 10, type: 'music', artist: 'Unknown', title: 'She Ready', src: getPath('SheReady.mp3'), weight: 6 },
-    { id: 11, type: 'music', artist: 'Unknown', title: 'Went Legit', src: getPath('WentLegit.mp3'), weight: 6 },
-    // Mock Jingle - ensuring it points to a file that might exist or handling failure gracefully
-    { id: 99, type: 'jingle', artist: 'hopRadio', title: 'Station ID', src: getPath('Intro.mp3'), weight: 0 },
-];
-
-class RadioEngine {
+export const radio = new class RadioEngine {
     constructor() {
-        this.playlist = INITIAL_PLAYLIST;
-        this.queue = [];
-        this.history = [];
-        this.currentTrack = null;
-        this.isPlaying = false;
-        this.volume = 0.6; // User volume control
-        this.onTrackChange = null;
-        this.onTimeUpdate = null;
-        this.onLoadStart = null;
-        this.onPlay = null;
-
-        // Howl instance
+        this.streamUrl = 'https://yepzhi-hopradio-sync.hf.space/stream';
         this.howl = null;
+        this.isPlaying = false;
+        this.volume = 0.6;
 
-        // Scheduler Rules
-        this.rules = {
-            adFrequency: 4, // Play ad every 4 songs
-            songsSinceAd: 0
-        };
+        // Hooks
+        this.onPlay = null;
+        this.onLoadStart = null;
+        this.onTrackChange = null;
 
-        // Audio Graph Components
+        // Audio Graph
         this.context = null;
-        this.masterGain = null;
         this.analyser = null;
-        this.filters = {};
-        this.isGraphInit = false;
-        this.inputGain = null; // New input gain node for our graph
-        this.masterGainHooked = false; // To track if Howler.masterGain has been redirected
-
-        // iOS Silent Audio Persistence
-        this.silentHowl = null;
-        this.videoTrickElement = null;
-        this.pipStreamDestination = null;
-
-        // Sync API URL (Hugging Face Space)
-        this.syncApiUrl = 'https://yepzhi-hopradio-sync.hf.space';
-        this.isSynced = false;
+        this.dataArray = null;
     }
-
-    // --- Public API ---
 
     async init() {
-        // Setup iOS-specific audio persistence
-        this._setupIOSAudioPersistence();
-
-        // Try to sync with server for synchronized playback
-        await this._syncWithServer();
-
-        // Prepare queue if sync failed
-        if (!this.isSynced) {
-            this._fillQueue();
-        }
+        console.log("RadioEngine: Initializing Stream Mode");
+        // Initial fake metadata
+        this._updateMetadata();
     }
 
-    // Sync all users to the same track/position
-    async _syncWithServer() {
-        try {
-            console.log('RadioEngine: Attempting to sync with server...');
-
-            // Add timeout to prevent hanging on cold start
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-            const response = await fetch(`${this.syncApiUrl}/now-playing`, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' },
-                signal: controller.signal,
+    _updateMetadata() {
+        if (this.onTrackChange) {
+            this.onTrackChange({
+                title: "Live Radio",
+                artist: "hopRadio",
+                src: this.streamUrl,
+                type: "stream",
+                id: "stream"
             });
-            clearTimeout(timeoutId);
-
-            if (!response.ok) throw new Error('Sync API unavailable');
-
-            const data = await response.json();
-            console.log('RadioEngine: Sync data received:', data);
-
-            // Find the track in our playlist
-            const syncTrack = this.playlist.find(t => t.id === data.track_id);
-            if (syncTrack) {
-                // Set this track as current and queue the rest
-                this.currentTrack = syncTrack;
-                this.syncPosition = data.position;
-                this.isSynced = true;
-
-                // Rebuild queue starting from next track
-                this._fillQueueFromTrack(data.track_id);
-
-                console.log(`RadioEngine: Synced to "${syncTrack.title}" at ${data.position}s`);
-            }
-        } catch (e) {
-            console.warn('RadioEngine: Sync failed, using local playback:', e.message);
-            this.isSynced = false;
-            this._fillQueue();
         }
-    }
-
-    // Fill queue starting from a specific track
-    _fillQueueFromTrack(startTrackId) {
-        const startIndex = this.playlist.findIndex(t => t.id === startTrackId);
-        if (startIndex === -1) {
-            this._fillQueue();
-            return;
-        }
-
-        this.queue = [];
-        // Add tracks starting from current one
-        for (let i = startIndex; i < this.playlist.length; i++) {
-            this.queue.push(this.playlist[i]);
-        }
-        // Wrap around to beginning
-        for (let i = 0; i < startIndex; i++) {
-            this.queue.push(this.playlist[i]);
-        }
-    }
-
-    // New Method: Real Offline Download
-    async downloadOfflineMix(onProgress) {
-        let completed = 0;
-        const total = this.playlist.length;
-        console.log(`RadioEngine: Starting offline download for ${total} tracks...`);
-
-        for (const track of this.playlist) {
-            try {
-                // Check if already exists
-                const existing = await get(track.src);
-                if (!existing) {
-                    const response = await fetch(track.src);
-                    const blob = await response.blob();
-                    await set(track.src, blob);
-                }
-                completed++;
-                if (onProgress) onProgress(Math.floor((completed / total) * 100));
-            } catch (err) {
-                console.error(`RadioEngine: Failed to download ${track.title}`, err);
-            }
-        }
-        console.log("RadioEngine: Offline download complete!");
-    }
-
-    _initAudioGraph() {
-        if (this.isGraphInit) return;
-        if (!Howler.ctx) return;
-
-        console.log("RadioEngine: Initializing Static Audio Graph...");
-        const ctx = Howler.ctx;
-        this.context = ctx;
-
-        // Create EQ Filters
-        const lowBass = ctx.createBiquadFilter();
-        lowBass.type = 'lowshelf';
-        lowBass.frequency.value = 60;
-        lowBass.gain.value = 5.5; // Reduced from 6.5 to prevent distortion
-
-        const mid = ctx.createBiquadFilter();
-        mid.type = 'peaking';
-        mid.frequency.value = 1000;
-        mid.gain.value = -3; // Scoop mids for cleaner sound
-        mid.Q.value = 1;
-
-        const treble = ctx.createBiquadFilter();
-        treble.type = 'highshelf';
-        treble.frequency.value = 8000;
-        treble.gain.value = 7.5; // Reduced from 9.1
-
-        // Analyser
-        this.analyser = ctx.createAnalyser();
-        this.analyser.fftSize = 128;
-        this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
-
-        // Master Gain (EQ output reduction - prevents distortion from EQ boost)
-        const masterGain = ctx.createGain();
-        masterGain.gain.value = 0.8; // 20% reduction after EQ
-
-        // Input Point (for routing sources into)
-        this.inputGain = ctx.createGain();
-
-        // Connect Chain: input -> lowBass -> mid -> treble -> masterGain -> analyser -> destination
-        this.inputGain.connect(lowBass);
-        lowBass.connect(mid);
-        mid.connect(treble);
-        treble.connect(masterGain);
-        masterGain.connect(this.analyser);
-        this.analyser.connect(ctx.destination);
-
-        this.isGraphInit = true;
     }
 
     play() {
-        // Attempt to setup EQ on user interaction
-        this._initAudioGraph();
-        this.resumeContext();
+        if (this.isPlaying) return;
 
-        // REMOVED: Silent loop and video tricks - they cause instability
-        // iOS background audio is a platform limitation we accept for now
+        console.log("RadioEngine: Starting Stream...");
+        if (this.onLoadStart) this.onLoadStart();
 
-        if (!this.currentTrack && this.queue.length === 0) {
-            this._fillQueue();
+        // 1. Unload previous instance to ensure fresh live edge
+        if (this.howl) {
+            this.howl.unload();
         }
 
-        if (this.howl && !this.howl.playing()) {
-            this.howl.play();
-        } else if (!this.howl) {
-            this._playNext(true);
-        }
-
-        this.isPlaying = true;
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.playbackState = 'playing';
-        }
+        // 2. Create new Howl instance
+        this.howl = new Howl({
+            src: [this.streamUrl],
+            format: ['mp3'],
+            html5: true, // Required for long streams & iOS background audio
+            volume: this.volume,
+            autoplay: true,
+            onplay: () => {
+                console.log("RadioEngine: Stream Playing!");
+                this.isPlaying = true;
+                if (this.onPlay) this.onPlay();
+                this._setupMediaSession();
+                this._connectVisualizer();
+            },
+            onloaderror: (id, err) => {
+                console.error("RadioEngine: Stream Connection Error", err);
+                // Simple retry
+                setTimeout(() => this.play(), 2000);
+            },
+            onend: () => {
+                console.log("RadioEngine: Stream ended (connection lost?)");
+                this.isPlaying = false;
+                // Auto-reconnect
+                setTimeout(() => this.play(), 1000);
+            }
+        });
     }
 
     pause() {
+        console.log("RadioEngine: Stopping Stream");
         if (this.howl) {
-            this.howl.pause();
+            this.howl.unload(); // Truly stop to save bandwidth
+            this.howl = null;
         }
         this.isPlaying = false;
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.playbackState = 'paused';
-        }
-    }
-
-    next() {
-        this._playNext();
     }
 
     setVolume(val) {
         this.volume = val;
-        Howler.volume(val);
+        if (this.howl) this.howl.volume(val);
     }
-
-    // --- Scheduler Logic ---
 
     resumeContext() {
         if (Howler.ctx && Howler.ctx.state === 'suspended') {
             Howler.ctx.resume();
-        }
-    }
-
-    async _playNext(isTuneIn = false) {
-        if (this.howl) {
-            this.howl.unload();
-            if (this.currentTrack && this.currentTrack.blobUrl) {
-                URL.revokeObjectURL(this.currentTrack.blobUrl); // Cleanup
-            }
-        }
-
-        if (this.queue.length === 0) {
-            this._fillQueue();
-        }
-
-        const track = this.queue.shift();
-        this.currentTrack = track;
-        this.history.push(track.id);
-
-        // Check rules for next insertions
-        if (track.type === 'music') {
-            this.rules.songsSinceAd++;
-        } else if (track.type === 'ad') {
-            this.rules.songsSinceAd = 0;
-        }
-
-        // Notify UI: Loading started
-        if (this.onLoadStart) this.onLoadStart();
-        if (this.onTrackChange) this.onTrackChange(track);
-
-        // Load Audio - Check Offline Cache First
-        let src = track.src;
-        try {
-            const blob = await get(track.src);
-            if (blob) {
-                const blobUrl = URL.createObjectURL(blob);
-                src = blobUrl;
-                track.blobUrl = blobUrl; // Tracking for cleanup
-                console.log("RadioEngine: Playing from Offline Cache!", track.title);
-            } else {
-                console.log("RadioEngine: Playing from Network:", track.src);
-            }
-        } catch (e) {
-            console.warn("RadioEngine: Cache check failed, using network", e);
-        }
-
-        this.howl = new Howl({
-            src: [src],
-            html5: true, // Native HTML5 Audio (Better for iOS Background)
-            volume: this.volume,
-            preload: true,
-            onplay: () => {
-                // Update Media Session (iOS Lock Screen)
-                this._updateMediaSession(track);
-
-                // Notify UI: Playing started
-                if (this.onPlay) this.onPlay();
-
-                // If we have a sync position from the server, use it
-                if (this.isSynced && this.syncPosition > 0) {
-                    console.log(`RadioEngine: Syncing to server position: ${this.syncPosition.toFixed(1)}s`);
-                    this.howl.seek(this.syncPosition);
-                    this.syncPosition = 0; // Clear after first use
-                    this.isSynced = false; // Only sync on first play
-                } else if (isTuneIn && track.type === 'music') {
-                    // Fallback: If no sync, tune in to random point
-                    const duration = this.howl.duration();
-                    const randomSeek = duration * (0.1 + Math.random() * 0.7);
-                    console.log(`RadioEngine: Tuning in live... skipping to ${randomSeek.toFixed(1)}s`);
-                    this.howl.seek(randomSeek);
-                }
-
-                // Connect Audio to Graph
-                this._connectToGraph();
-
-                // Preload next track for gapless feel
-                this._preloadNext();
-            },
-            onload: () => {
-                // DIRECT DOM MANIPULATION FOR iOS 26
-                // Howler creates an HTML5 Audio element but doesn't expose strict attributes we need for background video-like behavior
-                try {
-                    const audioNode = this.howl._sounds[0]._node;
-                    if (audioNode) {
-                        audioNode.setAttribute('playsinline', 'true');
-                        audioNode.setAttribute('webkit-playsinline', 'true');
-                        audioNode.setAttribute('x-webkit-airplay', 'allow');
-                        audioNode.preload = 'auto'; // Force buffer
-                        console.log("RadioEngine: Injected iOS attributes into audio node");
-                    }
-                } catch (e) {
-                    console.warn("RadioEngine: Failed to inject iOS attributes", e);
-                }
-            },
-            onend: () => {
-                this._playNext();
-            },
-            onloaderror: (id, err) => {
-                console.error("RadioEngine: Load Error:", err);
-                setTimeout(() => this._playNext(), 2000);
-            }
-        });
-
-        this.howl.play();
-    }
-
-    _preloadNext() {
-        if (this.queue.length === 0) return;
-        const nextTrack = this.queue[0];
-        console.log("RadioEngine: Preloading next:", nextTrack.title);
-        // Create a temporary Howl just to load the buffer
-        new Howl({
-            src: [nextTrack.src],
-            html5: true,
-            preload: true,
-            volume: 0 // Muted, just loading
-        });
-        // We don't play it, just let it load into cache
-        // Howler caches by URL, so the next 'new Howl' with same SRC should be instant.
-    }
-
-    _fillQueue() {
-        // Simple weighted random selection
-        if (this.rules.songsSinceAd >= this.rules.adFrequency) {
-            const ads = this.playlist.filter(t => t.type === 'ad');
-            if (ads.length > 0) {
-                this.queue.push(ads[Math.floor(Math.random() * ads.length)]);
-                this.rules.songsSinceAd = 0;
-                return;
-            }
-        }
-
-        const music = this.playlist.filter(t => t.type === 'music');
-        let pool = [];
-        music.forEach(track => {
-            for (let i = 0; i < track.weight; i++) pool.push(track);
-        });
-
-        for (let i = 0; i < 5; i++) {
-            const randomTrack = pool[Math.floor(Math.random() * pool.length)];
-            if (this.queue.length > 0 && this.queue[this.queue.length - 1].id === randomTrack.id) {
-                i--; continue;
-            }
-            this.queue.push(randomTrack);
-
-            if (Math.random() < 0.3) {
-                const jingles = this.playlist.filter(t => t.type === 'jingle');
-                if (jingles.length > 0) {
-                    this.queue.push(jingles[Math.floor(Math.random() * jingles.length)]);
-                }
-            }
-        }
-    }
-
-    // --- Equalizer & Graph Connection ---
-    _connectToGraph() {
-        this._initAudioGraph(); // Ensure graph exists
-        if (!this.inputGain) return; // Should exist
-
-        try {
-            const ctx = Howler.ctx;
-            // 1. Get HTML5 Node
-            let sourceNode = null;
-            if (this.howl && this.howl._sounds.length > 0) {
-                const sound = this.howl._sounds[0];
-                if (sound._node && sound._node.tagName === 'AUDIO') {
-                    // Check if we already attached a source to this element
-                    if (!sound._node._webAudioSource) {
-                        sound._node.crossOrigin = "anonymous";
-                        try {
-                            sound._node._webAudioSource = ctx.createMediaElementSource(sound._node);
-                        } catch (e) {
-                            console.warn("RadioEngine: Failed to create source (already exists?)", e);
-                        }
-                    }
-                    sourceNode = sound._node._webAudioSource;
-                }
-            }
-
-            // 2. Connect
-            if (sourceNode) {
-                // Connect to our graph
-                // Note: MediaElementSource can fan out, but we just need one connection to our InputGain.
-                // We disconnect first to be safe? No, disconnect() disconnects ALL.
-                // It's safe to connect multiple times, but let's avoid it.
-                // We can't easily check connection.
-                try {
-                    sourceNode.connect(this.inputGain);
-                } catch (e) {
-                    // ignore
-                }
-            } else {
-                // Web Audio Mode fallback (Howler.masterGain)
-                // If we are in Web Audio mode (html5: false), sound flows through masterGain.
-                // We want to redirect masterGain -> our graph.
-                if (!this.masterGainHooked) {
-                    Howler.masterGain.disconnect();
-                    Howler.masterGain.connect(this.inputGain);
-                    this.masterGainHooked = true;
-                }
-            }
-            // console.log("RadioEngine: Connected to Graph");
-
-        } catch (e) {
-            console.error("RadioEngine: Audio Graph Error:", e);
         }
     }
 
@@ -474,219 +102,48 @@ class RadioEngine {
         }
         return null;
     }
-    _updateMediaSession(track) {
+
+    _connectVisualizer() {
+        if (!Howler.ctx) return;
+        const ctx = Howler.ctx;
+
+        // Ensure Analyser exists
+        if (!this.analyser) {
+            this.analyser = ctx.createAnalyser();
+            this.analyser.fftSize = 64; // Low res for performance
+            this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+        }
+
+        // Hook into Howler HTML5 Audio Node
+        // Note: This works because backend sends CORS headers
+        try {
+            if (this.howl && this.howl._sounds.length > 0) {
+                const node = this.howl._sounds[0]._node;
+                if (node) {
+                    node.crossOrigin = "anonymous";
+                    if (!node._source) {
+                        const source = ctx.createMediaElementSource(node);
+                        source.connect(this.analyser);
+                        this.analyser.connect(ctx.destination);
+                        node._source = source; // Cache it
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn("Visualizer connect failed (CORS?):", e);
+        }
+    }
+
+    _setupMediaSession() {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: track.title,
-                artist: track.artist,
-                album: 'hopRadio Live',
-                artwork: [
-                    { src: 'https://yepzhi.com/hopRadio/logo.svg', sizes: '512x512', type: 'image/svg+xml' }
-                ]
+                title: "Live Stream",
+                artist: "hopRadio",
+                artwork: [{ src: 'https://yepzhi.com/hopRadio/logo.svg', sizes: '512x512', type: 'image/svg+xml' }]
             });
-
-            // CRITICAL for iOS: Set playback state explicitly
             navigator.mediaSession.playbackState = 'playing';
-
-            // Set position state (helps iOS understand track duration)
-            if (this.howl && this.howl.duration()) {
-                try {
-                    navigator.mediaSession.setPositionState({
-                        duration: this.howl.duration(),
-                        playbackRate: 1,
-                        position: this.howl.seek() || 0
-                    });
-                } catch (e) {
-                    console.log('Position state not supported');
-                }
-            }
-
-            // Action handlers - bound to this instance
-            const self = this;
-            navigator.mediaSession.setActionHandler('play', () => {
-                console.log('MediaSession: play action received');
-                self.resumeContext();
-                if (self.howl) {
-                    self.howl.play();
-                    self.isPlaying = true;
-                    navigator.mediaSession.playbackState = 'playing';
-                    if (self.onPlay) self.onPlay();
-                }
-            });
-            navigator.mediaSession.setActionHandler('pause', () => {
-                console.log('MediaSession: pause action received');
-                if (self.howl) {
-                    self.howl.pause();
-                    self.isPlaying = false;
-                    navigator.mediaSession.playbackState = 'paused';
-                }
-            });
-            navigator.mediaSession.setActionHandler('previoustrack', null);
-            navigator.mediaSession.setActionHandler('nexttrack', () => self.next());
-            navigator.mediaSession.setActionHandler('seekbackward', null);
-            navigator.mediaSession.setActionHandler('seekforward', null);
-            navigator.mediaSession.setActionHandler('seekto', null);
+            navigator.mediaSession.setActionHandler('play', () => this.play());
+            navigator.mediaSession.setActionHandler('pause', () => this.pause());
         }
     }
-
-    // iOS-specific: Aggressive audio recovery on visibility change
-    _setupIOSAudioPersistence() {
-        const self = this;
-
-        // Resume context and audio on visibility change (coming back to foreground)
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && self.isPlaying) {
-                console.log('RadioEngine: App returned to foreground, recovering audio...');
-
-                // Step 1: Resume AudioContext
-                if (Howler.ctx && Howler.ctx.state !== 'running') {
-                    Howler.ctx.resume().then(() => {
-                        console.log('RadioEngine: AudioContext resumed successfully');
-                    }).catch(e => {
-                        console.warn('RadioEngine: AudioContext resume failed:', e);
-                    });
-                }
-
-                // Step 2: Check if audio is truly playing
-                // Step 2: Force audio re-engagement
-                // iOS disconnects audio output in background, so we need to restart
-                if (self.howl) {
-                    const currentPosition = self.howl.seek();
-                    console.log('RadioEngine: Forcing audio re-engagement at position:', currentPosition);
-
-                    // Stop and restart at same position to reconnect audio output
-                    self.howl.pause();
-                    setTimeout(() => {
-                        if (typeof currentPosition === 'number' && currentPosition > 0) {
-                            self.howl.seek(currentPosition);
-                        }
-                        self.howl.play();
-                        console.log('RadioEngine: Audio re-engaged successfully');
-                    }, 50); // Small delay to ensure iOS registers the state change
-                }
-
-                // Step 3: Update MediaSession
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.playbackState = 'playing';
-                }
-            }
-        });
-
-        // Remove keepalive interval - it was causing issues
-        // The visibility change handler is more reliable
-    }
-
-    // iOS 26: Silent audio loop to trick iOS into keeping audio session alive
-    _startSilentLoop() {
-        if (this.silentHowl) return; // Already running
-
-        console.log("RadioEngine: Starting silent audio loop for iOS 26 persistence");
-        this.silentHowl = new Howl({
-            src: [getSilentAudioDataUrl()],
-            html5: true,
-            loop: true,
-            volume: 0.001, // Nearly inaudible but not zero (iOS may ignore zero volume)
-            preload: true
-        });
-        this.silentHowl.play();
-
-        // iOS 26 Extra: Create a MediaStream video element trick
-        this._setupMediaStreamVideoTrick();
-    }
-
-    // iOS 26: Route audio through MediaStreamDestination -> video element
-    // Safari treats video media elements more favorably for background audio
-    _setupMediaStreamVideoTrick() {
-        if (this.videoTrickElement) return; // Already setup
-
-        try {
-            const ctx = Howler.ctx;
-            if (!ctx) return;
-
-            // Create a MediaStreamDestination
-            const destination = ctx.createMediaStreamDestination();
-            this.pipStreamDestination = destination; // Store for cleanup
-
-            // Connect our audio graph output to it (in addition to speakers)
-            if (this.analyser) {
-                this.analyser.connect(destination);
-            }
-
-            // Create a video element and set its srcObject to the stream
-            // We make it 1x1 pixel and visible (opacity 0) so it's technically "visible" to the DOM, which helps PiP
-            const video = document.createElement('video');
-            video.width = 1;
-            video.height = 1;
-            video.style.position = 'fixed';
-            video.style.bottom = '0';
-            video.style.right = '0';
-            video.style.opacity = '0.01'; // Not display:none
-            video.style.pointerEvents = 'none';
-            video.setAttribute('playsinline', '');
-            video.setAttribute('webkit-playsinline', '');
-            video.muted = false; // Important: NOT muted
-            video.srcObject = destination.stream;
-
-            document.body.appendChild(video);
-
-            // Start the video (this registers as "media playback" to iOS)
-            video.play().catch(() => console.log("Video trick play failed"));
-
-            this.videoTrickElement = video;
-            console.log("RadioEngine: MediaStream video trick initialized for iOS 26");
-
-        } catch (e) {
-            console.warn("RadioEngine: MediaStream video trick failed:", e);
-        }
-    }
-
-    _stopSilentLoop() {
-        if (this.silentHowl) {
-            this.silentHowl.stop();
-            this.silentHowl.unload();
-            this.silentHowl = null;
-        }
-
-        // Cleanup Video Trick to prevents feedback loops
-        if (this.videoTrickElement) {
-            this.videoTrickElement.pause();
-            this.videoTrickElement.srcObject = null;
-            this.videoTrickElement.remove();
-            this.videoTrickElement = null;
-        }
-
-        // Disconnect analyser from destination
-        if (this.analyser && this.pipStreamDestination) {
-            try {
-                this.analyser.disconnect(this.pipStreamDestination);
-            } catch (e) {
-                console.warn("RadioEngine: Failed to disconnect analyser", e);
-            }
-            this.pipStreamDestination = null;
-        }
-    }
-
-    // Public method for UI to trigger PiP (Must be called from user gesture)
-    requestPiP() {
-        // Ensure video element exists
-        if (!this.videoTrickElement) {
-            console.log('RadioEngine: Creating video element for PiP request');
-            this._setupMediaStreamVideoTrick();
-        }
-
-        if (this.videoTrickElement && this.videoTrickElement.requestPictureInPicture) {
-            this.videoTrickElement.requestPictureInPicture()
-                .then(() => console.log('PiP activated!'))
-                .catch(e => {
-                    console.error('PiP failed:', e);
-                    // Fallback: alert user
-                    alert('Background mode not available. Try installing the app to your home screen.');
-                });
-        } else {
-            console.warn('RadioEngine: PiP not supported');
-            alert('Background mode not supported on this device/browser.');
-        }
-    }
-}
-
-export const radio = new RadioEngine();
+};
