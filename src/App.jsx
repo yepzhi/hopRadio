@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { radio } from './audio/RadioEngine';
-import { WifiOff, Play, Pause } from 'lucide-react';
+import { WifiOff, Play, Pause, User } from 'lucide-react';
 import AdSpace from './components/AdSpace';
 import './App.css';
 
@@ -95,12 +95,44 @@ function App() {
       particles.current = newParticles;
     };
 
-    // Visualizer Loop
+    // Listeners Count State
+    const [listeners, setListeners] = useState(0);
+
+    // Poll for listener count
+    useEffect(() => {
+      const fetchListeners = async () => {
+        try {
+          const res = await fetch('https://yepzhi-hopradio-sync.hf.space/');
+          if (res.ok) {
+            const data = await res.json();
+            setListeners(data.listeners || 0);
+          }
+        } catch (e) {
+          // Silent fail
+        }
+      };
+
+      fetchListeners();
+      const interval = setInterval(fetchListeners, 10000); // Poll every 10s
+      return () => clearInterval(interval);
+    }, []);
+
+    // Update Media Session Metadata
+    useEffect(() => {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: "hopRadio Live",
+          artist: `${listeners} listeners`,
+          artwork: [{ src: 'https://yepzhi.com/hopRadio/logo.svg', sizes: '512x512', type: 'image/svg+xml' }]
+        });
+      }
+    }, [listeners]);
+
+    // Audio Visualizer Animation Loop
     const renderVisualizer = () => {
       if (!canvasRef.current) return;
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
-      const width = canvas.width;
       const height = canvas.height;
 
       // Init particles on first run or resize
@@ -250,16 +282,26 @@ function App() {
         </div>
       </div>
 
+      {/* Live Status & Listeners */}
+      <div className="flex flex-col items-center mb-6 space-y-2 pointer-events-auto z-20 relative">
+        <div className="flex items-center space-x-2 bg-red-500/10 px-4 py-1.5 rounded-full border border-red-500/20 backdrop-blur-md">
+          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+          <span className="text-red-500 font-bold text-xs tracking-widest uppercase">LIVE AIR</span>
+        </div>
+
+        <div className="text-gray-400 text-xs font-medium flex items-center space-x-1">
+          <User size={12} />
+          <span>{listeners} Listening</span>
+        </div>
+      </div>
+
       {/* Player Card (Glass) */}
       <div className="glass-panel rounded-[30px] p-8 md:p-10 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-5 mb-6 transition-all duration-500 relative overflow-hidden">
 
         {/* Real-Time Visualizer (Canvas Background) */}
-        {/* Centered Vertically */}
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-60 z-0 h-32">
           <canvas ref={canvasRef} width={450} height={150} className="w-full h-full object-contain"></canvas>
         </div>
-
-        {/* Status area removed - was offline countdown */}
 
         <div className={`absolute top-6 right-6 text-xs uppercase tracking-[2px] font-bold flex items-center gap-2 z-20 ${isLive ? 'text-red-500' : 'text-gray-500'}`}>
           {isPlaying && isLive && <span className="w-2 h-2 rounded-full bg-red-600 live-dot-anim"></span>}
@@ -286,8 +328,6 @@ function App() {
 
         {/* Now Playing Info */}
         <div className="text-center min-h-[60px] flex flex-col items-center justify-center z-10">
-
-          {/* Status Text (Click to Start) - Only show if NOT playing */}
           {!isPlaying && (
             <div className="text-sm uppercase tracking-[2px] mb-2 font-medium text-gray-500">
               CLICK TO START
