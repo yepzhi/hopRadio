@@ -1,85 +1,149 @@
+
+import os
+import time
+import requests
+import queue
+import threading
+import subprocess
 from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime, timezone
-import math
 
-app = FastAPI(title="hopRadio Sync API")
+app = FastAPI()
 
-# Enable CORS for the PWA
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins (or specify yepzhi.com)
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Playlist with durations (in seconds) - MUST MATCH FRONTEND
-PLAYLIST = [
-    {"id": 1, "title": "Can't Believe It", "artist": "T-Pain", "duration": 257},
-    {"id": 2, "title": "International Love", "artist": "Pitbull", "duration": 227},
-    {"id": 3, "title": "Beautiful Girls", "artist": "Sean Kingston", "duration": 234},
-    {"id": 4, "title": "Blinding Lights", "artist": "The Weeknd", "duration": 200},
-    {"id": 5, "title": "Wake Me Up", "artist": "Avicii", "duration": 247},
-    {"id": 6, "title": "Part of Me", "artist": "Katy Perry", "duration": 235},
-    {"id": 7, "title": "We Found Love", "artist": "Rihanna", "duration": 215},
-    {"id": 8, "title": "Die Young", "artist": "Ke$ha", "duration": 219},
-    {"id": 9, "title": "Glad You Came", "artist": "The Wanted", "duration": 198},
-    {"id": 10, "title": "Good Feeling", "artist": "Flo Rida", "duration": 241},
-    {"id": 11, "title": "I Knew You Were Trouble", "artist": "Taylor Swift", "duration": 219},
-    {"id": 12, "title": "Treasure", "artist": "Bruno Mars", "duration": 178},
+# Configuration
+PLAYLIST_URLS = [
+    "https://yepzhi.com/hopRadio/assets/30For30.mp3",
+    "https://yepzhi.com/hopRadio/assets/HelpMe.mp3",
+    "https://yepzhi.com/hopRadio/assets/HolyBlindfold.mp3",
+    "https://yepzhi.com/hopRadio/assets/Jan31st.mp3",
+    "https://yepzhi.com/hopRadio/assets/RingRingRing.mp3",
+    "https://yepzhi.com/hopRadio/assets/SheReady.mp3",
+    "https://yepzhi.com/hopRadio/assets/WentLegit.mp3",
+    "https://yepzhi.com/hopRadio/assets/Intro.mp3"
 ]
 
-# Calculate total playlist duration
-TOTAL_DURATION = sum(track["duration"] for track in PLAYLIST)
+TRACKS_DIR = "tracks"
+os.makedirs(TRACKS_DIR, exist_ok=True)
 
-# Start timestamp (arbitrary anchor point - Jan 1, 2024 00:00:00 UTC)
-EPOCH = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+# Global audio buffer (for broadcasting)
+AUDIO_BUFFER = queue.Queue(maxsize=100)  # ~10 seconds buffer
+CLIENTS = [] # List of queues for connected clients
+
+def download_tracks():
+    print("Downloading tracks...")
+    local_files = []
+    for url in PLAYLIST_URLS:
+        filename = os.path.join(TRACKS_DIR, url.split('/')[-1])
+        if not os.path.exists(filename):
+            print(f"Downloading {url}...")
+            r = requests.get(url)
+            with open(filename, 'wb') as f:
+                f.write(r.content)
+        local_files.append(filename)
+    print("All tracks ready.")
+    return local_files
+
+def broadcast_loop():
+    """
+    Continuous DJ loop:
+    1. Reads playlist
+    2. Feeds files to FFmpeg
+    3. Output is piped to global buffer
+    """
+    local_files = download_tracks()
+    
+    # Infinite loop of playlist
+    while True:
+        # Create a concat list file
+        with open("playlist.txt", "w") as f:
+            for track in local_files:
+                f.write(f"file '{os.path.abspath(track)}'\n")
+        
+        # FFmpeg command: Concat -> MP3 Stream -> Stdout
+        # -re : Read input at native frame rate (simulates live stream)
+        # -f concat : Use concat demuxer
+        # -safe 0 : Allow absolute paths
+        # -i playlist.txt : Input file list
+        # -c:a libmp3lame : Re-encode to ensure consistent format
+        # -b:a 128k : Constant bitrate
+        # -f mp3 : Output format
+        # pipe:1 : Output to stdout
+        
+        process = subprocess.Popen(
+            [
+                "ffmpeg",
+                "-re",
+                "-f", "concat",
+                "-safe", "0",
+                "-i", "playlist.txt",
+                "-c:a", "libmp3lame",
+                "-b:a", "128k",
+                "-ac", "2",      # Stereo
+                "-ar", "44100",  # 44.1kHz
+                "-f", "mp3",
+                "pipe:1"
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL, # Hide logs
+            bufsize=1024*16 # 16kb buffer
+        )
+        
+        print("Broadcaster: Started FFmpeg stream")
+        
+        # Read chunks and broadcast to all connected clients
+        chunk_size = 4096
+        while True:
+            data = process.stdout.read(chunk_size)
+            if not data:
+                break
+                
+            # Distribute to all listeners
+            # We iterate backwards to safely remove disconnected clients if needed (handled in generator though)
+            for client_queue in list(CLIENTS):
+                try:
+                    client_queue.put_nowait(data)
+                except queue.Full:
+                    # Client too slow, drop them or skip chunk? 
+                    # For simplicity, we skip chunk for them (audio glitch but prevents server memory leak)
+                    pass
+        
+        process.wait()
+        print("Broadcaster: Playlist finished, looping...")
+
+# Start Broadcaster in background
+t = threading.Thread(target=broadcast_loop, daemon=True)
+t.start()
 
 @app.get("/")
-def root():
-    return {"status": "hopRadio Sync API is running", "total_duration": TOTAL_DURATION}
+def home():
+    return {"status": "Radio is ON AIR", "listeners": len(CLIENTS)}
 
-@app.get("/now-playing")
-def now_playing():
-    """
-    Returns the current track and position based on server time.
-    All users calling this endpoint at the same time will get the same result.
-    """
-    now = datetime.now(timezone.utc)
-    
-    # Calculate seconds since epoch
-    seconds_since_epoch = (now - EPOCH).total_seconds()
-    
-    # Find position in the playlist cycle
-    position_in_cycle = seconds_since_epoch % TOTAL_DURATION
-    
-    # Find which track we're on
-    accumulated = 0
-    current_track = PLAYLIST[0]
-    track_position = 0
-    
-    for track in PLAYLIST:
-        if accumulated + track["duration"] > position_in_cycle:
-            current_track = track
-            track_position = position_in_cycle - accumulated
-            break
-        accumulated += track["duration"]
-    
-    return {
-        "track_id": current_track["id"],
-        "title": current_track["title"],
-        "artist": current_track["artist"],
-        "position": round(track_position, 2),
-        "duration": current_track["duration"],
-        "server_time": now.isoformat(),
-    }
+@app.get("/stream")
+async def stream():
+    def event_stream():
+        # Create a client queue
+        client_queue = queue.Queue(maxsize=20) # Small buffer per client
+        CLIENTS.append(client_queue)
+        print(f"Client connected. Total: {len(CLIENTS)}")
+        
+        try:
+            while True:
+                # Wait for data from broadcaster
+                data = client_queue.get()
+                yield data
+        except Exception as e:
+            print(f"Client disconnected: {e}")
+        finally:
+            if client_queue in CLIENTS:
+                CLIENTS.remove(client_queue)
+                print(f"Client removed. Total: {len(CLIENTS)}")
 
-@app.get("/playlist")
-def get_playlist():
-    """Returns the full playlist with durations"""
-    return {"playlist": PLAYLIST, "total_duration": TOTAL_DURATION}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=7860)
+    return StreamingResponse(event_stream(), media_type="audio/mpeg")
