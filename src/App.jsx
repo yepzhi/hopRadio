@@ -12,9 +12,7 @@ function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isReady, setIsReady] = useState(false); // Radio ready state
 
-  // PWA State
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  // PWA State removed
 
   // Visualizer Ref
   const canvasRef = useRef(null);
@@ -54,13 +52,6 @@ function App() {
     }
   }, [listeners]);
 
-  // PWA Check Effect
-  useEffect(() => {
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    if (!isStandalone) {
-      setShowInstallBanner(true);
-    }
-  }, []);
 
   useEffect(() => {
     // Network Status
@@ -69,13 +60,7 @@ function App() {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // PWA Install Prompt
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setShowInstallBanner(true);
-    };
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    // PWA Install Prompt - Removed
 
     // Initialize Audio Engine (async)
     const initRadio = async () => {
@@ -214,7 +199,6 @@ function App() {
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
   }, [isPlaying]);
@@ -233,19 +217,6 @@ function App() {
 
 
 
-  const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setShowInstallBanner(false);
-      }
-      setDeferredPrompt(null);
-    } else {
-      // Manual instructions for iOS or if prompt unavailable
-      alert('Para instalar:\n\niOS: Toca el botón Compartir y selecciona "Agregar a pantalla de inicio"\n\nAndroid: Toca el menú (⋮) y selecciona "Instalar app"');
-    }
-  };
 
   return (
     <div className="container min-h-[100dvh] flex flex-col items-center justify-center p-5 pb-20 relative z-10 w-full max-w-4xl mx-auto">
@@ -347,22 +318,6 @@ function App() {
         </div>
       </div>
 
-      {/* PWA Install Banner */}
-      {showInstallBanner && (
-        <div className="w-full max-w-[550px] mb-1.5 bg-red-900/10 backdrop-blur-md border border-red-500/20 rounded-2xl p-4 md:px-6 md:py-4 flex flex-col md:flex-row items-center gap-4 shadow-lg animate-pulse-slow">
-          <div className="text-2xl filter drop-shadow-[0_0_10px_rgba(220,20,60,0.6)]">📱</div>
-          <div className="flex-1 text-center md:text-left">
-            <div className="font-bold text-sm text-white mb-0.5">Instala la App en tu pantalla de inicio</div>
-            <div className="text-xs text-gray-400">Para que la música siga sonando al salir de la App</div>
-          </div>
-          <button
-            onClick={handleInstallClick}
-            className="bg-gradient-to-br from-red-600/40 to-red-800/40 border border-red-500/50 hover:from-red-600/60 hover:to-red-800/60 text-white text-sm font-bold py-2 px-5 rounded-full transition-all shadow-[0_4px_12px_rgba(220,20,60,0.3)] hover:-translate-y-0.5"
-          >
-            Instalar
-          </button>
-        </div>
-      )}
 
       {/* AdSpace */}
       <div className="w-full flex justify-center mb-8">
