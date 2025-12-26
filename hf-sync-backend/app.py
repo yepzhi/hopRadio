@@ -4,6 +4,7 @@ import threading
 import glob
 import random
 import requests
+import subprocess
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -37,7 +38,7 @@ PLAYLIST = [
     {"id": "t9", "title": "Ring Ring Ring", "artist": "Unknown", "file": "RingRingRing.mp3", "weight": 5},
     {"id": "t10", "title": "She Ready", "artist": "Unknown", "file": "SheReady.mp3", "weight": 6},
     {"id": "t11", "title": "Went Legit", "artist": "Unknown", "file": "WentLegit.mp3", "weight": 6},
-    {"id": "j1", "title": "Station ID", "artist": "hopRadio", "file": "Intro.mp3", "weight": 2} # Low weight but present
+    {"id": "j1", "title": "Station ID", "artist": "hopRadio", "file": "Intro.mp3", "weight": 2}
 ]
 
 CLIENTS = []
@@ -70,7 +71,6 @@ def setup_tracks():
         download_track(t['file'])
 
 def select_next_track():
-    # Weighted Random Selection
     total_weight = sum(t['weight'] for t in PLAYLIST)
     r = random.uniform(0, total_weight)
     uptime = 0
@@ -80,29 +80,17 @@ def select_next_track():
         uptime += t['weight']
     return PLAYLIST[0]
 
-# Broadcast Thread
+# Broadcast Thread using FFmpeg subprocess
 def broadcast_stream():
     global CURRENT_TRACK_INFO
-    print("Starting broadcast loop...")
+    print("Starting FFmpeg broadcast loop...")
     
-    # 64KB chunks for network efficiency
-    CHUNK_SIZE = 64 * 1024 
-    # MP3 128kbps = 16KB/s. 64KB = ~4 seconds of audio.
-    # WAIT! 4 seconds is too choppy for latency updates.
-    # Let's use smaller chunks for smoother flow?
-    # 4KB = 0.25s. Good balance.
+    # 4KB chunks for smooth streaming
     CHUNK_SIZE = 4096 
-    BITRATE_BYTES_PER_SEC = 16000 # Approx for 128kbps, but MP3 VBR varies.
-    # We shouldn't rely on bitrate math. We should flood user buffer slightly.
-    # But if we flood too much, server memory explodes? No.
-    # We control the rate.
-    
-    # Precise Timing Variables
-    target_time = time.time()
     
     while True:
         track = select_next_track()
-        local_path = download_track(track['file']) # Ensure exists
+        local_path = download_track(track['file'])
         
         if not local_path:
             time.sleep(1)
@@ -111,59 +99,60 @@ def broadcast_stream():
         print(f"Now Playing: {track['title']}")
         CURRENT_TRACK_INFO = track
         
+        # FFmpeg Command
+        # -re : Read input at native frame rate (CRITICAL for streaming)
+        # -i : Input file
+        # -f mp3 : Output format mp3
+        # -b:a 192k : Audio bitrate 192kbps (CRITICAL for quality)
+        # -ac 2 : Stereo
+        # -ar 44100 : 44.1kHz
+        # pipe:1 : Output to stdout
+        cmd = [
+            'ffmpeg',
+            '-re', 
+            '-i', local_path,
+            '-f', 'mp3',
+            '-b:a', '192k',
+            '-ac', '2',
+            '-ar', '44100',
+            '-loglevel', 'error',
+            'pipe:1'
+        ]
+        
         try:
-            with open(local_path, 'rb') as f:
-                while True:
-                    # Drift Correction: Calculate when we SHOULD be done sending this chunk
-                    # But we don't know exact duration of chunk in seconds easily without parsing MP3.
-                    # Approximation: 4096 bytes / 16000 B/s = ~0.256s
-                    # We will speed up slightly (play 0.95x duration) to ensure buffer fill.
-                    
-                    chunk = f.read(CHUNK_SIZE)
-                    if not chunk:
-                        break
-                    
-                    # Approximate duration of this chunk
-                    # 128kbps = 16KB/s. 
-                    # Duration = len(chunk) / 16000
-                    chunk_duration = len(chunk) / 16000.0
-                    
-                    # Send to clients
-                    dead_clients = []
-                    for q in CLIENTS:
-                        try:
-                            if q.full():
-                                # Client lagging. Drop oldest to make room for new (Live Sync)
-                                try:
-                                    q.get_nowait()
-                                except Empty:
-                                    pass
-                            q.put_nowait(chunk)
-                        except Exception:
-                            dead_clients.append(q)
-                    
-                    # Cleanup
-                    for q in dead_clients:
-                        if q in CLIENTS:
-                            CLIENTS.remove(q)
-
-                    # Timing
-                    target_time += (chunk_duration * 0.95) # Go 5% faster than realtime to fill buffers
-                    
-                    # Sleep until target time
-                    now = time.time()
-                    delay = target_time - now
-                    
-                    if delay > 0:
-                        time.sleep(delay)
-                    else:
-                        # We are behind! Don't sleep, just catch up.
-                        # If we are WAY behind, reset target to now to avoid burst
-                        if delay < -5.0:
-                            target_time = now
-                            
+            # Popen allows us to read stdout in real-time
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            
+            while True:
+                # Read chunk from FFmpeg stdout
+                chunk = process.stdout.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+                
+                # Send to clients
+                dead_clients = []
+                for q in CLIENTS:
+                    try:
+                        if q.full():
+                            # Remove old if full to stay live
+                            try:
+                                q.get_nowait()
+                            except Empty:
+                                pass
+                        q.put_nowait(chunk)
+                    except Exception:
+                        dead_clients.append(q)
+                
+                # Cleanup dead clients
+                for q in dead_clients:
+                    if q in CLIENTS:
+                        CLIENTS.remove(q)
+                        
+            # Wait for process to finish ensuring file is done
+            process.wait()
+            
         except Exception as e:
-            print(f"Playback error: {e}")
+            print(f"Streaming error: {e}")
             time.sleep(1)
 
 # Background Loop
@@ -174,6 +163,7 @@ threading.Thread(target=broadcast_stream, daemon=True).start()
 def index():
     return {
         "status": "radio_active", 
+        "quality": "192kbps CBR",
         "listeners": len(CLIENTS),
         "now_playing": CURRENT_TRACK_INFO
     }
@@ -181,8 +171,8 @@ def index():
 @app.get("/stream")
 def stream_audio():
     def event_stream():
-        # Large buffer (approx 60s of audio) to absorb network jitter
-        # 4096 bytes * 250 = ~1MB
+        # Buffer to hold ~few seconds of audio
+        # 192kbps = 24KB/s. 250 chunks * 4KB = 1MB = ~40 seconds buffer max
         q = Queue(maxsize=250) 
         CLIENTS.append(q)
         print(f"Client connected. Total: {len(CLIENTS)}")
