@@ -162,6 +162,9 @@ class RadioEngine {
             this.howl.pause();
         }
         this.isPlaying = false;
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = 'paused';
+        }
     }
 
     next() {
@@ -394,24 +397,48 @@ class RadioEngine {
                 artist: track.artist,
                 album: 'hopRadio Live',
                 artwork: [
-                    { src: 'https://yepzhi.com/assets/hopradio-icon-512.png', sizes: '512x512', type: 'image/png' },
-                    { src: 'https://yepzhi.com/assets/hopradio-icon-192.png', sizes: '192x192', type: 'image/png' }
+                    { src: 'https://yepzhi.com/hopRadio/logo.svg', sizes: '512x512', type: 'image/svg+xml' }
                 ]
             });
 
             // CRITICAL for iOS: Set playback state explicitly
             navigator.mediaSession.playbackState = 'playing';
 
+            // Set position state (helps iOS understand track duration)
+            if (this.howl && this.howl.duration()) {
+                try {
+                    navigator.mediaSession.setPositionState({
+                        duration: this.howl.duration(),
+                        playbackRate: 1,
+                        position: this.howl.seek() || 0
+                    });
+                } catch (e) {
+                    console.log('Position state not supported');
+                }
+            }
+
+            // Action handlers - bound to this instance
+            const self = this;
             navigator.mediaSession.setActionHandler('play', () => {
-                this.play();
-                if (this.onPlay) this.onPlay();
+                console.log('MediaSession: play action received');
+                self.resumeContext();
+                if (self.howl) {
+                    self.howl.play();
+                    self.isPlaying = true;
+                    navigator.mediaSession.playbackState = 'playing';
+                    if (self.onPlay) self.onPlay();
+                }
             });
             navigator.mediaSession.setActionHandler('pause', () => {
-                this.pause();
+                console.log('MediaSession: pause action received');
+                if (self.howl) {
+                    self.howl.pause();
+                    self.isPlaying = false;
+                    navigator.mediaSession.playbackState = 'paused';
+                }
             });
             navigator.mediaSession.setActionHandler('previoustrack', null);
-            navigator.mediaSession.setActionHandler('nexttrack', () => this.next());
-            // iOS sometimes requires these to be explicitly set
+            navigator.mediaSession.setActionHandler('nexttrack', () => self.next());
             navigator.mediaSession.setActionHandler('seekbackward', null);
             navigator.mediaSession.setActionHandler('seekforward', null);
             navigator.mediaSession.setActionHandler('seekto', null);
@@ -531,11 +558,23 @@ class RadioEngine {
 
     // Public method for UI to trigger PiP (Must be called from user gesture)
     requestPiP() {
+        // Ensure video element exists
+        if (!this.videoTrickElement) {
+            console.log('RadioEngine: Creating video element for PiP request');
+            this._setupMediaStreamVideoTrick();
+        }
+
         if (this.videoTrickElement && this.videoTrickElement.requestPictureInPicture) {
             this.videoTrickElement.requestPictureInPicture()
-                .catch(e => console.error("PiP failed:", e));
+                .then(() => console.log('PiP activated!'))
+                .catch(e => {
+                    console.error('PiP failed:', e);
+                    // Fallback: alert user
+                    alert('Background mode not available. Try installing the app to your home screen.');
+                });
         } else {
-            console.warn("RadioEngine: PiP not supported or video element missing");
+            console.warn('RadioEngine: PiP not supported');
+            alert('Background mode not supported on this device/browser.');
         }
     }
 }
