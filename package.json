@@ -12,6 +12,7 @@
   "dependencies": {
     "framer-motion": "^12.23.26",
     "howler": "^2.2.4",
+    "idb-keyval": "^6.2.2",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
