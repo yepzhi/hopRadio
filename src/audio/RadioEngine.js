@@ -58,15 +58,78 @@ class RadioEngine {
         this.silentHowl = null;
         this.videoTrickElement = null;
         this.pipStreamDestination = null;
+
+        // Sync API URL (Hugging Face Space)
+        this.syncApiUrl = 'https://yepzhi-hopradio-sync.hf.space';
+        this.isSynced = false;
     }
 
     // --- Public API ---
 
-    init() {
-        // Prepare initial queue
-        this._fillQueue();
+    async init() {
         // Setup iOS-specific audio persistence
         this._setupIOSAudioPersistence();
+
+        // Try to sync with server for synchronized playback
+        await this._syncWithServer();
+
+        // Prepare queue if sync failed
+        if (!this.isSynced) {
+            this._fillQueue();
+        }
+    }
+
+    // Sync all users to the same track/position
+    async _syncWithServer() {
+        try {
+            console.log('RadioEngine: Attempting to sync with server...');
+            const response = await fetch(`${this.syncApiUrl}/now-playing`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+            });
+
+            if (!response.ok) throw new Error('Sync API unavailable');
+
+            const data = await response.json();
+            console.log('RadioEngine: Sync data received:', data);
+
+            // Find the track in our playlist
+            const syncTrack = this.playlist.find(t => t.id === data.track_id);
+            if (syncTrack) {
+                // Set this track as current and queue the rest
+                this.currentTrack = syncTrack;
+                this.syncPosition = data.position;
+                this.isSynced = true;
+
+                // Rebuild queue starting from next track
+                this._fillQueueFromTrack(data.track_id);
+
+                console.log(`RadioEngine: Synced to "${syncTrack.title}" at ${data.position}s`);
+            }
+        } catch (e) {
+            console.warn('RadioEngine: Sync failed, using local playback:', e.message);
+            this.isSynced = false;
+            this._fillQueue();
+        }
+    }
+
+    // Fill queue starting from a specific track
+    _fillQueueFromTrack(startTrackId) {
+        const startIndex = this.playlist.findIndex(t => t.id === startTrackId);
+        if (startIndex === -1) {
+            this._fillQueue();
+            return;
+        }
+
+        this.queue = [];
+        // Add tracks after the current one
+        for (let i = startIndex + 1; i < this.playlist.length; i++) {
+            this.queue.push(this.playlist[i]);
+        }
+        // Wrap around to beginning
+        for (let i = 0; i < startIndex; i++) {
+            this.queue.push(this.playlist[i]);
+        }
     }
 
     // New Method: Real Offline Download
@@ -247,8 +310,14 @@ class RadioEngine {
                 // Notify UI: Playing started
                 if (this.onPlay) this.onPlay();
 
-                // If this is the first "Tune In", seek to a random point
-                if (isTuneIn && track.type === 'music') {
+                // If we have a sync position from the server, use it
+                if (this.isSynced && this.syncPosition > 0) {
+                    console.log(`RadioEngine: Syncing to server position: ${this.syncPosition.toFixed(1)}s`);
+                    this.howl.seek(this.syncPosition);
+                    this.syncPosition = 0; // Clear after first use
+                    this.isSynced = false; // Only sync on first play
+                } else if (isTuneIn && track.type === 'music') {
+                    // Fallback: If no sync, tune in to random point
                     const duration = this.howl.duration();
                     const randomSeek = duration * (0.1 + Math.random() * 0.7);
                     console.log(`RadioEngine: Tuning in live... skipping to ${randomSeek.toFixed(1)}s`);
