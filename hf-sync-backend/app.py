@@ -26,7 +26,25 @@ app.add_middleware(
 TRACKS_DIR = "tracks"
 os.makedirs(TRACKS_DIR, exist_ok=True)
 
-# Correct Playlist with Weights
+# Playlist (without Intro.mp3 which 404s)
+PLAYLIST = [
+    {"id": "t1", "title": "Can't Believe It", "artist": "T-Pain", "file": "CantBelieveItTPain.mp3", "weight": 8},
+    {"id": "t2", "title": "Dior", "artist": "Pop Smoke", "file": "POPSMOKEDIOR.mp3", "weight": 9},
+    {"id": "t3", "title": "Typa", "artist": "GloRilla", "file": "GloRillaTypa.mp3", "weight": 7},
+    {"id": "t4", "title": "Just Wanna Rock", "artist": "Lil Uzi Vert", "file": "JustWannaR.mp3", "weight": 8},
+    {"id": "t5", "title": "30 For 30", "artist": "Unknown", "file": "30For30.mp3", "weight": 6},
+    {"id": "t6", "title": "Help Me", "artist": "Unknown", "file": "HelpMe.mp3", "weight": 6},
+    {"id": "t7", "title": "Holy Blindfold", "artist": "Unknown", "file": "HolyBlindfold.mp3", "weight": 6},
+    {"id": "t8", "title": "Jan 31st", "artist": "Unknown", "file": "Jan31st.mp3", "weight": 6},
+    {"id": "t9", "title": "Ring Ring Ring", "artist": "Unknown", "file": "RingRingRing.mp3", "weight": 5},
+    {"id": "t10", "title": "She Ready", "artist": "Unknown", "file": "SheReady.mp3", "weight": 6},
+    {"id": "t11", "title": "Went Legit", "artist": "Unknown", "file": "WentLegit.mp3", "weight": 6},
+]
+
+CLIENTS = []
+BURST_BUFFER = deque(maxlen=200)
+CURRENT_TRACK_INFO = {"title": "Connecting...", "artist": "hopRadio"}
+
 # Track Manager Queue
 READY_TRACKS = Queue(maxsize=3)
 
