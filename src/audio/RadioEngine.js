@@ -4,7 +4,8 @@ import { set, get } from 'idb-keyval'; // Persistent storage for blobs
 
 // Initial mocked playlist for development
 // Helper to generate full path based on environment
-const getPath = (filename) => `${import.meta.env.BASE_URL}tracks/${filename}`;
+const BASE = import.meta.env.BASE_URL || '/';
+const getPath = (filename) => `${BASE}tracks/${filename}`;
 
 const INITIAL_PLAYLIST = [
     { id: 1, type: 'music', artist: 'T-Pain', title: "Can't Believe It", src: getPath('CantBelieveItTPain.mp3'), weight: 8 },
@@ -492,7 +493,7 @@ class RadioEngine {
             document.body.appendChild(video);
 
             // Start the video (this registers as "media playback" to iOS)
-            video.play().catch(e => console.log("Video trick play failed"));
+            video.play().catch(() => console.log("Video trick play failed"));
 
             this.videoTrickElement = video;
             console.log("RadioEngine: MediaStream video trick initialized for iOS 26");

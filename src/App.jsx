@@ -80,7 +80,11 @@ function App() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // Initialize Audio Engine
-    radio.init();
+    try {
+      radio.init();
+    } catch (err) {
+      console.error("RadioEngine init failed:", err);
+    }
 
     radio.onTrackChange = (newTrack) => {
       setTrack(newTrack);
