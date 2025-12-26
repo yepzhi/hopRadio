@@ -11,6 +11,11 @@
 
 <body>
   <div id="root"></div>
+  <script>
+    window.onerror = function (m, u, l, c, e) {
+      document.body.innerHTML = '<div style="color:red;background:black;padding:20px;font-family:monospace;white-space:pre-wrap">ERROR: ' + m + '\n\n' + (e ? e.stack : '') + '</div>';
+    };
+  </script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 
