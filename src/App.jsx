@@ -324,7 +324,20 @@ function App() {
         <AdSpace />
       </div>
 
-      {/* Footer */}
+      {/* Cross Link: SERGRadio */}
+      <div className="w-full flex justify-center mb-6 pointer-events-auto z-30">
+        <a href="https://yepzhi.com/SERGRadio/" className="group relative px-6 py-2 bg-black/60 border border-blue-900/50 rounded-full flex items-center gap-3 hover:bg-black/80 transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(0,0,255,0.4)]">
+          <div className="w-8 h-8 rounded-full bg-blue-900 border border-blue-500 flex items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-blue-500/30 animate-pulse"></div>
+            <span className="font-bold text-[10px] text-white z-10">SR</span>
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] text-gray-400 uppercase tracking-widest leading-none">Listen to</span>
+            <span className="text-sm font-bold text-white tracking-wide"><span className="text-blue-500">SERG</span><span className="text-red-500">Radio</span></span>
+          </div>
+          <svg className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+      </div>
       <div className="absolute bottom-2 w-full flex flex-col md:flex-row justify-between items-end px-8 z-20 pointer-events-none gap-2 md:gap-0">
         <div className="pointer-events-auto">
           <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-400 transition-colors text-xs font-medium block max-w-md text-left leading-tight">
