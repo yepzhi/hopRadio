@@ -30,7 +30,7 @@ class RadioEngine {
         this.history = [];
         this.currentTrack = null;
         this.isPlaying = false;
-        this.volume = 0.8;
+        this.volume = 0.6; // Reduced from 0.8
         this.onTrackChange = null;
         this.onTimeUpdate = null;
         this.onLoadStart = null;
@@ -105,7 +105,7 @@ class RadioEngine {
         const lowBass = ctx.createBiquadFilter();
         lowBass.type = 'lowshelf';
         lowBass.frequency.value = 60;
-        lowBass.gain.value = 6.5; // Adjusted to 6.5 as per user request
+        lowBass.gain.value = 5.5; // Reduced from 6.5 to prevent distortion
 
         const mid = ctx.createBiquadFilter();
         mid.type = 'peaking';
@@ -116,7 +116,7 @@ class RadioEngine {
         const treble = ctx.createBiquadFilter();
         treble.type = 'highshelf';
         treble.frequency.value = 8000;
-        treble.gain.value = 9.1;
+        treble.gain.value = 7.5; // Reduced from 9.1
 
         // Analyser
         this.analyser = ctx.createAnalyser();
