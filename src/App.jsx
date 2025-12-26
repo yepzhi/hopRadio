@@ -242,34 +242,11 @@ function App() {
           <canvas ref={canvasRef} width={450} height={150} className="w-full h-full object-contain"></canvas>
         </div>
 
-        {/* Top Left Status / Countdown */}
-        {/* Top Left Status / Countdown */}
-        <div className="absolute top-6 left-6 z-20 flex flex-col items-start">
-          {downloadProgress === 100 && (
-            <div className="flex flex-col gap-2">
-              <div className="text-xs font-bold tracking-[2px] text-green-400 animate-pulse">
-                OFFLINE MODE <br />
-                <span className="text-white text-base">
-                  {Math.floor(offlineTime / 60)}:{(offlineTime % 60).toString().padStart(2, '0')} REMAINING
-                </span>
-              </div>
+        {/* Status area removed - was offline countdown */}
 
-              {/* Go Back Live Button */}
-              <button
-                onClick={handleGoLive}
-                className="flex items-center gap-1 text-[10px] font-bold bg-zinc-800/80 hover:bg-zinc-700 text-white px-2 py-1 rounded-full border border-gray-600 transition-all uppercase tracking-wider"
-              >
-                <WifiOff size={10} className="text-red-500" />
-                <span>Go Live</span>
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Live Status - Upper Right */}
         <div className={`absolute top-6 right-6 text-xs uppercase tracking-[2px] font-bold flex items-center gap-2 z-20 ${isLive ? 'text-red-500' : 'text-gray-500'}`}>
           {isPlaying && isLive && <span className="w-2 h-2 rounded-full bg-red-600 live-dot-anim"></span>}
-          {isPlaying ? (isBuffering ? 'BUFFERING...' : (downloadProgress === 100 ? <span className="text-green-500">OFFLINE</span> : 'LIVE')) : ''}
+          {isPlaying ? (isBuffering ? 'BUFFERING...' : 'LIVE') : ''}
         </div>
 
         {/* Play Button */}
