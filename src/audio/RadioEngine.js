@@ -1,6 +1,6 @@
 import { Howl, Howler } from 'howler';
 import { getSilentAudioDataUrl } from './silentAudio.js';
-import { set, get, keys } from 'idb-keyval'; // Persistent storage for blobs
+import { set, get } from 'idb-keyval'; // Persistent storage for blobs
 
 // Initial mocked playlist for development
 // Helper to generate full path based on environment
@@ -282,7 +282,7 @@ class RadioEngine {
         const nextTrack = this.queue[0];
         console.log("RadioEngine: Preloading next:", nextTrack.title);
         // Create a temporary Howl just to load the buffer
-        const nextHowl = new Howl({
+        new Howl({
             src: [nextTrack.src],
             html5: true,
             preload: true,
@@ -492,7 +492,7 @@ class RadioEngine {
             document.body.appendChild(video);
 
             // Start the video (this registers as "media playback" to iOS)
-            video.play().catch(e => console.log("Video trick play failed:", e));
+            video.play().catch(e => console.log("Video trick play failed"));
 
             this.videoTrickElement = video;
             console.log("RadioEngine: MediaStream video trick initialized for iOS 26");

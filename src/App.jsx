@@ -24,8 +24,13 @@ function App() {
 
   // Visualizer Ref
   const canvasRef = useRef(null);
-  const animationRef = useRef(null);
-  const particles = useRef([]);
+  // PWA Check Effect
+  useEffect(() => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (!isStandalone) {
+      setShowInstallBanner(true);
+    }
+  }, []); // Run once on mount
 
   // Countdown Timer Logic
   useEffect(() => {
@@ -73,12 +78,6 @@ function App() {
       setShowInstallBanner(true);
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Initial check for PWA button visibility (Legacy behavior)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    if (!isStandalone) {
-      setShowInstallBanner(true);
-    }
 
     // Initialize Audio Engine
     radio.init();
@@ -222,18 +221,19 @@ function App() {
     setIsDownloading(true);
     setDownloadProgress(0);
 
-    // Simulate Download
-    const interval = setInterval(() => {
-      setDownloadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          // Don't reset immediately, keep "Offline Ready" state active
-          setIsDownloading(false);
-          return 100;
-        }
-        return prev + 1; // 1% per tick is slower (previously 5)
-      });
-    }, 150); // 150ms per tick (previously 100ms) -> total ~15s
+    // REAL Download via RadioEngine
+    radio.downloadOfflineMix((progress) => {
+      setDownloadProgress(progress);
+      if (progress === 100) {
+        setIsDownloading(false);
+      }
+    }).catch(err => {
+      console.error("Download failed:", err);
+      // Fallback/Warning (optional) - for now just reset
+      setIsDownloading(false);
+      setDownloadProgress(0);
+      alert("Download failed. Check connection.");
+    });
   };
 
   const handleInstallClick = async () => {
@@ -407,7 +407,7 @@ function App() {
         </div>
         <div className="pointer-events-auto">
           <div className="text-gray-600 text-[10px] tracking-wide">
-            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v1.3.3</span>
+            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v1.4.0</span>
           </div>
         </div>
       </div>
