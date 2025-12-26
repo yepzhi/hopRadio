@@ -219,7 +219,7 @@ function App() {
 
 
   return (
-    <div className="container min-h-[100dvh] flex flex-col items-center justify-center p-5 pb-10 relative z-10 w-full max-w-4xl mx-auto">
+    <div className="container min-h-[100dvh] flex flex-col items-center justify-center p-4 md:p-5 pb-16 md:pb-20 relative z-10 w-full max-w-4xl mx-auto">
 
       {/* Loading Screen - Waking Radio */}
       {!isReady && (
@@ -269,7 +269,7 @@ function App() {
       </div>
 
       {/* Player Card (Glass) */}
-      <div className="glass-panel rounded-[30px] p-8 md:p-10 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-5 mb-1.5 transition-all duration-500 relative overflow-hidden">
+      <div className="glass-panel rounded-[30px] p-6 md:p-8 lg:p-10 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-4 md:gap-5 mb-3 md:mb-4 lg:mb-6 transition-all duration-500 relative overflow-hidden">
 
         {/* Real-Time Visualizer (Canvas Background) */}
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-60 z-0 h-32">
@@ -320,7 +320,7 @@ function App() {
 
 
       {/* AdSpace */}
-      <div className="w-full flex justify-center mb-4">
+      <div className="w-full flex justify-center mb-4 md:mb-6 lg:mb-8">
         <AdSpace />
       </div>
 
@@ -333,7 +333,7 @@ function App() {
         </div>
         <div className="pointer-events-auto">
           <div className="text-gray-600 text-[10px] tracking-wide">
-            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v2.1.8</span>
+            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v2.1.9</span>
           </div>
         </div>
       </div>
