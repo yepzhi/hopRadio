@@ -125,37 +125,37 @@ export const radio = new class RadioEngine {
 
                         // --- EQ Restoration & "PowerHitz" Processing ---
 
-                        // 1. Dynamics Compressor (The "Radio Sound")
+                        // 1. Dynamics Compressor (Radio Limiter / Glue)
                         const compressor = ctx.createDynamicsCompressor();
-                        compressor.threshold.value = -24;
-                        compressor.knee.value = 30;
-                        compressor.ratio.value = 12;
-                        compressor.attack.value = 0.003;
-                        compressor.release.value = 0.25;
+                        compressor.threshold.value = -12; // Start compressing earlier
+                        compressor.knee.value = 10;       // Harder knee
+                        compressor.ratio.value = 5;       // 5:1 Radio Ratio
+                        compressor.attack.value = 0.005;
+                        compressor.release.value = 0.15;
 
                         // 2. EQ Filters (V-Shape / Smiley Face)
-                        // Low Shelf (Deep Bass)
+                        // Low Shelf (Deep Bass + Punch)
                         const lowShelf = ctx.createBiquadFilter();
                         lowShelf.type = 'lowshelf';
-                        lowShelf.frequency.value = 60; // Deep sub-bass focus
-                        lowShelf.gain.value = 6.0;     // Punchy
+                        lowShelf.frequency.value = 80; // Slightly higher to catch kick drums too
+                        lowShelf.gain.value = 5.0;     // +5dB (Safe boost)
 
                         // Mid (Scoop - Clarity)
                         const mid = ctx.createBiquadFilter();
                         mid.type = 'peaking';
                         mid.frequency.value = 1000;
-                        mid.gain.value = -4.0;
+                        mid.gain.value = -3.0; // Gentle scoop
                         mid.Q.value = 1;
 
                         // High Shelf (Crispness/Air)
                         const highShelf = ctx.createBiquadFilter();
                         highShelf.type = 'highshelf';
-                        highShelf.frequency.value = 4000; // Presence
-                        highShelf.gain.value = 6.0;
+                        highShelf.frequency.value = 5000;
+                        highShelf.gain.value = 5.0; // +5dB (Crystal clear)
 
-                        // Master Gain (Compensate for boosts)
+                        // Master Gain (Headroom for Boosts)
                         const masterGain = ctx.createGain();
-                        masterGain.gain.value = 0.9;
+                        masterGain.gain.value = 0.6; // Reduced from 0.9 to prevent digital clipping
 
                         // Connect Graph: 
                         // Source -> Low -> Mid -> High -> Compressor -> Master -> Analyser -> Destination
