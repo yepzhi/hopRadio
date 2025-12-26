@@ -333,7 +333,7 @@ function App() {
         </div>
         <div className="pointer-events-auto">
           <div className="text-gray-600 text-[10px] tracking-wide">
-            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v2.1.4</span>
+            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v2.1.5</span>
           </div>
         </div>
       </div>
