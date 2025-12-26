@@ -30,7 +30,7 @@ class RadioEngine {
         this.history = [];
         this.currentTrack = null;
         this.isPlaying = false;
-        this.volume = 0.6; // Reduced from 0.8
+        this.volume = 0.48; // Reduced another 20% (0.6 * 0.8 = 0.48)
         this.onTrackChange = null;
         this.onTimeUpdate = null;
         this.onLoadStart = null;
@@ -448,25 +448,50 @@ class RadioEngine {
         }
     }
 
-    // iOS-specific: Keep audio context alive
+    // iOS-specific: Aggressive audio recovery on visibility change
     _setupIOSAudioPersistence() {
-        // Resume context on visibility change
+        const self = this;
+
+        // Resume context and audio on visibility change (coming back to foreground)
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && this.isPlaying) {
-                this.resumeContext();
-                // Try to resume playback if it was interrupted
-                if (this.howl && !this.howl.playing()) {
-                    this.howl.play();
+            if (!document.hidden && self.isPlaying) {
+                console.log('RadioEngine: App returned to foreground, recovering audio...');
+
+                // Step 1: Resume AudioContext
+                if (Howler.ctx && Howler.ctx.state !== 'running') {
+                    Howler.ctx.resume().then(() => {
+                        console.log('RadioEngine: AudioContext resumed successfully');
+                    }).catch(e => {
+                        console.warn('RadioEngine: AudioContext resume failed:', e);
+                    });
+                }
+
+                // Step 2: Check if audio is truly playing
+                if (self.howl) {
+                    const wasPlaying = self.howl.playing();
+
+                    if (!wasPlaying) {
+                        console.log('RadioEngine: Audio was stopped, restarting...');
+                        self.howl.play();
+                    } else {
+                        // Audio claims to be playing - verify by seeking slightly
+                        // This forces iOS to re-engage the audio output
+                        const currentSeek = self.howl.seek();
+                        if (typeof currentSeek === 'number' && currentSeek > 0.1) {
+                            self.howl.seek(currentSeek - 0.1);
+                        }
+                    }
+                }
+
+                // Step 3: Update MediaSession
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'playing';
                 }
             }
         });
 
-        // Periodic keepalive to prevent iOS from killing the audio context
-        setInterval(() => {
-            if (this.isPlaying && Howler.ctx) {
-                this.resumeContext();
-            }
-        }, 5000); // Every 5 seconds
+        // Remove keepalive interval - it was causing issues
+        // The visibility change handler is more reliable
     }
 
     // iOS 26: Silent audio loop to trick iOS into keeping audio session alive
