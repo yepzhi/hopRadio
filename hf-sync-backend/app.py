@@ -10,6 +10,8 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from queue import Queue, Full, Empty
 
+from collections import deque
+
 app = FastAPI()
 
 # Enable CORS
@@ -25,7 +27,6 @@ TRACKS_DIR = "tracks"
 os.makedirs(TRACKS_DIR, exist_ok=True)
 
 # Correct Playlist with Weights
-# Source: https://yepzhi.com/hopRadio/tracks/
 PLAYLIST = [
     {"id": "t1", "title": "Can't Believe It", "artist": "T-Pain", "file": "CantBelieveItTPain.mp3", "weight": 8},
     {"id": "t2", "title": "Dior", "artist": "Pop Smoke", "file": "POPSMOKEDIOR.mp3", "weight": 9},
@@ -42,6 +43,10 @@ PLAYLIST = [
 ]
 
 CLIENTS = []
+# Global Circular Buffer for Burst-on-Connect
+# Stores last ~30 seconds of audio to fast-fill client buffer
+# 192kbps = 24KB/s. 4KB chunks. 6 chunks/s. 200 chunks = ~33 seconds.
+BURST_BUFFER = deque(maxlen=200)
 CURRENT_TRACK_INFO = {"title": "Connecting...", "artist": "hopRadio"}
 
 def download_track(filename):
@@ -100,19 +105,13 @@ def broadcast_stream():
         CURRENT_TRACK_INFO = track
         
         # FFmpeg Command
-        # -re : Read input at native frame rate (CRITICAL for streaming)
-        # -i : Input file
-        # -f mp3 : Output format mp3
-        # -b:a 192k : Audio bitrate 192kbps (CRITICAL for quality)
-        # -ac 2 : Stereo
-        # -ar 44100 : 44.1kHz
-        # pipe:1 : Output to stdout
         cmd = [
             'ffmpeg',
             '-re', 
             '-i', local_path,
             '-f', 'mp3',
             '-b:a', '192k',
+            '-bufsize', '384k', # Increase internal buffer
             '-ac', '2',
             '-ar', '44100',
             '-loglevel', 'error',
@@ -129,12 +128,15 @@ def broadcast_stream():
                 if not chunk:
                     break
                 
-                # Send to clients
+                # Update Burst Buffer
+                BURST_BUFFER.append(chunk)
+
+                # Send to active clients
                 dead_clients = []
                 for q in CLIENTS:
                     try:
+                        # Drop old if full (shouldn't happen often if clients read fast)
                         if q.full():
-                            # Remove old if full to stay live
                             try:
                                 q.get_nowait()
                             except Empty:
@@ -171,11 +173,22 @@ def index():
 @app.get("/stream")
 def stream_audio():
     def event_stream():
-        # Buffer to hold ~few seconds of audio
-        # 192kbps = 24KB/s. 250 chunks * 4KB = 1MB = ~40 seconds buffer max
-        q = Queue(maxsize=250) 
+        # Client Queue
+        # Size = Burst Size + some headroom
+        q = Queue(maxsize=300) 
+        
+        # BURST: Pre-fill queue with recent history so client buffer fills instantly
+        # This prevents the "start starved" issue with -re streams
+        backlog = list(BURST_BUFFER)
+        for chunk in backlog:
+            try:
+                q.put_nowait(chunk)
+            except Full:
+                break
+                
         CLIENTS.append(q)
-        print(f"Client connected. Total: {len(CLIENTS)}")
+        print(f"Client connected. Burst: {len(backlog)} chunks. Total Clients: {len(CLIENTS)}")
+        
         try:
             while True:
                 chunk = q.get()
