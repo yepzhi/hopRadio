@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { radio } from './audio/RadioEngine';
-import { WifiOff, Download, Play, Pause } from 'lucide-react';
+import { WifiOff, Play, Pause } from 'lucide-react';
 import AdSpace from './components/AdSpace';
 import './App.css';
 
@@ -11,13 +11,6 @@ function App() {
   const [isBuffering, setIsBuffering] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  // Download State
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
-
-  // PWA State
-  const [offlineTime, setOfflineTime] = useState(3600); // 1 hour in seconds
-
   // PWA State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
@@ -26,45 +19,14 @@ function App() {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const particles = useRef([]);
+
   // PWA Check Effect
   useEffect(() => {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     if (!isStandalone) {
       setShowInstallBanner(true);
     }
-  }, []); // Run once on mount
-
-  // Countdown Timer Logic
-  useEffect(() => {
-    let timer;
-    if (downloadProgress === 100 && isPlaying) {
-      timer = setInterval(() => {
-        setOfflineTime(prev => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [downloadProgress, isPlaying]);
-
-  const handleGoLive = () => {
-    // Reset Verification: Stop simulated offline, go back to live stream
-    setDownloadProgress(0);
-    setOfflineTime(3600);
-
-    // Stop current playback (which user thinks is offline)
-    if (isPlaying) {
-      radio.pause(); // Stop engine
-      setIsPlaying(false);
-    }
-
-    // Slight delay then restart live (optional, or let user press play)
-    // User requested "button to go back to live music or restart player".
-    // We'll reset to initial state so they see "CLICK TO START" or auto-play.
-    // Let's reset fully.
-    setTimeout(() => {
-      // Optional: Auto-start live? Let's verify user preference. "restart player".
-      // Just stopping resets the UI to "Live" (since downloadProgress is 0)
-    }, 100);
-  };
+  }, []);
 
   useEffect(() => {
     // Network Status
@@ -371,28 +333,9 @@ function App() {
       )}
 
       {/* AdSpace */}
-      <div className="w-full flex justify-center mb-1.5">
+      <div className="w-full flex justify-center mb-8">
         <AdSpace />
       </div>
-
-      {/* Offline Mix Button / Progress */}
-      <button
-        onClick={handleDownload}
-        disabled={isDownloading}
-        className="glass-panel px-8 py-3 rounded-full flex items-center gap-3 text-sm font-medium hover:bg-white/5 hover:border-red-500/30 hover:text-white transition-all group relative overflow-hidden mb-8"
-      >
-        {isDownloading ? (
-          <>
-            <div className="absolute inset-0 bg-red-900/40 transition-all duration-100" style={{ width: `${downloadProgress}%` }}></div>
-            <span className="relative z-10">{downloadProgress === 100 ? 'Offline Ready' : `Downloading Mix... ${downloadProgress}%`}</span>
-          </>
-        ) : (
-          <>
-            <Download size={18} className="text-gray-400 group-hover:text-red-400 transition-colors" />
-            <span className="text-gray-300">Download Offline Mix (84MB)</span>
-          </>
-        )}
-      </button>
 
       {/* Footer */}
       <div className="absolute bottom-2 w-full flex flex-col md:flex-row justify-between items-end px-8 z-20 pointer-events-none gap-2 md:gap-0">
@@ -403,7 +346,7 @@ function App() {
         </div>
         <div className="pointer-events-auto">
           <div className="text-gray-600 text-[10px] tracking-wide">
-            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v1.7.0</span>
+            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v2.0.0</span>
           </div>
         </div>
       </div>
