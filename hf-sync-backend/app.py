@@ -110,8 +110,8 @@ def broadcast_stream():
             '-re', 
             '-i', local_path,
             '-f', 'mp3',
-            '-b:a', '192k',
-            '-bufsize', '384k', # Increase internal buffer
+            '-b:a', '128k',
+            '-bufsize', '512k', # Increase internal buffer
             '-ac', '2',
             '-ar', '44100',
             '-loglevel', 'error',
