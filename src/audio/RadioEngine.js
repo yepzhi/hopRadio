@@ -123,39 +123,51 @@ export const radio = new class RadioEngine {
                     if (!node._source) {
                         const source = ctx.createMediaElementSource(node);
 
-                        // --- EQ Restoration ---
-                        // Low Shelf (Bass)
+                        // --- EQ Restoration & "PowerHitz" Processing ---
+
+                        // 1. Dynamics Compressor (The "Radio Sound")
+                        const compressor = ctx.createDynamicsCompressor();
+                        compressor.threshold.value = -24;
+                        compressor.knee.value = 30;
+                        compressor.ratio.value = 12;
+                        compressor.attack.value = 0.003;
+                        compressor.release.value = 0.25;
+
+                        // 2. EQ Filters (V-Shape / Smiley Face)
+                        // Low Shelf (Deep Bass)
                         const lowShelf = ctx.createBiquadFilter();
                         lowShelf.type = 'lowshelf';
-                        lowShelf.frequency.value = 200;
-                        lowShelf.gain.value = 5.5;
+                        lowShelf.frequency.value = 60; // Deep sub-bass focus
+                        lowShelf.gain.value = 6.0;     // Punchy
 
-                        // Mid (Scoop)
+                        // Mid (Scoop - Clarity)
                         const mid = ctx.createBiquadFilter();
                         mid.type = 'peaking';
                         mid.frequency.value = 1000;
-                        mid.gain.value = -3;
+                        mid.gain.value = -4.0;
                         mid.Q.value = 1;
 
-                        // High Shelf (Treble)
+                        // High Shelf (Crispness/Air)
                         const highShelf = ctx.createBiquadFilter();
                         highShelf.type = 'highshelf';
-                        highShelf.frequency.value = 3000;
-                        highShelf.gain.value = 7.5;
+                        highShelf.frequency.value = 4000; // Presence
+                        highShelf.gain.value = 6.0;
 
-                        // Master Gain
+                        // Master Gain (Compensate for boosts)
                         const masterGain = ctx.createGain();
-                        masterGain.gain.value = 0.8; // Prevent clipping
+                        masterGain.gain.value = 0.9;
 
-                        // Connect Graph: Source -> Low -> Mid -> High -> Master -> Analyser -> Destination
+                        // Connect Graph: 
+                        // Source -> Low -> Mid -> High -> Compressor -> Master -> Analyser -> Destination
                         source.connect(lowShelf);
                         lowShelf.connect(mid);
                         mid.connect(highShelf);
-                        highShelf.connect(masterGain);
+                        highShelf.connect(compressor);
+                        compressor.connect(masterGain);
                         masterGain.connect(this.analyser);
                         this.analyser.connect(ctx.destination);
 
-                        node._source = source; // Cache it prevents double connection
+                        node._source = source; // Cache it
                     }
                 }
             }
