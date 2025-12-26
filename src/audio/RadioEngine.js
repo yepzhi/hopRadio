@@ -83,10 +83,17 @@ class RadioEngine {
     async _syncWithServer() {
         try {
             console.log('RadioEngine: Attempting to sync with server...');
+
+            // Add timeout to prevent hanging on cold start
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+
             const response = await fetch(`${this.syncApiUrl}/now-playing`, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' },
+                signal: controller.signal,
             });
+            clearTimeout(timeoutId);
 
             if (!response.ok) throw new Error('Sync API unavailable');
 

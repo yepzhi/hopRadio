@@ -10,6 +10,7 @@ function App() {
   const [isLive, setIsLive] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isReady, setIsReady] = useState(false); // Radio ready state
 
   // PWA State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -43,12 +44,16 @@ function App() {
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Initialize Audio Engine
-    try {
-      radio.init();
-    } catch (err) {
-      console.error("RadioEngine init failed:", err);
-    }
+    // Initialize Audio Engine (async)
+    const initRadio = async () => {
+      try {
+        await radio.init();
+      } catch (err) {
+        console.error("RadioEngine init failed:", err);
+      }
+      setIsReady(true);
+    };
+    initRadio();
 
     radio.onTrackChange = (newTrack) => {
       setTrack(newTrack);
@@ -184,25 +189,7 @@ function App() {
     setIsPlaying(!isPlaying);
   };
 
-  const handleDownload = () => {
-    if (isDownloading) return;
-    setIsDownloading(true);
-    setDownloadProgress(0);
 
-    // REAL Download via RadioEngine
-    radio.downloadOfflineMix((progress) => {
-      setDownloadProgress(progress);
-      if (progress === 100) {
-        setIsDownloading(false);
-      }
-    }).catch(err => {
-      console.error("Download failed:", err);
-      // Fallback/Warning (optional) - for now just reset
-      setIsDownloading(false);
-      setDownloadProgress(0);
-      alert("Download failed. Check connection.");
-    });
-  };
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
@@ -220,6 +207,15 @@ function App() {
 
   return (
     <div className="container min-h-[100dvh] flex flex-col items-center justify-center p-5 pb-20 relative z-10 w-full max-w-4xl mx-auto">
+
+      {/* Loading Screen - Waking Radio */}
+      {!isReady && (
+        <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
+          <h1 className="logo-text text-5xl font-black tracking-tighter mb-4 text-white">hopRadio</h1>
+          <div className="text-red-500 animate-pulse text-lg mb-4">Waking up the radio...</div>
+          <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
 
       {/* Network Warning */}
       {!isOnline && (
