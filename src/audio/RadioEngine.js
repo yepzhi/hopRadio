@@ -129,8 +129,8 @@ class RadioEngine {
         }
 
         this.queue = [];
-        // Add tracks after the current one
-        for (let i = startIndex + 1; i < this.playlist.length; i++) {
+        // Add tracks starting from current one
+        for (let i = startIndex; i < this.playlist.length; i++) {
             this.queue.push(this.playlist[i]);
         }
         // Wrap around to beginning
