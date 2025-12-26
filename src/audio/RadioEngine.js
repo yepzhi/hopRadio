@@ -141,8 +141,8 @@ class RadioEngine {
         this._initAudioGraph();
         this.resumeContext();
 
-        // iOS 26: Start silent audio loop to keep audio session alive
-        this._startSilentLoop();
+        // REMOVED: Silent loop and video tricks - they cause instability
+        // iOS background audio is a platform limitation we accept for now
 
         if (!this.currentTrack && this.queue.length === 0) {
             this._fillQueue();
@@ -155,6 +155,9 @@ class RadioEngine {
         }
 
         this.isPlaying = true;
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = 'playing';
+        }
     }
 
     pause() {
