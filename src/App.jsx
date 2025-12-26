@@ -21,6 +21,39 @@ function App() {
   const animationRef = useRef(null);
   const particles = useRef([]);
 
+  // Listeners Count State
+  const [listeners, setListeners] = useState(0);
+
+  // Poll for listener count
+  useEffect(() => {
+    const fetchListeners = async () => {
+      try {
+        const res = await fetch('https://yepzhi-hopradio-sync.hf.space/');
+        if (res.ok) {
+          const data = await res.json();
+          setListeners(data.listeners || 0);
+        }
+      } catch (e) {
+        // Silent fail
+      }
+    };
+
+    fetchListeners();
+    const interval = setInterval(fetchListeners, 10000); // Poll every 10s
+    return () => clearInterval(interval);
+  }, []);
+
+  // Update Media Session Metadata
+  useEffect(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: "hopRadio Live",
+        artist: `${listeners} listeners`,
+        artwork: [{ src: 'https://yepzhi.com/hopRadio/logo.svg', sizes: '512x512', type: 'image/svg+xml' }]
+      });
+    }
+  }, [listeners]);
+
   // PWA Check Effect
   useEffect(() => {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
@@ -95,38 +128,6 @@ function App() {
       particles.current = newParticles;
     };
 
-    // Listeners Count State
-    const [listeners, setListeners] = useState(0);
-
-    // Poll for listener count
-    useEffect(() => {
-      const fetchListeners = async () => {
-        try {
-          const res = await fetch('https://yepzhi-hopradio-sync.hf.space/');
-          if (res.ok) {
-            const data = await res.json();
-            setListeners(data.listeners || 0);
-          }
-        } catch (e) {
-          // Silent fail
-        }
-      };
-
-      fetchListeners();
-      const interval = setInterval(fetchListeners, 10000); // Poll every 10s
-      return () => clearInterval(interval);
-    }, []);
-
-    // Update Media Session Metadata
-    useEffect(() => {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: "hopRadio Live",
-          artist: `${listeners} listeners`,
-          artwork: [{ src: 'https://yepzhi.com/hopRadio/logo.svg', sizes: '512x512', type: 'image/svg+xml' }]
-        });
-      }
-    }, [listeners]);
 
     // Audio Visualizer Animation Loop
     const renderVisualizer = () => {
