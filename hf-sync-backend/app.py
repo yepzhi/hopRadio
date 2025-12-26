@@ -102,16 +102,14 @@ def broadcast_stream():
             continue
             
         print(f"Now Playing: {track['title']}")
-        CURRENT_TRACK_INFO = track
-        
         # FFmpeg Command
         cmd = [
             'ffmpeg',
             '-re', 
             '-i', local_path,
             '-f', 'mp3',
-            '-b:a', '128k',
-            '-bufsize', '512k', # Increase internal buffer
+            '-b:a', '192k',
+            '-bufsize', '512k', # Internal buffer
             '-ac', '2',
             '-ar', '44100',
             '-loglevel', 'error',
@@ -199,4 +197,11 @@ def stream_audio():
             if q in CLIENTS:
                 CLIENTS.remove(q)
 
-    return StreamingResponse(event_stream(), media_type="audio/mpeg")
+    # Headers to prevent buffering by NGINX/Proxies
+    headers = {
+        "Cache-Control": "no-cache",
+        "X-Accel-Buffering": "no",
+        "Connection": "keep-alive"
+    }
+
+    return StreamingResponse(event_stream(), media_type="audio/mpeg", headers=headers)
