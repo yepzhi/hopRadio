@@ -30,7 +30,7 @@ class RadioEngine {
         this.history = [];
         this.currentTrack = null;
         this.isPlaying = false;
-        this.volume = 0.48; // Reduced another 20% (0.6 * 0.8 = 0.48)
+        this.volume = 0.6; // User volume control
         this.onTrackChange = null;
         this.onTimeUpdate = null;
         this.onLoadStart = null;
@@ -123,14 +123,19 @@ class RadioEngine {
         this.analyser.fftSize = 128;
         this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
 
+        // Master Gain (EQ output reduction - prevents distortion from EQ boost)
+        const masterGain = ctx.createGain();
+        masterGain.gain.value = 0.8; // 20% reduction after EQ
+
         // Input Point (for routing sources into)
         this.inputGain = ctx.createGain();
 
-        // Connect Chain: input -> lowBass -> mid -> treble -> analyser -> destination
+        // Connect Chain: input -> lowBass -> mid -> treble -> masterGain -> analyser -> destination
         this.inputGain.connect(lowBass);
         lowBass.connect(mid);
         mid.connect(treble);
-        treble.connect(this.analyser);
+        treble.connect(masterGain);
+        masterGain.connect(this.analyser);
         this.analyser.connect(ctx.destination);
 
         this.isGraphInit = true;
