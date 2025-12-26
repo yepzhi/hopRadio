@@ -114,8 +114,7 @@ export const radio = new class RadioEngine {
             this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
         }
 
-        // Hook into Howler HTML5 Audio Node
-        // Note: This works because backend sends CORS headers
+        // Hook into Howler HTML5 Audio Node for Visualizer AND EQ
         try {
             if (this.howl && this.howl._sounds.length > 0) {
                 const node = this.howl._sounds[0]._node;
@@ -123,14 +122,45 @@ export const radio = new class RadioEngine {
                     node.crossOrigin = "anonymous";
                     if (!node._source) {
                         const source = ctx.createMediaElementSource(node);
-                        source.connect(this.analyser);
+
+                        // --- EQ Restoration ---
+                        // Low Shelf (Bass)
+                        const lowShelf = ctx.createBiquadFilter();
+                        lowShelf.type = 'lowshelf';
+                        lowShelf.frequency.value = 200;
+                        lowShelf.gain.value = 5.5;
+
+                        // Mid (Scoop)
+                        const mid = ctx.createBiquadFilter();
+                        mid.type = 'peaking';
+                        mid.frequency.value = 1000;
+                        mid.gain.value = -3;
+                        mid.Q.value = 1;
+
+                        // High Shelf (Treble)
+                        const highShelf = ctx.createBiquadFilter();
+                        highShelf.type = 'highshelf';
+                        highShelf.frequency.value = 3000;
+                        highShelf.gain.value = 7.5;
+
+                        // Master Gain
+                        const masterGain = ctx.createGain();
+                        masterGain.gain.value = 0.8; // Prevent clipping
+
+                        // Connect Graph: Source -> Low -> Mid -> High -> Master -> Analyser -> Destination
+                        source.connect(lowShelf);
+                        lowShelf.connect(mid);
+                        mid.connect(highShelf);
+                        highShelf.connect(masterGain);
+                        masterGain.connect(this.analyser);
                         this.analyser.connect(ctx.destination);
-                        node._source = source; // Cache it
+
+                        node._source = source; // Cache it prevents double connection
                     }
                 }
             }
         } catch (e) {
-            console.warn("Visualizer connect failed (CORS?):", e);
+            console.warn("Audio Graph connect failed (CORS?):", e);
         }
     }
 
