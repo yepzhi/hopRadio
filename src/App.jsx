@@ -134,6 +134,7 @@ function App() {
       if (!canvasRef.current) return;
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
+      const width = canvas.width;
       const height = canvas.height;
 
       // Init particles on first run or resize
