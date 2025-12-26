@@ -46,11 +46,19 @@ function App() {
 
     // Initialize Audio Engine (async)
     const initRadio = async () => {
+      // Failsafe: Force entry after 5 seconds no matter what
+      const failsafeTimer = setTimeout(() => {
+        console.warn("RadioEngine init timed out, forcing start");
+        setIsReady(true);
+      }, 5000);
+
       try {
         await radio.init();
       } catch (err) {
         console.error("RadioEngine init failed:", err);
       }
+
+      clearTimeout(failsafeTimer);
       setIsReady(true);
     };
     initRadio();
@@ -213,7 +221,16 @@ function App() {
         <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
           <h1 className="logo-text text-5xl font-black tracking-tighter mb-4 text-white">hopRadio</h1>
           <div className="text-red-500 animate-pulse text-lg mb-4">Waking up the radio...</div>
-          <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-8"></div>
+
+          {/* Failsafe Button - shows after 3s */}
+          <button
+            onClick={() => setIsReady(true)}
+            className="text-gray-500 text-xs hover:text-white underline animate-in fade-in duration-1000 delay-3000 opacity-0 fill-mode-forwards"
+            style={{ animationDelay: '3s', animationFillMode: 'forwards' }}
+          >
+            Taking too long? Start anyway
+          </button>
         </div>
       )}
 
