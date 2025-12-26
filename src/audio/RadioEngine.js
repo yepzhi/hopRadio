@@ -180,7 +180,7 @@ class RadioEngine {
         const mid = ctx.createBiquadFilter();
         mid.type = 'peaking';
         mid.frequency.value = 1000;
-        mid.gain.value = 0;
+        mid.gain.value = -3; // Scoop mids for cleaner sound
         mid.Q.value = 1;
 
         const treble = ctx.createBiquadFilter();
