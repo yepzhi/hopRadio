@@ -24,6 +24,8 @@ function App() {
 
   // Visualizer Ref
   const canvasRef = useRef(null);
+  const animationRef = useRef(null);
+  const particles = useRef([]);
   // PWA Check Effect
   useEffect(() => {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
