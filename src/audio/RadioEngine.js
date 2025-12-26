@@ -472,20 +472,21 @@ class RadioEngine {
                 }
 
                 // Step 2: Check if audio is truly playing
+                // Step 2: Force audio re-engagement
+                // iOS disconnects audio output in background, so we need to restart
                 if (self.howl) {
-                    const wasPlaying = self.howl.playing();
+                    const currentPosition = self.howl.seek();
+                    console.log('RadioEngine: Forcing audio re-engagement at position:', currentPosition);
 
-                    if (!wasPlaying) {
-                        console.log('RadioEngine: Audio was stopped, restarting...');
-                        self.howl.play();
-                    } else {
-                        // Audio claims to be playing - verify by seeking slightly
-                        // This forces iOS to re-engage the audio output
-                        const currentSeek = self.howl.seek();
-                        if (typeof currentSeek === 'number' && currentSeek > 0.1) {
-                            self.howl.seek(currentSeek - 0.1);
+                    // Stop and restart at same position to reconnect audio output
+                    self.howl.pause();
+                    setTimeout(() => {
+                        if (typeof currentPosition === 'number' && currentPosition > 0) {
+                            self.howl.seek(currentPosition);
                         }
-                    }
+                        self.howl.play();
+                        console.log('RadioEngine: Audio re-engaged successfully');
+                    }, 50); // Small delay to ensure iOS registers the state change
                 }
 
                 // Step 3: Update MediaSession
