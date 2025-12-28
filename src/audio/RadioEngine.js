@@ -134,36 +134,37 @@ export const radio = new class RadioEngine {
                         // --- EQ Restoration & "PowerHitz" Processing ---
 
                         // 1. Dynamics Compressor (Radio Limiter / Glue)
+                        // 1. Dynamics Compressor (Radio Limiter / Glue)
                         const compressor = ctx.createDynamicsCompressor();
-                        compressor.threshold.value = -12; // Start compressing earlier
-                        compressor.knee.value = 10;       // Harder knee
-                        compressor.ratio.value = 5;       // 5:1 Radio Ratio
-                        compressor.attack.value = 0.005;
-                        compressor.release.value = 0.15;
+                        compressor.threshold.value = -12; // Standard radio threshold
+                        compressor.knee.value = 10;       // Soft/Hard hybrid
+                        compressor.ratio.value = 8;       // 8:1 Tight radio compression (Powerhitz style)
+                        compressor.attack.value = 0.002;  // Fast attack to catch peaks
+                        compressor.release.value = 0.2;
 
-                        // 2. EQ Filters (V-Shape / Smiley Face)
-                        // Low Shelf (Deep Bass + Punch)
+                        // 2. EQ Filters (V-Shape / "Jamz" Style)
+                        // Low Shelf (Punchy Bass)
                         const lowShelf = ctx.createBiquadFilter();
                         lowShelf.type = 'lowshelf';
-                        lowShelf.frequency.value = 80; // Slightly higher to catch kick drums too
-                        lowShelf.gain.value = 5.0;     // +5dB (Safe boost)
+                        lowShelf.frequency.value = 90; // Focused punch (Kick/Bass)
+                        lowShelf.gain.value = 6.0;     // +6dB (Strong but clean)
 
                         // Mid (Scoop - Clarity)
                         const mid = ctx.createBiquadFilter();
                         mid.type = 'peaking';
                         mid.frequency.value = 1000;
-                        mid.gain.value = -3.0; // Gentle scoop
-                        mid.Q.value = 1;
+                        mid.gain.value = -4.0; // Moderate scoop to remove boxiness
+                        mid.Q.value = 1.0;
 
-                        // High Shelf (Crispness/Air)
+                        // High Shelf (High Treble / Air - Not Harsh)
                         const highShelf = ctx.createBiquadFilter();
                         highShelf.type = 'highshelf';
-                        highShelf.frequency.value = 5000;
-                        highShelf.gain.value = 5.0; // +5dB (Crystal clear)
+                        highShelf.frequency.value = 8000; // Moved up to 8kHz for "Air" rather than 5kHz "Bite"
+                        highShelf.gain.value = 7.0;       // +7dB (Sparkle without hurting ears)
 
-                        // Master Gain (Headroom for Boosts)
+                        // Master Gain (Headroom)
                         const masterGain = ctx.createGain();
-                        masterGain.gain.value = 0.6; // Reduced from 0.9 to prevent digital clipping
+                        masterGain.gain.value = 0.7; // Safe headroom after compression
 
                         // Connect Graph: 
                         // Source -> Low -> Mid -> High -> Compressor -> Master -> Analyser -> Destination
