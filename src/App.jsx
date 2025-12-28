@@ -12,6 +12,13 @@ function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isReady, setIsReady] = useState(false); // Radio ready state
 
+  // Offline Mode State
+  const [offlineProgress, setOfflineProgress] = useState(0); // 0-100
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [hasOfflineData, setHasOfflineData] = useState(false);
+
+
   // PWA State removed
 
   // Visualizer Ref
@@ -44,6 +51,102 @@ function App() {
     const interval = setInterval(fetchListeners, 5000); // Poll every 5s for faster metadata updates
     return () => clearInterval(interval);
   }, []);
+
+  // Check for existing offline data on load
+  useEffect(() => {
+    caches.open('hopradio-v1').then(async (cache) => {
+      const keys = await cache.keys();
+      if (keys.length > 5) { // Arbitrary check for "enough" songs
+        setHasOfflineData(true);
+      }
+    });
+  }, []);
+
+  // Offline Download Logic
+  const downloadOfflineTracks = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    setOfflineProgress(0);
+
+    try {
+      // 1. Get List
+      const res = await fetch('https://yepzhi-hopradio-sync.hf.space/api/offline-queue');
+      const data = await res.json();
+      const queue = data.queue; // Array of { download_url, ... }
+
+      const cache = await caches.open('hopradio-v1');
+      let completed = 0;
+
+      const metadata = [];
+
+      // 2. Download & Cache
+      // We process sequentially to be nice to the network, or small batches
+      for (const item of queue) {
+        try {
+          // Check if already cached
+          const existingMatches = await cache.match(item.download_url);
+          if (!existingMatches) {
+            const trackRes = await fetch(item.download_url);
+            if (trackRes.ok) {
+              await cache.put(item.download_url, trackRes);
+            }
+          }
+
+          metadata.push(item);
+          completed++;
+          setOfflineProgress(Math.round((completed / queue.length) * 100));
+        } catch (e) {
+          console.error("Download failed for track", item.title, e);
+        }
+      }
+
+      // Save Metadata Map
+      localStorage.setItem('hopradio-offline-meta', JSON.stringify(metadata));
+      setHasOfflineData(true);
+      alert("Download Complete! You can now listen offline.");
+    } catch (e) {
+      alert("Download Failed: " + e.message);
+    } finally {
+      setIsDownloading(false);
+      setOfflineProgress(0);
+    }
+  };
+
+  const toggleOfflineMode = async () => {
+    if (!isOfflineMode) {
+      // Switch TO Offline
+      const metaStr = localStorage.getItem('hopradio-offline-meta');
+      if (!metaStr) return;
+      const metadata = JSON.parse(metaStr);
+
+      const cache = await caches.open('hopradio-v1');
+      const playlist = [];
+
+      for (const item of metadata) {
+        const response = await cache.match(item.download_url);
+        if (response) {
+          const blob = await response.blob();
+          playlist.push({
+            ...item,
+            blobUrl: URL.createObjectURL(blob)
+          });
+        }
+      }
+
+      if (playlist.length > 0) {
+        radio.playOffline(playlist);
+        setIsOfflineMode(true);
+        setIsLive(false);
+        setIsPlaying(true);
+      }
+    } else {
+      // Switch TO Live
+      radio.switchToLive();
+      setIsOfflineMode(false);
+      setIsLive(true);
+    }
+  };
+
 
   // Update Media Session Metadata
   useEffect(() => {
@@ -274,11 +377,12 @@ function App() {
         <div className="absolute top-6 right-6 z-20 flex flex-col items-end gap-1">
           <div className={`text-xs uppercase tracking-[2px] font-bold flex items-center gap-2 ${isLive ? 'text-red-500' : 'text-gray-500'}`}>
             {isPlaying && isLive && <span className="w-2 h-2 rounded-full bg-red-600 live-dot-anim"></span>}
-            {isPlaying ? (isBuffering ? 'BUFFERING...' : 'LIVE') : ''}
+            {isOfflineMode ? 'OFFLINE MODE' : (isPlaying ? (isBuffering ? 'BUFFERING...' : 'LIVE') : '')}
           </div>
           {/* HD Radio Logo - Top Right */}
-          <img src="/hopRadio/hd-logo.png" alt="HD Radio" className="h-5 opacity-90 mt-1" />
+          <img src="/hopRadio/hd-logo.png" alt="HD Radio" className={`h-5 opacity-90 mt-1 ${isOfflineMode ? 'grayscale brightness-50' : ''}`} />
         </div>
+
 
         {/* Play Button */}
         <button
@@ -302,9 +406,10 @@ function App() {
         <div className="text-center min-h-[60px] flex flex-col items-center justify-center z-10">
           {!isPlaying && (
             <div className="text-sm uppercase tracking-[2px] mb-2 font-medium text-gray-500">
-              CLICK TO START
+              {isOfflineMode ? 'OFFLINE READY' : 'CLICK TO START'}
             </div>
           )}
+
 
           <div className={`transition-all duration-500 ${isPlaying ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-2'}`}>
             <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-md">
@@ -328,8 +433,15 @@ function App() {
 
       {/* AdSpace */}
       <div className="w-full flex justify-center mb-2 md:mb-4">
-        <AdSpace />
+        {isOfflineMode ? (
+          <div className="text-center text-gray-500 text-xs tracking-widest uppercase py-4">
+            Local Playback Active
+          </div>
+        ) : (
+          <AdSpace />
+        )}
       </div>
+
 
       {/* Cross Link: Hub */}
       <div className="w-full flex justify-center mb-4 pointer-events-auto z-30">
@@ -353,11 +465,40 @@ function App() {
       </div>
 
       {/* Investment Pill (Bottom Center) */}
-      <div className="absolute bottom-6 left-0 right-0 z-20 pointer-events-none flex justify-center">
+      <div className="absolute bottom-6 left-0 right-0 z-20 pointer-events-none flex flex-col items-center gap-2">
+
+        {/* Offline Controls */}
+        <div className="pointer-events-auto flex items-center gap-2">
+          {isDownloading ? (
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900/80 border border-gray-700 text-xs font-mono text-green-400">
+              <span>DOWNLOADING {offlineProgress}%</span>
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={downloadOfflineTracks}
+                className="px-4 py-2 rounded-full bg-black/40 border border-gray-700 hover:bg-gray-800 text-gray-400 hover:text-white transition-all text-[10px] uppercase tracking-wider font-bold backdrop-blur-md"
+              >
+                {hasOfflineData ? 'Update Offline' : 'Download 1h Offline'}
+              </button>
+
+              {hasOfflineData && (
+                <button
+                  onClick={toggleOfflineMode}
+                  className={`px-4 py-2 rounded-full border transition-all text-[10px] uppercase tracking-wider font-bold backdrop-blur-md ${isOfflineMode ? 'bg-red-600 border-red-500 text-white' : 'bg-black/40 border-gray-700 text-gray-400 hover:text-white'}`}
+                >
+                  {isOfflineMode ? 'Go Live' : 'Go Offline'}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
         <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="pointer-events-auto px-4 py-2 rounded-full bg-gradient-to-br from-red-900/80 to-red-700/80 border border-red-600/50 text-white/90 hover:from-red-800 hover:to-red-600 transition-all text-[10px] font-medium block text-center leading-tight shadow-lg backdrop-blur-md">
           Do you like this? 💙 <span className="font-bold">Invest in this project.</span>
         </a>
       </div>
+
     </div>
 
   );

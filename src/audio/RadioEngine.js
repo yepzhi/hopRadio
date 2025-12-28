@@ -19,7 +19,7 @@ export const radio = new class RadioEngine {
     }
 
     async init() {
-        console.log("RadioEngine: Initializing Stream Mode");
+        console.log("RadioEngine: Initializing");
         // Initial fake metadata
         this._updateMetadata();
     }
@@ -27,10 +27,10 @@ export const radio = new class RadioEngine {
     _updateMetadata() {
         if (this.onTrackChange) {
             this.onTrackChange({
-                title: "Live Radio",
+                title: this.isOffline ? "Offline Mode" : "Live Radio",
                 artist: "hopRadio",
-                src: this.streamUrl,
-                type: "stream",
+                src: this.isOffline ? "Local Cache" : this.streamUrl,
+                type: this.isOffline ? "offline" : "stream",
                 id: "stream"
             });
         }
@@ -38,6 +38,11 @@ export const radio = new class RadioEngine {
 
     play() {
         if (this.isPlaying) return;
+
+        if (this.isOffline) {
+            this._playCurrentOfflineTrack();
+            return;
+        }
 
         console.log("RadioEngine: Starting Stream...");
         if (this.onLoadStart) this.onLoadStart();
@@ -83,8 +88,76 @@ export const radio = new class RadioEngine {
         this.howl.play();
     }
 
+    // --- Offline Mode ---
+    playOffline(playlist) {
+        if (!playlist || playlist.length === 0) {
+            console.error("RadioEngine: Empty playlist for offline mode");
+            return;
+        }
+
+        console.log("RadioEngine: Switching to Offline Mode", playlist);
+        this.pause(); // Stop stream if running
+
+        this.isOffline = true;
+        this.offlineQueue = playlist; // Array of { blobUrl, title, artist, ... }
+        this.offlineIndex = 0;
+
+        this._playCurrentOfflineTrack();
+    }
+
+    playNextOffline() {
+        if (!this.isOffline) return;
+        this.offlineIndex = (this.offlineIndex + 1) % this.offlineQueue.length;
+        this._playCurrentOfflineTrack();
+    }
+
+    _playCurrentOfflineTrack() {
+        if (!this.offlineQueue || this.offlineQueue.length === 0) return;
+
+        const track = this.offlineQueue[this.offlineIndex];
+        console.log("RadioEngine: Playing Offline Track", track.title);
+
+        if (this.howl) {
+            this.howl.unload();
+        }
+
+        if (this.onLoadStart) this.onLoadStart();
+        if (this.onTrackChange) this.onTrackChange(track);
+
+        this.howl = new Howl({
+            src: [track.blobUrl],
+            format: ['mp3'],
+            html5: true, // Keep consistent for visualizer hook
+            volume: this.volume,
+            autoplay: true,
+            onplay: () => {
+                this.isPlaying = true;
+                if (this.onPlay) this.onPlay();
+                this._setupMediaSession(track);
+                this._connectVisualizer();
+            },
+            onend: () => {
+                console.log("RadioEngine: Track ended, playing next...");
+                this.playNextOffline();
+            },
+            onloaderror: (id, err) => {
+                console.error("RadioEngine: Offline Playback Error", err);
+                this.playNextOffline(); // Skip bad track
+            }
+        });
+    }
+
+    switchToLive() {
+        console.log("RadioEngine: Switching back to Live Stream");
+        this.pause();
+        this.isOffline = false;
+        this.offlineQueue = [];
+        this.play(); // Auto-start live
+    }
+    // --------------------
+
     pause() {
-        console.log("RadioEngine: Stopping Stream");
+        console.log("RadioEngine: Stopping Audio");
         if (this.howl) {
             this.howl.unload(); // Truly stop to save bandwidth
             this.howl = null;
@@ -185,14 +258,25 @@ export const radio = new class RadioEngine {
         }
     }
 
-    _setupMediaSession() {
+    _setupMediaSession(track = null) {
         if ('mediaSession' in navigator) {
+            const title = track ? track.title : "Live Stream";
+            const artist = track ? track.artist : "hopRadio";
+
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: "Live Stream",
-                artist: "hopRadio",
+                title: title,
+                artist: artist,
                 artwork: [{ src: 'https://yepzhi.com/hopRadio/logo.svg', sizes: '512x512', type: 'image/svg+xml' }]
             });
             navigator.mediaSession.playbackState = 'playing';
+
+            if (track) {
+                // Offline Controls
+                navigator.mediaSession.setActionHandler('nexttrack', () => this.playNextOffline());
+            } else {
+                navigator.mediaSession.setActionHandler('nexttrack', null);
+            }
+
             navigator.mediaSession.setActionHandler('play', () => this.play());
             navigator.mediaSession.setActionHandler('pause', () => this.pause());
         }
