@@ -34,11 +34,11 @@ PLAYLIST = [
     {"id": "t3", "title": "Typa", "artist": "GloRilla", "file": "GloRillaTypa.mp3", "weight": 7},
     {"id": "t4", "title": "Just Wanna Rock", "artist": "Lil Uzi Vert", "file": "JustWannaR.mp3", "weight": 8},
     {"id": "t5", "title": "30 For 30", "artist": "Loe Shimmy", "file": "30For30.mp3", "weight": 6},
-    {"id": "t6", "title": "Help Me", "artist": "Unknown", "file": "HelpMe.mp3", "weight": 6},
-    {"id": "t7", "title": "Holy Blindfold", "artist": "Unknown", "file": "HolyBlindfold.mp3", "weight": 6},
+    {"id": "t6", "title": "Help Me", "artist": "Real Boston Richey", "file": "HelpMe.mp3", "weight": 6},
+    {"id": "t7", "title": "Holy Blindfold", "artist": "Chris Brown", "file": "HolyBlindfold.mp3", "weight": 6},
     {"id": "t8", "title": "Jan 31st", "artist": "YFN Lucci", "file": "Jan31st.mp3", "weight": 6},
     {"id": "t9", "title": "Ring Ring Ring", "artist": "Unknown", "file": "RingRingRing.mp3", "weight": 5},
-    {"id": "t10", "title": "She Ready", "artist": "Unknown", "file": "SheReady.mp3", "weight": 6},
+    {"id": "t10", "title": "She Ready", "artist": "Key Glock", "file": "SheReady.mp3", "weight": 6},
     {"id": "t11", "title": "Went Legit", "artist": "G Herbo", "file": "WentLegit.mp3", "weight": 6},
     {"id": "t12", "title": "Shake Dat Ass", "artist": "Bossman Dlow", "file": "Bossman Dlow - Shake Dat _ss (Twerk Song) [CLEAN].mp3", "weight": 8},
     {"id": "t13", "title": "Shake Dat Ass (Moskeez)", "artist": "Bossman Dlow", "file": "Bossman Dlow - Shake Dat ss (Twerk Song) [CLEAN] - MOSKEEZ.mp3", "weight": 7},
@@ -62,8 +62,6 @@ PLAYLIST = [
 
 CLIENTS = []
 # Global Circular Buffer for Burst-on-Connect
-# Stores last ~6 seconds of audio to fast-fill client buffer (Anti-Starvation)
-# 192kbps = 24KB/s. 16KB chunks. 1.5 chunks/s. 10 chunks = ~6 seconds.
 BURST_BUFFER = deque(maxlen=10) 
 CURRENT_TRACK_INFO = {"title": "Connecting...", "artist": "hopRadio"}
 
@@ -75,20 +73,25 @@ def download_track(filename):
     local_path = os.path.join(TRACKS_DIR, filename)
     
     # Check if exists and valid
-    if os.path.exists(local_path) and os.path.getsize(local_path) > 0:
-        return local_path
+    if os.path.exists(local_path):
+        size = os.path.getsize(local_path)
+        if size > 100000: # Verify it's not a tiny error file (>100KB)
+            return local_path
+        else:
+            print(f"Warning: {filename} is too small ({size} bytes). Re-downloading...")
+            os.remove(local_path)
         
-    print(f"Downloading {filename}...")
+    print(f"Downloading {filename} from {url}...")
     try:
-        r = requests.get(url, stream=True, timeout=15)
+        r = requests.get(url, stream=True, timeout=30) # Increased timeout
         if r.status_code == 200:
             with open(local_path, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=65536):
                     f.write(chunk)
-            print(f"Downloaded {filename}")
+            print(f"Success: Downloaded {filename} ({os.path.getsize(local_path)} bytes)")
             return local_path
         else:
-            print(f"Failed to download {url}: {r.status_code}")
+            print(f"Failed to download {url}: Status {r.status_code}")
     except Exception as e:
         print(f"Error downloading {filename}: {e}")
     return None
