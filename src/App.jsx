@@ -460,8 +460,9 @@ function App() {
           </a>
         </div>
         <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80">
-          v2.2.5
+          v2.2.6
         </div>
+
       </div>
 
       {/* Investment Pill (Bottom Center) */}
@@ -494,9 +495,10 @@ function App() {
           )}
         </div>
 
-        <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="pointer-events-auto px-4 py-2 rounded-full bg-gradient-to-br from-red-900/80 to-red-700/80 border border-red-600/50 text-white/90 hover:from-red-800 hover:to-red-600 transition-all text-[10px] font-medium block text-center leading-tight shadow-lg backdrop-blur-md">
-          Do you like this? 💙 <span className="font-bold">Invest in this project.</span>
+        <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="pointer-events-auto px-4 py-2 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-700 transition-all text-[10px] font-medium block text-center leading-tight shadow-lg backdrop-blur-md">
+          Do you like this? 💙 <span className="font-bold text-gray-400 group-hover:text-white">Invest in this project.</span>
         </a>
+
       </div>
 
     </div>
