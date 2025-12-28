@@ -253,7 +253,7 @@ function App() {
       )}
 
       {/* Logo Section */}
-      <div className="text-center mb-2">
+      <div className="text-center mb-6">
         <h1 className="logo-text text-6xl md:text-8xl font-black tracking-tighter mb-2">hopRadio</h1>
         <div className="text-gray-400 font-light tracking-widest text-sm md:text-base max-w-lg mx-auto mb-6">
           We don't play what you want, we play what you need
