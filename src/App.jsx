@@ -260,16 +260,10 @@ function App() {
         </div>
       </div>
 
-      {/* Live Status & Listeners */}
-      <div className="flex flex-col items-center mb-6 space-y-2 pointer-events-auto z-20 relative">
-        <div className="text-gray-400 text-xs font-medium flex items-center space-x-1">
-          <User size={12} />
-          <span>{listeners} Listening</span>
-        </div>
-      </div>
+      {/* Live Status & Listeners - REMOVED (Moved below) */}
 
       {/* Player Card (Glass) */}
-      <div className="glass-panel rounded-[30px] p-6 md:p-8 lg:p-10 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-4 md:gap-5 mb-3 md:mb-4 lg:mb-6 transition-all duration-500 relative overflow-hidden">
+      <div className="glass-panel rounded-[30px] p-6 md:p-8 lg:p-10 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-4 md:gap-5 mb-1 transition-all duration-500 relative overflow-hidden">
 
         {/* Real-Time Visualizer (Canvas Background) */}
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-60 z-0 h-32">
@@ -284,7 +278,7 @@ function App() {
         {/* Play Button */}
         <button
           onClick={togglePlay}
-          className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-gold-400 transition-colors cursor-pointer relative group mt-4 z-10 ${isBuffering ? 'animate-pulse' : ''}`}
+          className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-white transition-colors cursor-pointer relative group mt-4 z-10 ${isBuffering ? 'animate-pulse' : ''}`}
         >
           {/* Spinner Ring if buffering */}
           {isBuffering && isPlaying ? (
@@ -311,10 +305,20 @@ function App() {
             <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-md">
               {track ? track.title : 'hopRadio Live'}
             </h2>
-            <p className="text-gray-400 font-light text-lg">
+            <p className="text-gray-400 font-light text-lg mb-3">
               {track ? track.artist : 'HQ Audio Stream'}
             </p>
+            {/* HD Radio Logo */}
+            <img src="/hopRadio/hd-logo.png" alt="HD Radio" className="h-8 mx-auto opacity-80" />
           </div>
+        </div>
+      </div>
+
+      {/* Listeners Info (Bottom Right of Player) */}
+      <div className="w-full md:w-auto min-w-[300px] md:min-w-[450px] flex justify-end px-4 mb-3 md:mb-4 lg:mb-6">
+        <div className="text-gray-500 text-[10px] uppercase tracking-wider font-bold flex items-center space-x-1">
+          <User size={10} />
+          <span>{listeners} Listening</span>
         </div>
       </div>
 
@@ -324,28 +328,32 @@ function App() {
         <AdSpace />
       </div>
 
-      {/* Cross Link: SERGRadio */}
+      {/* Cross Link: Hub */}
       <div className="w-full flex justify-center mb-6 pointer-events-auto z-30">
-        <a href="https://yepzhi.com/SERGRadio/" className="group relative px-8 py-3 bg-black/60 border border-blue-900/50 rounded-full flex items-center gap-3 hover:bg-black/90 transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(0,0,255,0.3)]">
-          <span className="text-xs text-gray-400 uppercase tracking-widest font-semibold group-hover:text-gray-300">Listen</span>
-          <span className="text-xl font-black tracking-tight"><span className="text-blue-600 drop-shadow-[0_0_8px_rgba(0,0,255,0.8)]">SERG</span><span className="text-red-500 drop-shadow-[0_0_8px_rgba(255,0,0,0.8)]">Radio</span></span>
+        <a href="https://yepzhi.com" className="group relative px-8 py-3 bg-black/60 border border-gray-800 rounded-full flex items-center gap-3 hover:bg-black/90 transition-all hover:scale-105 hover:shadow-lg">
+          <span className="text-xs text-gray-400 uppercase tracking-widest font-semibold group-hover:text-gray-300">More Tools</span>
           <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
         </a>
       </div>
-      <div className="absolute bottom-2 w-full flex flex-col md:flex-row justify-between items-end px-8 z-20 pointer-events-none gap-2 md:gap-0">
+
+      {/* Footer */}
+      <div className="absolute bottom-2 w-full flex flex-col items-center justify-center px-8 z-20 pointer-events-none gap-1">
+        <div className="pointer-events-auto text-gray-600 text-[10px] tracking-wide flex items-center gap-2">
+          Created by
+          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-3 py-1 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-red-500 hover:text-red-400 hover:border-red-900 transition-all font-bold shadow-sm">
+            @yepzhi
+          </a>
+          <span className="text-gray-700">v2.2.3</span>
+        </div>
         <div className="pointer-events-auto">
-          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-400 transition-colors text-xs font-medium block max-w-md text-left leading-tight">
-            Do you like this? 💙 <span className="text-red-700 hover:text-red-500 font-normal transition-colors">Invest in this project, make this a real radio station. click here to know more.</span>
+          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-4 py-2 rounded-full bg-gradient-to-br from-red-900 to-red-700 border border-red-600 text-white hover:from-red-800 hover:to-red-600 transition-all text-xs font-medium block max-w-md text-center leading-tight shadow-md hover:shadow-lg">
+            Do you like this? 💙 <span className="font-bold">Invest in this project, make this a real radio station. Click here to know more.</span>
           </a>
         </div>
-        <div className="pointer-events-auto">
-          <div className="text-gray-600 text-[10px] tracking-wide">
-            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v2.2.3</span>
-          </div>
-        </div>
       </div>
-
     </div>
+
+    </div >
   );
 }
 
