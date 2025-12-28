@@ -339,20 +339,24 @@ function App() {
         </a>
       </div>
 
-      {/* Footer */}
-      <div className="absolute bottom-2 w-full flex flex-col items-center justify-center px-8 z-20 pointer-events-none gap-1">
-        <div className="pointer-events-auto text-gray-600 text-[10px] tracking-wide flex items-center gap-2">
-          Created by
-          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-3 py-1 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-red-500 hover:text-red-400 hover:border-red-900 transition-all font-bold shadow-sm">
+      {/* Footer (Right Aligned, Stacked Version) */}
+      <div className="absolute bottom-4 right-6 z-20 pointer-events-none flex flex-col items-end gap-1">
+        <div className="pointer-events-auto flex items-center gap-2">
+          <span className="text-gray-500 text-[10px] tracking-wide font-medium mr-1">Created by</span>
+          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-3 py-1 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-red-500 hover:text-red-400 hover:border-red-900 transition-all font-bold shadow-sm text-[10px]">
             @yepzhi
           </a>
-          <span className="text-gray-700">v2.2.4</span>
         </div>
-        <div className="pointer-events-auto">
-          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-4 py-2 rounded-full bg-gradient-to-br from-red-900 to-red-700 border border-red-600 text-white hover:from-red-800 hover:to-red-600 transition-all text-xs font-medium block max-w-md text-center leading-tight shadow-md hover:shadow-lg">
-            Do you like this? 💙 <span className="font-bold">Invest in this project, make this a real radio station. Click here to know more.</span>
-          </a>
+        <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80">
+          v2.2.5
         </div>
+      </div>
+
+      {/* Investment Pill (Bottom Center) */}
+      <div className="absolute bottom-6 left-0 right-0 z-20 pointer-events-none flex justify-center">
+        <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="pointer-events-auto px-4 py-2 rounded-full bg-gradient-to-br from-red-900/80 to-red-700/80 border border-red-600/50 text-white/90 hover:from-red-800 hover:to-red-600 transition-all text-[10px] font-medium block text-center leading-tight shadow-lg backdrop-blur-md">
+          Do you like this? 💙 <span className="font-bold">Invest in this project.</span>
+        </a>
       </div>
     </div>
 
