@@ -232,6 +232,22 @@ def index():
         "queue": READY_TRACKS.qsize()
     }
 
+@app.get("/api/offline-queue")
+def get_offline_queue():
+    """Returns a list of 15 random tracks for client-side offline buffering"""
+    # Select 15 random tracks (approx 1 hour)
+    queue = random.sample(PLAYLIST, min(len(PLAYLIST), 15))
+    
+    # Enrich with direct download URLs
+    # Assuming the frontend can access the same source URLs
+    response_queue = []
+    for track in queue:
+        t = track.copy()
+        t['download_url'] = f"https://yepzhi.com/hopRadio/tracks/{track['file']}"
+        response_queue.append(t)
+        
+    return {"queue": response_queue}
+
 @app.get("/stream")
 def stream_audio():
     def event_stream():
