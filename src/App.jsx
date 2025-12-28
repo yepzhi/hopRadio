@@ -315,7 +315,7 @@ function App() {
       </div>
 
       {/* Listeners Info (Bottom Right of Player) */}
-      <div className="w-full md:w-auto min-w-[300px] md:min-w-[450px] flex justify-end px-4 mb-3 md:mb-4 lg:mb-6">
+      <div className="w-full md:w-auto min-w-[300px] md:min-w-[450px] flex justify-end px-4 mb-2 md:mb-3">
         <div className="text-gray-500 text-[10px] uppercase tracking-wider font-bold flex items-center space-x-1">
           <User size={10} />
           <span>{listeners} Listening</span>
@@ -324,13 +324,13 @@ function App() {
 
 
       {/* AdSpace */}
-      <div className="w-full flex justify-center mb-4 md:mb-6 lg:mb-8">
+      <div className="w-full flex justify-center mb-2 md:mb-4">
         <AdSpace />
       </div>
 
       {/* Cross Link: Hub */}
-      <div className="w-full flex justify-center mb-6 pointer-events-auto z-30">
-        <a href="https://yepzhi.com" className="group relative px-8 py-3 bg-black/60 border border-gray-800 rounded-full flex items-center gap-3 hover:bg-black/90 transition-all hover:scale-105 hover:shadow-lg">
+      <div className="w-full flex justify-center mb-4 pointer-events-auto z-30">
+        <a href="https://yepzhi.com" className="group relative px-6 py-2.5 bg-black/40 backdrop-blur-xl border border-gray-800 rounded-full flex items-center gap-3 hover:bg-black/80 transition-all hover:scale-105 hover:shadow-lg">
           <span className="text-xs text-gray-400 uppercase tracking-widest font-semibold group-hover:text-gray-300">More Tools</span>
           <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
         </a>
@@ -343,7 +343,7 @@ function App() {
           <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-3 py-1 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-red-500 hover:text-red-400 hover:border-red-900 transition-all font-bold shadow-sm">
             @yepzhi
           </a>
-          <span className="text-gray-700">v2.2.3</span>
+          <span className="text-gray-700">v2.2.4</span>
         </div>
         <div className="pointer-events-auto">
           <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-4 py-2 rounded-full bg-gradient-to-br from-red-900 to-red-700 border border-red-600 text-white hover:from-red-800 hover:to-red-600 transition-all text-xs font-medium block max-w-md text-center leading-tight shadow-md hover:shadow-lg">
