@@ -34,7 +34,7 @@ PLAYLIST = [
     {"id": "t2", "title": "Dior", "artist": "Pop Smoke", "file": "POPSMOKEDIOR.mp3", "weight": 9},
     {"id": "t3", "title": "Typa", "artist": "GloRilla", "file": "GloRillaTypa.mp3", "weight": 7},
     {"id": "t4", "title": "Just Wanna Rock", "artist": "Lil Uzi Vert", "file": "JustWannaR.mp3", "weight": 8},
-    {"id": "t5", "title": "30 For 30", "artist": "Loe Shimmy", "file": "30For30.mp3", "weight": 6},
+    {"id": "t5", "title": "30 For 30", "artist": "SZA", "file": "30For30.mp3", "weight": 6},
     {"id": "t6", "title": "Help Me", "artist": "Real Boston Richey", "file": "HelpMe.mp3", "weight": 6},
     {"id": "t7", "title": "Holy Blindfold", "artist": "Chris Brown", "file": "HolyBlindfold.mp3", "weight": 6},
     {"id": "t8", "title": "Jan 31st", "artist": "YFN Lucci", "file": "Jan31st.mp3", "weight": 6},
