@@ -17,7 +17,6 @@ jobs:
 
       - name: Push to Hub
         env:
-        env:
           HF_TOKEN: ${{ secrets.HOPRADIO_KEY }}
         run: |
           # 1. Clone the Space
