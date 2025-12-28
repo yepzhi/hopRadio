@@ -64,7 +64,7 @@ PLAYLIST = [
     {"id": "t32", "title": "Whatever She Wants", "artist": "Bryson Tiller", "file": "Bryson Tiller - Whatever She Wants (CLEAN) [Lyrics] - Hip Hop_R&B Lyrics.mp3", "weight": 8},
     {"id": "t33", "title": "Players", "artist": "Coi Leray", "file": "Coi Leray - Players [Clean] - Sock With A Glock.mp3", "weight": 8},
     {"id": "t34", "title": "Laffy Taffy", "artist": "D4L", "file": "D4L - Laffy Taffy (Clean - Lyrics) - Kids Dance Party.mp3", "weight": 7},
-    {"id": "t35", "title": "ROCKSTAR", "artist": "DaBaby ft. Roddy Ricch", "file": "DaBaby - ROCKSTAR (Clean - Lyrics) feat. Roddy Ricch - Polar Records.mp3", "weight": 9},
+    {"id": "t35", "title": "Rockstar", "artist": "DaBaby", "file": "DaBaby - ROCKSTAR (Clean - Lyrics) feat. Roddy Ricch - Polar Records.mp3", "weight": 9},
     {"id": "t36", "title": "Damn!", "artist": "YoungBloodZ", "file": "Damn! (Radio Edit) - YoungBloodZ.mp3", "weight": 8},
     {"id": "t37", "title": "Blow My High", "artist": "Dee Mula", "file": "Dee Mula - Blow My High [Clean] - Sock With A Glock.mp3", "weight": 6},
     {"id": "t38", "title": "What It Is", "artist": "Doechii & Kodak Black", "file": "Doechii & Kodak Black - What It Is (Clean Lyrics) - Clean Recordz.mp3", "weight": 8},
