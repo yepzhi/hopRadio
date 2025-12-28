@@ -262,11 +262,6 @@ function App() {
 
       {/* Live Status & Listeners */}
       <div className="flex flex-col items-center mb-6 space-y-2 pointer-events-auto z-20 relative">
-        <div className="flex items-center space-x-2 bg-red-500/10 px-4 py-1.5 rounded-full border border-red-500/20 backdrop-blur-md">
-          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-          <span className="text-red-500 font-bold text-xs tracking-widest uppercase">LIVE AIR</span>
-        </div>
-
         <div className="text-gray-400 text-xs font-medium flex items-center space-x-1">
           <User size={12} />
           <span>{listeners} Listening</span>
