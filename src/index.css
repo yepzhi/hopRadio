@@ -61,6 +61,30 @@ body::before {
   /* Gold Glow */
 }
 
+/* SERG - Blue Fog Glow (Intensified) - PORTED FROM SERGRADIO */
+.serg-blue-text {
+  text-shadow:
+    0 0 10px rgba(0, 0, 255, 0.9),
+    0 0 30px rgba(0, 0, 255, 0.7),
+    0 0 60px rgba(0, 0, 255, 0.5),
+    /* Wider Fog */
+    0 0 100px rgba(0, 0, 255, 0.3);
+  /* Ambient Mist */
+  filter: drop-shadow(0 0 20px rgba(0, 0, 255, 0.6));
+}
+
+.radio-gradient-text {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Blood Red Gradient */
+  background: linear-gradient(135deg, #ff4444 0%, #cc0000 60%, #8b0000 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* Red Fog Glow (Intensified) */
+  filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.8)) drop-shadow(0 0 40px rgba(255, 0, 0, 0.5)) drop-shadow(0 0 80px rgba(139, 0, 0, 0.3));
+  padding-left: 0px;
+}
+
 /* Glass Card from Reference */
 .glass-panel {
   background: rgba(255, 255, 255, 0.03);

@@ -447,31 +447,18 @@ function App() {
       <div className="w-full flex justify-center mb-4 pointer-events-auto z-30">
         <a href="https://yepzhi.com/SERGRadio/" className="group relative px-6 py-2.5 bg-black/40 backdrop-blur-xl border border-blue-900/50 rounded-full flex items-center gap-3 hover:bg-black/80 transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(59,130,246,0.3)]">
           <span className="text-xs text-gray-400 uppercase tracking-widest font-semibold group-hover:text-gray-300">Listen</span>
-          <span className="text-xl font-black tracking-tight"><span className="text-blue-700 tracking-tighter drop-shadow-[0_0_8px_rgba(29,78,216,0.6)]">SERG</span><span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Radio</span></span>
+          <h1 className="logo-base text-xl font-black tracking-tight mb-0 leading-none">
+            <span className="text-blue-700 tracking-tighter serg-blue-text">SERG</span><span className="radio-gradient-text">Radio</span>
+          </h1>
           <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
         </a>
       </div>
 
-      {/* Footer (Right Aligned, Stacked Version) */}
-      <div className="absolute bottom-4 right-6 z-20 pointer-events-none flex flex-col items-end gap-1">
-        <div className="pointer-events-auto flex items-center gap-2">
-          <span className="text-gray-500 text-[10px] tracking-wide font-medium mr-1">Created by</span>
-          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-3 py-1 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-red-500 hover:text-red-400 hover:border-red-900 transition-all font-bold shadow-sm text-[10px]">
-            @yepzhi
-          </a>
-        </div>
-        <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80">
-          v2.2.7
-        </div>
-
-
-      </div>
-
-      {/* Investment Pill (Bottom Center) */}
-      <div className="absolute bottom-6 left-0 right-0 z-20 pointer-events-none flex flex-col items-center gap-2">
+      {/* Flex Column Container for Bottom Elements to avoid cramping */}
+      <div className="w-full max-w-[450px] flex flex-col items-center gap-4 mt-2 pb-6 z-20 pointer-events-auto">
 
         {/* Offline Controls */}
-        <div className="pointer-events-auto flex items-center gap-2">
+        <div className="flex items-center gap-2">
           {isDownloading ? (
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900/80 border border-gray-700 text-xs font-mono text-green-400">
               <span>DOWNLOADING {offlineProgress}%</span>
@@ -497,9 +484,21 @@ function App() {
           )}
         </div>
 
-        <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="pointer-events-auto px-4 py-2 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-700 transition-all text-[10px] font-medium block text-center leading-tight shadow-lg backdrop-blur-md">
+        {/* Invest Button */}
+        <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="w-full max-w-[300px] px-4 py-2 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-700 transition-all text-[10px] font-medium block text-center leading-tight shadow-lg backdrop-blur-md">
           Do you like this? 💙 <span className="font-bold text-gray-400 group-hover:text-white">Invest in this project.</span>
         </a>
+
+        {/* Footer info inline (mobile friendly) */}
+        <div className="flex items-center gap-2 mt-2">
+          <span className="text-gray-500 text-[10px] tracking-wide font-medium mr-1">Created by</span>
+          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-3 py-1 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-red-500 hover:text-red-400 hover:border-red-900 transition-all font-bold shadow-sm text-[10px]">
+            @yepzhi
+          </a>
+          <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
+            v2.2.8
+          </div>
+        </div>
 
       </div>
 
