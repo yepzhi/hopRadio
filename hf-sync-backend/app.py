@@ -13,7 +13,6 @@ from queue import Queue, Full, Empty
 from collections import deque
 
 app = FastAPI()
-# v2.2.2 Force Sync Trigger
 
 # Enable CORS
 app.add_middleware(
