@@ -30,6 +30,10 @@ function App() {
         if (res.ok) {
           const data = await res.json();
           setListeners(data.listeners || 0);
+          // Auto-update track info from server (Metadata Sync)
+          if (data.now_playing) {
+            setTrack(data.now_playing);
+          }
         }
       } catch (e) {
         // Silent fail
@@ -37,7 +41,7 @@ function App() {
     };
 
     fetchListeners();
-    const interval = setInterval(fetchListeners, 10000); // Poll every 10s
+    const interval = setInterval(fetchListeners, 5000); // Poll every 5s for faster metadata updates
     return () => clearInterval(interval);
   }, []);
 
@@ -45,12 +49,12 @@ function App() {
   useEffect(() => {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: "hopRadio Live",
-        artist: `${listeners} listeners`,
+        title: track ? track.title : "hopRadio Live",
+        artist: track ? track.artist : `${listeners} listeners`,
         artwork: [{ src: 'https://yepzhi.com/hopRadio/logo.svg', sizes: '512x512', type: 'image/svg+xml' }]
       });
     }
-  }, [listeners]);
+  }, [listeners, track]);
 
 
   useEffect(() => {
@@ -81,9 +85,10 @@ function App() {
     };
     initRadio();
 
-    radio.onTrackChange = (newTrack) => {
-      setTrack(newTrack);
-    };
+    // Local override ONLY if user clicks play/pause manually (optional, removed to rely on server poll)
+    // radio.onTrackChange = (newTrack) => {
+    //   setTrack(newTrack);
+    // };
 
     // Buffering Events
     radio.onLoadStart = () => {
@@ -340,7 +345,7 @@ function App() {
         </div>
         <div className="pointer-events-auto">
           <div className="text-gray-600 text-[10px] tracking-wide">
-            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v2.2.0</span>
+            Created by <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-700 hover:text-red-500 transition-colors font-bold">@yepzhi</a> <span className="text-gray-500">v2.2.1</span>
           </div>
         </div>
       </div>
