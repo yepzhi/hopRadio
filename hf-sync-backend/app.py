@@ -27,22 +27,44 @@ TRACKS_DIR = "tracks"
 os.makedirs(TRACKS_DIR, exist_ok=True)
 
 # Playlist (without Intro.mp3 which 404s)
+# Playlist (Auto-Generated)
 PLAYLIST = [
     {"id": "t1", "title": "Can't Believe It", "artist": "T-Pain", "file": "CantBelieveItTPain.mp3", "weight": 8},
     {"id": "t2", "title": "Dior", "artist": "Pop Smoke", "file": "POPSMOKEDIOR.mp3", "weight": 9},
     {"id": "t3", "title": "Typa", "artist": "GloRilla", "file": "GloRillaTypa.mp3", "weight": 7},
     {"id": "t4", "title": "Just Wanna Rock", "artist": "Lil Uzi Vert", "file": "JustWannaR.mp3", "weight": 8},
-    {"id": "t5", "title": "30 For 30", "artist": "Unknown", "file": "30For30.mp3", "weight": 6},
+    {"id": "t5", "title": "30 For 30", "artist": "Loe Shimmy", "file": "30For30.mp3", "weight": 6},
     {"id": "t6", "title": "Help Me", "artist": "Unknown", "file": "HelpMe.mp3", "weight": 6},
     {"id": "t7", "title": "Holy Blindfold", "artist": "Unknown", "file": "HolyBlindfold.mp3", "weight": 6},
-    {"id": "t8", "title": "Jan 31st", "artist": "Unknown", "file": "Jan31st.mp3", "weight": 6},
+    {"id": "t8", "title": "Jan 31st", "artist": "YFN Lucci", "file": "Jan31st.mp3", "weight": 6},
     {"id": "t9", "title": "Ring Ring Ring", "artist": "Unknown", "file": "RingRingRing.mp3", "weight": 5},
     {"id": "t10", "title": "She Ready", "artist": "Unknown", "file": "SheReady.mp3", "weight": 6},
-    {"id": "t11", "title": "Went Legit", "artist": "Unknown", "file": "WentLegit.mp3", "weight": 6},
+    {"id": "t11", "title": "Went Legit", "artist": "G Herbo", "file": "WentLegit.mp3", "weight": 6},
+    {"id": "t12", "title": "Shake Dat Ass", "artist": "Bossman Dlow", "file": "Bossman Dlow - Shake Dat _ss (Twerk Song) [CLEAN].mp3", "weight": 8},
+    {"id": "t13", "title": "Shake Dat Ass (Moskeez)", "artist": "Bossman Dlow", "file": "Bossman Dlow - Shake Dat ss (Twerk Song) [CLEAN] - MOSKEEZ.mp3", "weight": 7},
+    {"id": "t14", "title": "Bottoms Up", "artist": "Trey Songz ft. Nicki", "file": "Bottoms Up- Trey Songz Ft. Nicki Minaj (Clean) - EdittedSongs🤍.mp3", "weight": 8},
+    {"id": "t15", "title": "Safe", "artist": "Cardi B ft. Kehlani", "file": "Cardi B - Safe feat. Kehlani (Clean Version)  Lyrics - Kids Dance Party.mp3", "weight": 7},
+    {"id": "t16", "title": "Weird", "artist": "Chino", "file": "Chino Weird Clean - DecaturQ.mp3", "weight": 6},
+    {"id": "t17", "title": "Residuals", "artist": "Chris Brown", "file": "Chris Brown Residuals Clean - DecaturQ.mp3", "weight": 7},
+    {"id": "t18", "title": "What Did I Miss", "artist": "Drake", "file": "Drake - What Did I Miss (Clean) - XeonBeats.mp3", "weight": 9},
+    {"id": "t19", "title": "Went Legit (Clean)", "artist": "G Herbo", "file": "G Herbo - Went Legit (Best Clean Version) - TheKobe1234 Records.mp3", "weight": 6},
+    {"id": "t20", "title": "Sk8", "artist": "JID & Ciara", "file": "JID & Ciara & EARTHGANG Sk8 Clean - DecaturQ.mp3", "weight": 7},
+    {"id": "t21", "title": "Lovin On Me", "artist": "Jack Harlow", "file": "Jack Harlow - Lovin On Me (Clean Version) (Lyrics) - Kids Dance Party.mp3", "weight": 9},
+    {"id": "t22", "title": "Not Fair", "artist": "Leon Thomas", "file": "Leon Thomas Not Fair Clean - DecaturQ.mp3", "weight": 6},
+    {"id": "t23", "title": "3am", "artist": "Loe Shimmy & Don Toliver", "file": "Loe Shimmy & Don Toliver - 3am [Clean] - Sock With A Glock.mp3", "weight": 7},
+    {"id": "t24", "title": "Turn Yo Clic Up", "artist": "Quavo & Future", "file": "Quavo & Future - Turn Yo Clic Up [Clean] - Sock With A Glock.mp3", "weight": 8},
+    {"id": "t25", "title": "Buy You A Drank", "artist": "T-Pain", "file": "T-Pain - Buy You A Drank (Shawty Snappin') (Feat. Yung Joc) (Clean) - DJRatAttack.mp3", "weight": 9},
+    {"id": "t26", "title": "FEINVALID", "artist": "Travis Scott", "file": "Travis Scott - FE!N (Clean - Lyrics) feat. Playboi Carti - Polar Records.mp3", "weight": 10},
+    {"id": "t27", "title": "IS IT", "artist": "Tyla", "file": "Tyla - IS IT (Clean) - XeonBeats.mp3", "weight": 7},
+    {"id": "t28", "title": "Jan 31st (Full)", "artist": "YFN Lucci", "file": "YFN Lucci - Jan. 31st (My Truth) [Clean] - Sock With A Glock.mp3", "weight": 6},
+    {"id": "t29", "title": "Uh Oh", "artist": "Zeddy Will", "file": "Zeddy Will Uh Oh Clean - DecaturQ.mp3", "weight": 7},
 ]
 
 CLIENTS = []
-BURST_BUFFER = deque(maxlen=200)
+# Global Circular Buffer for Burst-on-Connect
+# Stores last ~6 seconds of audio to fast-fill client buffer (Anti-Starvation)
+# 192kbps = 24KB/s. 16KB chunks. 1.5 chunks/s. 10 chunks = ~6 seconds.
+BURST_BUFFER = deque(maxlen=10) 
 CURRENT_TRACK_INFO = {"title": "Connecting...", "artist": "hopRadio"}
 
 # Track Manager Queue
@@ -77,16 +99,8 @@ def track_manager_loop():
     while True:
         try:
             if not READY_TRACKS.full():
-                # Weighted Random Selection
-                total = sum(t['weight'] for t in PLAYLIST)
-                r = random.uniform(0, total)
-                upto = 0
-                selected_track = PLAYLIST[0]
-                for t in PLAYLIST:
-                    if r < upto + t['weight']:
-                        selected_track = t
-                        break
-                    upto += t['weight']
+                # Even Distribution Shuffle
+                selected_track = select_next_track()
                 
                 # Download (Blocking, but in this separate thread)
                 path = download_track(selected_track['file'])
@@ -99,6 +113,38 @@ def track_manager_loop():
         except Exception as e:
             print(f"Track Manager Error: {e}")
             time.sleep(1)
+
+# Broadcast Thread using FFmpeg subprocess
+# (Defined earlier, reused seamlessly)
+
+# Track Shuffle Bag (Even Distribution) & History
+SHUFFLE_BAG = []
+LAST_PLAYED = deque(maxlen=5) # Prevent repeats in last 5 songs
+
+def select_next_track():
+    global SHUFFLE_BAG, LAST_PLAYED
+    
+    # 1. Refill if needed
+    if not SHUFFLE_BAG:
+        print("Refilling Shuffle Bag...")
+        SHUFFLE_BAG = list(PLAYLIST)
+        random.shuffle(SHUFFLE_BAG)
+        
+        # Smart Refill: Ensure the top of the NEW bag doesn't match LAST_PLAYED history
+        # If the first song was just played, swap it with a random one in the bag
+        if SHUFFLE_BAG and LAST_PLAYED and SHUFFLE_BAG[-1]['id'] in [t['id'] for t in LAST_PLAYED]:
+             print("Shuffle collision detected! Swapping...")
+             idx = random.randint(0, len(SHUFFLE_BAG) - 2) # Pick random index
+             # Swap last with random
+             SHUFFLE_BAG[-1], SHUFFLE_BAG[idx] = SHUFFLE_BAG[idx], SHUFFLE_BAG[-1]
+
+    # 2. Pop
+    track = SHUFFLE_BAG.pop()
+    
+    # 3. Add to history
+    LAST_PLAYED.append(track)
+    
+    return track
 
 # Broadcast Thread using FFmpeg subprocess
 def broadcast_stream():
@@ -209,11 +255,13 @@ def stream_audio():
             if q in CLIENTS:
                 CLIENTS.remove(q)
 
-    # Headers to prevent buffering by NGINX/Proxies
+    # Headers to prevent buffering AND Enable CORS for AudioContext
     headers = {
         "Cache-Control": "no-cache",
         "X-Accel-Buffering": "no",
-        "Connection": "keep-alive"
+        "Connection": "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "*",
     }
-
+    
     return StreamingResponse(event_stream(), media_type="audio/mpeg", headers=headers)
