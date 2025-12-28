@@ -445,8 +445,9 @@ function App() {
 
       {/* Cross Link: Hub */}
       <div className="w-full flex justify-center mb-4 pointer-events-auto z-30">
-        <a href="https://yepzhi.com" className="group relative px-6 py-2.5 bg-black/40 backdrop-blur-xl border border-gray-800 rounded-full flex items-center gap-3 hover:bg-black/80 transition-all hover:scale-105 hover:shadow-lg">
-          <span className="text-xs text-gray-400 uppercase tracking-widest font-semibold group-hover:text-gray-300">More Tools</span>
+        <a href="https://yepzhi.com/SERGRadio/" className="group relative px-6 py-2.5 bg-black/40 backdrop-blur-xl border border-blue-900/50 rounded-full flex items-center gap-3 hover:bg-black/80 transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(59,130,246,0.3)]">
+          <span className="text-xs text-gray-400 uppercase tracking-widest font-semibold group-hover:text-gray-300">Listen</span>
+          <span className="text-xl font-black tracking-tight"><span className="text-blue-700 tracking-tighter drop-shadow-[0_0_8px_rgba(29,78,216,0.6)]">SERG</span><span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Radio</span></span>
           <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
         </a>
       </div>
@@ -460,8 +461,9 @@ function App() {
           </a>
         </div>
         <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80">
-          v2.2.6
+          v2.2.7
         </div>
+
 
       </div>
 
