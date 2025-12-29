@@ -361,7 +361,13 @@ function App() {
 
       {/* Logo Section */}
       <div className="text-center mb-10 mt-4">
-        <h1 className="logo-text text-5xl md:text-7xl font-black tracking-tighter mb-4 opacity-90">hopRadio</h1>
+        <h1 className="logo-text text-5xl md:text-7xl font-black tracking-tighter mb-0 opacity-90">hopRadio</h1>
+
+        {/* Attribution Badge */}
+        <div className="text-right pr-4 md:pr-12 -mt-1 mb-6 max-w-xl mx-auto">
+          <span className="text-gray-500 font-bold text-xs md:text-sm tracking-wide lowercase">by </span>
+          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-500 font-black text-xs md:text-sm hover:text-white transition-all uppercase">@Yepzhi</a>
+        </div>
 
         {/* Apple-style Typography */}
         <div className="flex flex-col items-center gap-1 max-w-2xl mx-auto px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -551,7 +557,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.3.1
+            v2.3.2
           </div>
         </div>
 
