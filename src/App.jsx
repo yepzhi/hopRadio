@@ -360,13 +360,18 @@ function App() {
       )}
 
       {/* Logo Section */}
-      <div className="text-center mb-6">
-        <h1 className="logo-text text-6xl md:text-8xl font-black tracking-tighter mb-2">hopRadio</h1>
-        <div className="text-gray-400 font-light tracking-widest text-sm md:text-base max-w-lg mx-auto mb-1">
-          We don't play what you want, we play what you need
-        </div>
-        <div className="text-gray-400 font-light tracking-widest text-xs md:text-sm max-w-lg mx-auto mb-6">
-          From New York to H City! Live 24/7.
+      <div className="text-center mb-10 mt-4">
+        <h1 className="logo-text text-5xl md:text-7xl font-black tracking-tighter mb-4 opacity-90">hopRadio</h1>
+
+        {/* Apple-style Typography */}
+        <div className="flex flex-col items-center gap-1 max-w-2xl mx-auto px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <h2 className="text-3xl md:text-5xl font-semibold tracking-tighter text-white leading-tight">
+            We don't play what you want, <br className="hidden md:block" />
+            <span className="text-gray-500">we play what you need.</span>
+          </h2>
+          <p className="mt-3 text-lg md:text-xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 tracking-tight">
+            From New York to H City! Live 24/7.
+          </p>
         </div>
       </div>
 
@@ -546,7 +551,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.3.0
+            v2.3.1
           </div>
         </div>
 
