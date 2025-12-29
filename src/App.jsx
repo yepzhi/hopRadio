@@ -362,22 +362,22 @@ function App() {
       {/* Logo Section */}
       <div className="flex flex-col items-center mb-6 mt-4">
         {/* Logo Container for Relative Positioning */}
-        <div className="relative">
+        <div className="relative mb-1">
           <h1 className="logo-text text-6xl md:text-8xl font-black tracking-tighter cursor-default">hopRadio</h1>
 
           {/* Attribution Badge - Positioned under "dio" */}
           <div className="absolute -bottom-3 -right-1 md:-right-2 flex items-center gap-1">
             <span className="text-gray-500 font-bold text-[10px] md:text-xs tracking-wide lowercase">by </span>
-            <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-500 font-black text-[10px] md:text-xs hover:text-white transition-all uppercase">@Yepzhi</a>
+            <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-500 font-black text-[10px] md:text-xs hover:text-white transition-all">@Yepzhi</a>
           </div>
         </div>
 
-        {/* Slogan (Apple Style - Small Size) */}
-        <div className="flex flex-col items-center gap-1 max-w-lg mx-auto px-4 mt-4 mb-2">
-          <h2 className="text-sm md:text-base font-bold tracking-tighter text-white leading-tight text-center">
-            We don't play what you want, <span className="text-gray-500">we play what you need.</span>
+        {/* Slogan (Simplified & Closer) */}
+        <div className="flex flex-col items-center gap-0 max-w-lg mx-auto px-4 mt-2 mb-2">
+          <h2 className="text-xs md:text-sm text-gray-500 font-normal tracking-tight leading-tight text-center">
+            We don't play what you want, we play what you need.
           </h2>
-          <p className="text-xs md:text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 tracking-tight opacity-90">
+          <p className="text-[10px] md:text-xs font-medium bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 tracking-tight opacity-90 mt-1">
             From New York to H City! Live 24/7.
           </p>
         </div>
@@ -559,7 +559,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.3.6
+            v2.3.7
           </div>
         </div>
 
