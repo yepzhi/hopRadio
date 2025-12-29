@@ -384,22 +384,52 @@ function App() {
         </div>
 
 
-        {/* Play Button */}
+        {/* Play Button Container with Offline Controls */}
+        <div className="flex items-center justify-center gap-6 mt-4 relative z-10">
+
+          {/* Offline Prev (Hidden if Online) */}
+          {isOfflineMode && (
+            <button onClick={() => radio.playPrevOffline()} className="text-gray-500 hover:text-white transition-colors p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+            </button>
+          )}
+
+          {/* Main Play Button */}
+          <button
+            onClick={togglePlay}
+            className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-white transition-colors cursor-pointer relative group ${isBuffering ? 'animate-pulse' : ''}`}
+          >
+            {/* Spinner Ring if buffering */}
+            {isBuffering && isPlaying ? (
+              <div className="absolute inset-0 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
+            ) : null}
+            <div className="relative z-10">
+              {isPlaying ? (
+                isBuffering ? null : <Pause size={48} fill="currentColor" />
+              ) : (
+                <Play size={48} fill="currentColor" className="ml-2" />
+              )}
+            </div>
+          </button>
+
+          {/* Offline Next (Hidden if Online) */}
+          {isOfflineMode && (
+            <button onClick={() => radio.playNextOffline()} className="text-gray-500 hover:text-white transition-colors p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+            </button>
+          )}
+        </div>
+
+        {/* Scratch Button - Lower Left Absolute */}
         <button
-          onClick={togglePlay}
-          className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-white transition-colors cursor-pointer relative group mt-4 z-10 ${isBuffering ? 'animate-pulse' : ''}`}
+          onClick={() => radio.triggerScratch()}
+          className="absolute bottom-6 left-6 z-30 text-gray-600 hover:text-white active:scale-95 transition-all group"
+          title="DJ Scratch Effect"
         >
-          {/* Spinner Ring if buffering */}
-          {isBuffering && isPlaying ? (
-            <div className="absolute inset-0 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
-          ) : null}
-          <div className="relative z-10">
-            {isPlaying ? (
-              isBuffering ? null : <Pause size={48} fill="currentColor" />
-            ) : (
-              <Play size={48} fill="currentColor" className="ml-2" />
-            )}
-          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:animate-spin-slow">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
         </button>
 
         {/* Now Playing Info */}
@@ -496,7 +526,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.2.8
+            v2.2.9
           </div>
         </div>
 

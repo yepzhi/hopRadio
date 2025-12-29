@@ -111,6 +111,61 @@ export const radio = new class RadioEngine {
         this._playCurrentOfflineTrack();
     }
 
+    playPrevOffline() {
+        if (!this.isOffline) return;
+        // Handle wrap-around for negative index
+        this.offlineIndex = (this.offlineIndex - 1 + this.offlineQueue.length) % this.offlineQueue.length;
+        this._playCurrentOfflineTrack();
+    }
+
+    triggerScratch() {
+        if (!Howler.ctx) return;
+        const ctx = Howler.ctx;
+
+        // Synthesize a quick "Wiki-Wiki" scratch sound
+        const t = ctx.currentTime;
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        // White Noise Buffer (Better for scratching than oscillator)
+        const bufferSize = ctx.sampleRate * 0.5; // 0.5 sec buffer
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        // Filter Sweep (The "Wah" in the scratch)
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(400, t);
+        filter.frequency.linearRampToValueAtTime(2500, t + 0.1); // Up
+        filter.frequency.linearRampToValueAtTime(400, t + 0.2);  // Down (Wiki)
+        filter.Q.value = 5;
+
+        // Envelope
+        gainNode.gain.setValueAtTime(0.8, t);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+
+        // Pitch Bend (The "Zip")
+        noise.playbackRate.setValueAtTime(0.8, t);
+        noise.playbackRate.linearRampToValueAtTime(2.0, t + 0.1);
+        noise.playbackRate.linearRampToValueAtTime(0.5, t + 0.2);
+
+        // Connect
+        noise.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        // Note: Connecting directly to destination bypasses our master compressor, 
+        // which gives it a "cut through" effect like a real DJ cue.
+
+        noise.start(t);
+        noise.stop(t + 0.3);
+    }
+
     _playCurrentOfflineTrack() {
         if (!this.offlineQueue || this.offlineQueue.length === 0) return;
 
