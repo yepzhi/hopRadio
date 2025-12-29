@@ -118,70 +118,7 @@ export const radio = new class RadioEngine {
         this._playCurrentOfflineTrack();
     }
 
-    triggerScratch() {
-        // "Double Punch" Tape Stop Effect
-        // Sequence: "Chk-Chk-Whoooom"
-        // We do two quick "brakes" (mini-stops) followed by the full slow down.
-
-        if (!this.howl || !this.howl.playing()) return;
-
-        const originalVol = this.howl.volume();
-
-        // 1. Duck volume slightly for the whole effect (prevent harshness)
-        // But do not restore it until the very end.
-        this.howl.volume(originalVol * 0.7);
-
-        // Clear any previous scratch intervals
-        if (this._scratchInterval) clearInterval(this._scratchInterval);
-        if (this._scratchTimeout) clearTimeout(this._scratchTimeout);
-
-        // Helper: Perform a quick rate drop (Brake Check)
-        const doMiniPunch = (delay) => {
-            setTimeout(() => {
-                this.howl.rate(0.05); // Hard brake (almost stop)
-
-                setTimeout(() => {
-                    this.howl.rate(1.0); // Release brake
-                }, 80); // Slightly longer hold for distinctness
-            }, delay);
-        };
-
-        // Helper: Perform the main Tape Stop
-        const doTapeStop = (delay) => {
-            setTimeout(() => {
-                let steps = 8;
-                let duration = 300;
-                let stepTime = duration / steps;
-                let i = 0;
-
-                // Fade out volume completely during the main stop
-                this.howl.fade(this.howl.volume(), 0, duration);
-
-                this._scratchInterval = setInterval(() => {
-                    i++;
-                    const progress = i / steps;
-                    const newRate = Math.max(0.05, 1.0 * (1 - Math.pow(progress, 0.5)));
-                    this.howl.rate(newRate);
-
-                    if (i >= steps) {
-                        clearInterval(this._scratchInterval);
-
-                        // Hold silence/stop
-                        this._scratchTimeout = setTimeout(() => {
-                            // Release & Spin Up & Restore Volume
-                            this.howl.rate(1.0);
-                            this.howl.fade(0, originalVol, 200); // Smooth restore to ORIGINAL volume
-                        }, 250);
-                    }
-                }, stepTime);
-            }, delay);
-        };
-
-        // Execute Sequence
-        doMiniPunch(0);    // Brake 1
-        doMiniPunch(140);  // Brake 2
-        doTapeStop(280);   // Full Stop
-    }
+    // Scratch functionality removed by user request (v2.3.8)
 
     _playCurrentOfflineTrack() {
         if (!this.offlineQueue || this.offlineQueue.length === 0) return;
