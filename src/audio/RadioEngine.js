@@ -122,16 +122,15 @@ export const radio = new class RadioEngine {
         if (!Howler.ctx) return;
         const ctx = Howler.ctx;
 
-        // Synthesizing a "Hip Hop" Scratch (The Classic "Fresh" / "Ahhh" cut)
-        // We create TWO events: Forward (sharp/high) and Backward (lower/longer) -> "Wiki-Wiki" style
+        // Synthesizing a "Baby Scratch" (Sharp, percussive cut)
         const t = ctx.currentTime;
 
-        const playScratchSlice = (startTime, duration, startFreq, endFreq, startRate, endRate) => {
+        const playScratchSlice = (startTime, duration, startFreq, endFreq, startRate, endRate, volume) => {
             const bufferSize = ctx.sampleRate * duration;
             const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
             const data = buffer.getChannelData(0);
 
-            // Texturize the noise (Pink-ish noise is better for vinyl)
+            // Texturize the noise (Pink-ish noise)
             let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
             for (let i = 0; i < bufferSize; i++) {
                 const white = Math.random() * 2 - 1;
@@ -142,7 +141,7 @@ export const radio = new class RadioEngine {
                 b4 = 0.55000 * b4 + white * 0.5329522;
                 b5 = -0.7616 * b5 - white * 0.0168980;
                 data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-                data[i] *= 3.5; // Gain compensation
+                data[i] *= 3.5;
                 b6 = white * 0.115926;
             }
 
@@ -150,22 +149,23 @@ export const radio = new class RadioEngine {
             noise.buffer = buffer;
 
             const filter = ctx.createBiquadFilter();
-            filter.type = 'bandpass';
-            filter.Q.value = 4.0; // Vocal resonance
+            filter.type = 'lowpass'; // Lowpass sounds warmer/vinyl-like
+            filter.Q.value = 5.0;
 
             const gainNode = ctx.createGain();
 
-            // Pitch/Speed Envelope (The physical movement of the hand)
+            // Pitch/Speed Envelope (Tighter movement)
             noise.playbackRate.setValueAtTime(startRate, startTime);
-            noise.playbackRate.exponentialRampToValueAtTime(endRate, startTime + duration);
+            noise.playbackRate.linearRampToValueAtTime(endRate, startTime + duration);
 
-            // Filter Envelope (The "Wah" characteristic of a sample being sped up)
+            // Filter Envelope (The "Wah")
             filter.frequency.setValueAtTime(startFreq, startTime);
             filter.frequency.exponentialRampToValueAtTime(endFreq, startTime + duration);
 
-            // Volume Envelope (Sharp attack/decay)
+            // Volume Envelope (Sharp attack, quick decay)
             gainNode.gain.setValueAtTime(0, startTime);
-            gainNode.gain.linearRampToValueAtTime(0.8, startTime + 0.02);
+            gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.01);
+            gainNode.gain.linearRampToValueAtTime(volume * 0.5, startTime + (duration * 0.5));
             gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
 
             noise.connect(filter);
@@ -174,11 +174,13 @@ export const radio = new class RadioEngine {
             noise.start(startTime);
         };
 
-        // Movement 1: "Wi" (Fast Forward) - High pitch, short
-        playScratchSlice(t, 0.12, 800, 2000, 1.0, 2.5);
+        // Movement 1: Forward Stab (High Pitch)
+        // Shorter duration, Lower max volume (0.4)
+        playScratchSlice(t, 0.08, 1200, 2500, 1.0, 2.0, 0.4);
 
-        // Movement 2: "Ki" (Backward Pull) - Lower pitch, slightly longer
-        playScratchSlice(t + 0.13, 0.18, 1500, 400, 2.0, 0.5);
+        // Movement 2: Backward Pull (Lower Pitch)
+        // Slightly delayed, dragging sound
+        playScratchSlice(t + 0.09, 0.12, 2000, 600, 1.8, 0.8, 0.3);
     }
 
     _playCurrentOfflineTrack() {

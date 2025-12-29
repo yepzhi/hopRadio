@@ -32,6 +32,9 @@ function App() {
   // Poll for listener count
   useEffect(() => {
     const fetchListeners = async () => {
+      // Don't overwrite metadata if we are offline
+      if (isOfflineMode) return;
+
       try {
         const res = await fetch('https://yepzhi-hopradio-sync.hf.space/');
         if (res.ok) {
@@ -50,7 +53,7 @@ function App() {
     fetchListeners();
     const interval = setInterval(fetchListeners, 5000); // Poll every 5s for faster metadata updates
     return () => clearInterval(interval);
-  }, []);
+  }, [isOfflineMode]);
 
   // Check for existing offline data on load
   useEffect(() => {
@@ -188,10 +191,11 @@ function App() {
     };
     initRadio();
 
-    // Local override ONLY if user clicks play/pause manually (optional, removed to rely on server poll)
-    // radio.onTrackChange = (newTrack) => {
-    //   setTrack(newTrack);
-    // };
+    // Hook radio events
+    radio.onTrackChange = (newTrack) => {
+      console.log("App: onTrackChange", newTrack);
+      setTrack(newTrack);
+    };
 
     // Buffering Events
     radio.onLoadStart = () => {
@@ -389,8 +393,12 @@ function App() {
 
           {/* Offline Prev (Hidden if Online) */}
           {isOfflineMode && (
-            <button onClick={() => radio.playPrevOffline()} className="text-gray-500 hover:text-white transition-colors p-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+            <button
+              onClick={() => radio.playPrevOffline()}
+              className="text-white hover:text-red-400 transition-colors p-3 bg-white/10 rounded-full backdrop-blur-sm active:scale-95"
+              title="Previous Song"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
             </button>
           )}
 
@@ -414,8 +422,12 @@ function App() {
 
           {/* Offline Next (Hidden if Online) */}
           {isOfflineMode && (
-            <button onClick={() => radio.playNextOffline()} className="text-gray-500 hover:text-white transition-colors p-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+            <button
+              onClick={() => radio.playNextOffline()}
+              className="text-white hover:text-red-400 transition-colors p-3 bg-white/10 rounded-full backdrop-blur-sm active:scale-95"
+              title="Next Song"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
             </button>
           )}
         </div>
@@ -432,8 +444,8 @@ function App() {
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
           </button>
-          <span className="text-[10px] uppercase font-bold text-gray-600 tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none select-none">
-            Scratch it
+          <span className="text-[10px] uppercase font-bold text-gray-600 tracking-widest pointer-events-none select-none animate-pulse">
+            Scratch it!
           </span>
         </div>
 
@@ -531,7 +543,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.2.10
+            v2.2.12
           </div>
         </div>
 
