@@ -362,8 +362,11 @@ function App() {
       {/* Logo Section */}
       <div className="text-center mb-6">
         <h1 className="logo-text text-6xl md:text-8xl font-black tracking-tighter mb-2">hopRadio</h1>
-        <div className="text-gray-400 font-light tracking-widest text-sm md:text-base max-w-lg mx-auto mb-6">
+        <div className="text-gray-400 font-light tracking-widest text-sm md:text-base max-w-lg mx-auto mb-1">
           We don't play what you want, we play what you need
+        </div>
+        <div className="text-gray-400 font-light tracking-widest text-xs md:text-sm max-w-lg mx-auto mb-6">
+          From New York to H City! Live 24/7.
         </div>
       </div>
 
@@ -381,7 +384,7 @@ function App() {
         <div className="absolute top-6 right-6 z-20 flex flex-col items-end gap-1">
           <div className={`text-xs uppercase tracking-[2px] font-bold flex items-center gap-2 ${isLive ? 'text-red-500' : 'text-gray-500'}`}>
             {isPlaying && isLive && <span className="w-2 h-2 rounded-full bg-red-600 live-dot-anim"></span>}
-            {isOfflineMode ? 'OFFLINE MODE' : (isPlaying ? (isBuffering ? 'BUFFERING...' : 'LIVE 24/7') : '')}
+            {isOfflineMode ? 'OFFLINE MODE' : (isPlaying ? (isBuffering ? 'BUFFERING...' : 'LIVE') : '')}
           </div>
           {/* HD Radio Logo - Top Right */}
           <img src="/hopRadio/hd-logo.png" alt="HD Radio" className={`h-5 opacity-90 mt-1 ${isOfflineMode ? 'grayscale brightness-50' : ''}`} />
@@ -465,10 +468,6 @@ function App() {
             <p className="text-gray-400 font-light text-lg mb-3">
               {track ? track.artist : 'HQ Audio Stream'}
             </p>
-            {/* New Slogan Line */}
-            <p className="text-red-500 font-bold text-xs tracking-wider uppercase animate-pulse">
-              From New York to H City! Live 24/7.
-            </p>
           </div>
         </div>
       </div>
@@ -547,7 +546,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.2.14
+            v2.2.15
           </div>
         </div>
 

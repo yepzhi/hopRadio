@@ -121,105 +121,56 @@ export const radio = new class RadioEngine {
     triggerScratch() {
         if (!Howler.ctx) return;
         const ctx = Howler.ctx;
+        const now = ctx.currentTime;
 
-        // Synthesizing the Classic Hip-Hop "Ahhh" Scratch
-        // To make it sound like a record and not just noise, we need FORMANT FILTERS.
-        // The "Ahhh" vowel has specific resonance peaks (F1: ~700Hz, F2: ~1200Hz, F3: ~2500Hz).
+        // 1. "Stop the Record" Effect (Ducking/Muffling the Music)
+        // We duck the master volume briefly to simulate the DJ putting hand on the record
+        const originalVolume = Howler.volume();
+        Howler.volume(originalVolume * 0.2); // Drop to 20%
 
-        const t = ctx.currentTime;
+        // Schedule restore
+        setTimeout(() => {
+            Howler.volume(originalVolume); // Restore smoothly? Howler handles ramps poorly globally, instantaneous is safer for "release"
+        }, 250); // 250ms mute
 
-        const playScratchSlice = (startTime, duration, startRate, endRate, volume) => {
-            // Source: Pink Noise (better spectrum for vinyl than white noise)
-            const bufferSize = ctx.sampleRate * duration;
-            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-            const data = buffer.getChannelData(0);
+        // 2. Synthesize a Brighter, Cleaner Scratch (FM Chirp)
+        // Instead of muddy noise, we use a Sawtooth wave with extreme pitch modulation (Chirp)
+        // This cuts through clearly like a digital scratch sample.
 
-            let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-            for (let i = 0; i < bufferSize; i++) {
-                const white = Math.random() * 2 - 1;
-                b0 = 0.99886 * b0 + white * 0.0555179;
-                b1 = 0.99332 * b1 + white * 0.0750759;
-                b2 = 0.96900 * b2 + white * 0.1538520;
-                b3 = 0.86650 * b3 + white * 0.3104856;
-                b4 = 0.55000 * b4 + white * 0.5329522;
-                b5 = -0.7616 * b5 - white * 0.0168980;
-                data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-                data[i] *= 0.8; // Normalize pink noise
-                b6 = white * 0.115926;
-            }
+        const playScratchChirp = (startTime, duration, startFreq, endFreq, vol) => {
+            const osc = ctx.createOscillator();
+            osc.type = 'sawtooth'; // Sawtooth has harmonics (buzz), clearer than noise
 
-            const noise = ctx.createBufferSource();
-            noise.buffer = buffer;
+            const gain = ctx.createGain();
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'highpass'; // Remove mud
+            filter.frequency.value = 800;
 
-            // --- FORMANT FILTER BANK ("Voice" Shaping) ---
-            // F1 (Ahhh - 700Hz)
-            const f1 = ctx.createBiquadFilter();
-            f1.type = 'bandpass';
-            f1.frequency.value = 700;
-            f1.Q.value = 3.0;
+            // Pitch Envelope (The "Scratch" movement)
+            osc.frequency.setValueAtTime(startFreq, startTime);
+            osc.frequency.exponentialRampToValueAtTime(endFreq, startTime + duration);
 
-            // F2 (Ahhh - 1200Hz)
-            const f2 = ctx.createBiquadFilter();
-            f2.type = 'bandpass';
-            f2.frequency.value = 1200;
-            f2.Q.value = 3.5;
+            // Volume Envelope
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(vol, startTime + 0.01);
+            gain.gain.linearRampToValueAtTime(0, startTime + duration);
 
-            // F3 (Ahhh - 2600Hz)
-            const f3 = ctx.createBiquadFilter();
-            f3.type = 'bandpass';
-            f3.frequency.value = 2600;
-            f3.Q.value = 4.0;
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
 
-            // Parallel connection for formants
-            const formantInput = ctx.createGain();
-            const formantOutput = ctx.createGain();
-
-            formantInput.connect(f1);
-            formantInput.connect(f2);
-            formantInput.connect(f3);
-            f1.connect(formantOutput);
-            f2.connect(formantOutput);
-            f3.connect(formantOutput);
-
-            // Resonant Filter (Vinyl Movement "Wah") - Applied AFTER formants
-            const movementFilter = ctx.createBiquadFilter();
-            movementFilter.type = 'lowpass';
-            movementFilter.Q.value = 1.0;
-
-            const gainNode = ctx.createGain();
-
-            // --- ENVELOPES ---
-
-            // 1. Playback Rate (The actual scratch push/pull)
-            // Simulates the hand stopping the record and pushing it
-            noise.playbackRate.setValueAtTime(startRate, startTime);
-            noise.playbackRate.linearRampToValueAtTime(endRate, startTime + duration);
-
-            // 2. Filter Sweep (Vinyl speed effect on formants)
-            // As playing faster, formants shift up slightly
-            movementFilter.frequency.setValueAtTime(startRate * 800, startTime);
-            movementFilter.frequency.exponentialRampToValueAtTime(endRate * 800, startTime + duration);
-
-            // 3. Volume (Crossfader cut)
-            gainNode.gain.setValueAtTime(0, startTime);
-            gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.01);
-            gainNode.gain.linearRampToValueAtTime(volume * 0.6, startTime + (duration * 0.6));
-            gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
-
-            // Connect Graph
-            noise.connect(formantInput);
-            formantOutput.connect(movementFilter);
-            movementFilter.connect(gainNode);
-            gainNode.connect(ctx.destination);
-
-            noise.start(startTime);
+            osc.start(startTime);
+            osc.stop(startTime + duration);
         };
 
-        // "Wiki-Wiki" Pattern:
-        // 1. "Forward" (Sharp)
-        playScratchSlice(t, 0.09, 1.2, 2.8, 0.5);
-        // 2. "Back" (Drag)
-        playScratchSlice(t + 0.10, 0.14, 2.2, 0.4, 0.5);
+        // Movement 1: Forward (Sharp High Chirp) "Wiki"
+        playScratchChirp(now, 0.08, 1000, 3000, 0.3);
+
+        // Movement 2: Backward (Lower Drag) "Wiki"
+        playScratchChirp(now + 0.09, 0.10, 2500, 500, 0.4);
+
+        // Movement 3: Short Finisher
+        playScratchChirp(now + 0.20, 0.05, 800, 1500, 0.2);
     }
 
     _playCurrentOfflineTrack() {
