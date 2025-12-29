@@ -122,48 +122,63 @@ export const radio = new class RadioEngine {
         if (!Howler.ctx) return;
         const ctx = Howler.ctx;
 
-        // Synthesize a quick "Wiki-Wiki" scratch sound
+        // Synthesizing a "Hip Hop" Scratch (The Classic "Fresh" / "Ahhh" cut)
+        // We create TWO events: Forward (sharp/high) and Backward (lower/longer) -> "Wiki-Wiki" style
         const t = ctx.currentTime;
-        const oscillator = ctx.createOscillator();
-        const gainNode = ctx.createGain();
-        const filter = ctx.createBiquadFilter();
 
-        // White Noise Buffer (Better for scratching than oscillator)
-        const bufferSize = ctx.sampleRate * 0.5; // 0.5 sec buffer
-        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-        }
+        const playScratchSlice = (startTime, duration, startFreq, endFreq, startRate, endRate) => {
+            const bufferSize = ctx.sampleRate * duration;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
 
-        const noise = ctx.createBufferSource();
-        noise.buffer = buffer;
+            // Texturize the noise (Pink-ish noise is better for vinyl)
+            let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                b0 = 0.99886 * b0 + white * 0.0555179;
+                b1 = 0.99332 * b1 + white * 0.0750759;
+                b2 = 0.96900 * b2 + white * 0.1538520;
+                b3 = 0.86650 * b3 + white * 0.3104856;
+                b4 = 0.55000 * b4 + white * 0.5329522;
+                b5 = -0.7616 * b5 - white * 0.0168980;
+                data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                data[i] *= 3.5; // Gain compensation
+                b6 = white * 0.115926;
+            }
 
-        // Filter Sweep (The "Wah" in the scratch)
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(400, t);
-        filter.frequency.linearRampToValueAtTime(2500, t + 0.1); // Up
-        filter.frequency.linearRampToValueAtTime(400, t + 0.2);  // Down (Wiki)
-        filter.Q.value = 5;
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
 
-        // Envelope
-        gainNode.gain.setValueAtTime(0.8, t);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.Q.value = 4.0; // Vocal resonance
 
-        // Pitch Bend (The "Zip")
-        noise.playbackRate.setValueAtTime(0.8, t);
-        noise.playbackRate.linearRampToValueAtTime(2.0, t + 0.1);
-        noise.playbackRate.linearRampToValueAtTime(0.5, t + 0.2);
+            const gainNode = ctx.createGain();
 
-        // Connect
-        noise.connect(filter);
-        filter.connect(gainNode);
-        gainNode.connect(ctx.destination);
-        // Note: Connecting directly to destination bypasses our master compressor, 
-        // which gives it a "cut through" effect like a real DJ cue.
+            // Pitch/Speed Envelope (The physical movement of the hand)
+            noise.playbackRate.setValueAtTime(startRate, startTime);
+            noise.playbackRate.exponentialRampToValueAtTime(endRate, startTime + duration);
 
-        noise.start(t);
-        noise.stop(t + 0.3);
+            // Filter Envelope (The "Wah" characteristic of a sample being sped up)
+            filter.frequency.setValueAtTime(startFreq, startTime);
+            filter.frequency.exponentialRampToValueAtTime(endFreq, startTime + duration);
+
+            // Volume Envelope (Sharp attack/decay)
+            gainNode.gain.setValueAtTime(0, startTime);
+            gainNode.gain.linearRampToValueAtTime(0.8, startTime + 0.02);
+            gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+
+            noise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            noise.start(startTime);
+        };
+
+        // Movement 1: "Wi" (Fast Forward) - High pitch, short
+        playScratchSlice(t, 0.12, 800, 2000, 1.0, 2.5);
+
+        // Movement 2: "Ki" (Backward Pull) - Lower pitch, slightly longer
+        playScratchSlice(t + 0.13, 0.18, 1500, 400, 2.0, 0.5);
     }
 
     _playCurrentOfflineTrack() {

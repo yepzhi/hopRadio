@@ -421,16 +421,21 @@ function App() {
         </div>
 
         {/* Scratch Button - Lower Left Absolute */}
-        <button
-          onClick={() => radio.triggerScratch()}
-          className="absolute bottom-6 left-6 z-30 text-gray-600 hover:text-white active:scale-95 transition-all group"
-          title="DJ Scratch Effect"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:animate-spin-slow">
-            <circle cx="12" cy="12" r="10"></circle>
-            <circle cx="12" cy="12" r="3"></circle>
-          </svg>
-        </button>
+        <div className="absolute bottom-6 left-6 z-30 flex items-center gap-2 group">
+          <button
+            onClick={() => radio.triggerScratch()}
+            className="text-gray-600 hover:text-white active:scale-95 transition-all"
+            title="DJ Scratch Effect"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:animate-spin-slow">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+          <span className="text-[10px] uppercase font-bold text-gray-600 tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none select-none">
+            Scratch it
+          </span>
+        </div>
 
         {/* Now Playing Info */}
         <div className="text-center min-h-[60px] flex flex-col items-center justify-center z-10">
@@ -526,7 +531,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.2.9
+            v2.2.10
           </div>
         </div>
 
