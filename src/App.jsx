@@ -360,22 +360,21 @@ function App() {
       )}
 
       {/* Logo Section */}
-      <div className="text-center mb-10 mt-4">
-        <h1 className="logo-text text-5xl md:text-7xl font-black tracking-tighter mb-0 opacity-90">hopRadio</h1>
+      <div className="text-center mb-6 mt-4">
+        <h1 className="logo-text text-6xl md:text-8xl font-black tracking-tighter mb-2">hopRadio</h1>
 
         {/* Attribution Badge */}
-        <div className="text-right pr-4 md:pr-12 -mt-1 mb-6 max-w-xl mx-auto">
+        <div className="text-right pr-2 md:pr-4 -mt-1 mb-6 max-w-xl mx-auto">
           <span className="text-gray-500 font-bold text-xs md:text-sm tracking-wide lowercase">by </span>
           <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="text-red-500 font-black text-xs md:text-sm hover:text-white transition-all uppercase">@Yepzhi</a>
         </div>
 
-        {/* Apple-style Typography */}
-        <div className="flex flex-col items-center gap-1 max-w-2xl mx-auto px-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tighter text-white leading-tight">
-            We don't play what you want, <br className="hidden md:block" />
-            <span className="text-gray-500">we play what you need.</span>
+        {/* Slogan (Apple Style - Small Size) */}
+        <div className="flex flex-col items-center gap-1 max-w-lg mx-auto px-4 mb-2">
+          <h2 className="text-sm md:text-base font-bold tracking-tighter text-white leading-tight">
+            We don't play what you want, <span className="text-gray-500">we play what you need.</span>
           </h2>
-          <p className="mt-3 text-lg md:text-xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 tracking-tight">
+          <p className="text-xs md:text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 tracking-tight opacity-90">
             From New York to H City! Live 24/7.
           </p>
         </div>
@@ -383,8 +382,8 @@ function App() {
 
       {/* Live Status & Listeners - REMOVED (Moved below) */}
 
-      {/* Player Card (Glass) */}
-      <div className="glass-panel rounded-[30px] p-6 md:p-8 lg:p-10 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-4 md:gap-5 mb-1 transition-all duration-500 relative overflow-hidden">
+      {/* Player Card (Glass - Extra Foggy) */}
+      <div className="glass-panel backdrop-blur-3xl rounded-[30px] p-6 md:p-8 lg:p-10 w-full md:w-auto min-w-[300px] md:min-w-[450px] flex flex-col items-center gap-4 md:gap-5 mb-1 transition-all duration-500 relative overflow-hidden">
 
         {/* Real-Time Visualizer (Canvas Background) */}
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-60 z-0 h-32">
@@ -557,7 +556,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.3.3
+            v2.3.4
           </div>
         </div>
 
