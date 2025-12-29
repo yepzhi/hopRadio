@@ -119,48 +119,67 @@ export const radio = new class RadioEngine {
     }
 
     triggerScratch() {
-        // "Tape Stop" / "Vinyl Stop" Effect using Playback Rate
-        // This slows down the *actual song* to mimic a hand pressing on the record.
+        // "Double Punch" Tape Stop Effect
+        // Sequence: "Chk-Chk-Whoooom"
+        // We do two quick "brakes" (mini-stops) followed by the full slow down.
 
         if (!this.howl || !this.howl.playing()) return;
 
-        // 1. Duck volume slightly to prevent harshness
         const originalVol = this.howl.volume();
-        this.howl.fade(originalVol, originalVol * 0.5, 50);
 
-        // 2. Rate Ramp Down (Simulate inertia of stopping)
-        // Howler doesn't have rate ramping, so we emulate it with a few steps or just a solid drop.
-        // A direct drop to 0.0 isn't supported by all browsers (stops audio). 0.1 is safe.
-
-        let steps = 5;
-        let duration = 150; // ms to stop
-        let stepTime = duration / steps;
-
-        let currentRate = this.howl.rate();
-
-        // Cancel any existing ramps (naive implementation)
+        // Clear any previous scratch intervals
         if (this._scratchInterval) clearInterval(this._scratchInterval);
+        if (this._scratchTimeout) clearTimeout(this._scratchTimeout);
 
-        // Animate Rate Down
-        let i = 0;
-        this._scratchInterval = setInterval(() => {
-            i++;
-            const progress = i / steps;
-            // Linear drop
-            const newRate = Math.max(0.1, currentRate * (1 - progress));
-            this.howl.rate(newRate);
+        // Helper: Perform a quick rate drop and snap back
+        const doMiniPunch = (delay) => {
+            setTimeout(() => {
+                this.howl.rate(0.2); // Quick brake
+                // Duck volume slightly to make it percussive
+                this.howl.volume(originalVol * 0.8);
 
-            if (i >= steps) {
-                clearInterval(this._scratchInterval);
-
-                // Hold the "stop" momentarily
                 setTimeout(() => {
-                    // Snap back to normal (Release the record)
-                    this.howl.rate(1.0);
-                    this.howl.fade(this.howl.volume(), originalVol, 100);
-                }, 100);
-            }
-        }, stepTime);
+                    this.howl.rate(1.0); // Snap back
+                    this.howl.volume(originalVol);
+                }, 60); // 60ms "punch" duration
+            }, delay);
+        };
+
+        // Helper: Perform the main Tape Stop
+        const doTapeStop = (delay) => {
+            setTimeout(() => {
+                let steps = 8;
+                let duration = 300; // Slower, deeper stop
+                let stepTime = duration / steps;
+                let i = 0;
+
+                this.howl.fade(originalVol, 0, duration); // Fade out during stop
+
+                this._scratchInterval = setInterval(() => {
+                    i++;
+                    const progress = i / steps;
+                    // Exponential drop for realistic inertia
+                    const newRate = Math.max(0.05, 1.0 * (1 - Math.pow(progress, 0.5)));
+                    this.howl.rate(newRate);
+
+                    if (i >= steps) {
+                        clearInterval(this._scratchInterval);
+
+                        // Hold silence briefly
+                        this._scratchTimeout = setTimeout(() => {
+                            // Release / Spin Up
+                            this.howl.rate(1.0);
+                            this.howl.fade(0, originalVol, 150);
+                        }, 200);
+                    }
+                }, stepTime);
+            }, delay);
+        };
+
+        // Execute Sequence
+        doMiniPunch(0);    // Punch 1 (Time 0)
+        doMiniPunch(120);  // Punch 2 (Time 120ms) - "Double Punch"
+        doTapeStop(260);   // The Big Stop (Time 260ms)
     }
 
     _playCurrentOfflineTrack() {
