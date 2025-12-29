@@ -119,58 +119,48 @@ export const radio = new class RadioEngine {
     }
 
     triggerScratch() {
-        if (!Howler.ctx) return;
-        const ctx = Howler.ctx;
-        const now = ctx.currentTime;
+        // "Tape Stop" / "Vinyl Stop" Effect using Playback Rate
+        // This slows down the *actual song* to mimic a hand pressing on the record.
 
-        // 1. "Stop the Record" Effect (Ducking/Muffling the Music)
-        // We duck the master volume briefly to simulate the DJ putting hand on the record
-        const originalVolume = Howler.volume();
-        Howler.volume(originalVolume * 0.2); // Drop to 20%
+        if (!this.howl || !this.howl.playing()) return;
 
-        // Schedule restore
-        setTimeout(() => {
-            Howler.volume(originalVolume); // Restore smoothly? Howler handles ramps poorly globally, instantaneous is safer for "release"
-        }, 250); // 250ms mute
+        // 1. Duck volume slightly to prevent harshness
+        const originalVol = this.howl.volume();
+        this.howl.fade(originalVol, originalVol * 0.5, 50);
 
-        // 2. Synthesize a Brighter, Cleaner Scratch (FM Chirp)
-        // Instead of muddy noise, we use a Sawtooth wave with extreme pitch modulation (Chirp)
-        // This cuts through clearly like a digital scratch sample.
+        // 2. Rate Ramp Down (Simulate inertia of stopping)
+        // Howler doesn't have rate ramping, so we emulate it with a few steps or just a solid drop.
+        // A direct drop to 0.0 isn't supported by all browsers (stops audio). 0.1 is safe.
 
-        const playScratchChirp = (startTime, duration, startFreq, endFreq, vol) => {
-            const osc = ctx.createOscillator();
-            osc.type = 'sawtooth'; // Sawtooth has harmonics (buzz), clearer than noise
+        let steps = 5;
+        let duration = 150; // ms to stop
+        let stepTime = duration / steps;
 
-            const gain = ctx.createGain();
-            const filter = ctx.createBiquadFilter();
-            filter.type = 'highpass'; // Remove mud
-            filter.frequency.value = 800;
+        let currentRate = this.howl.rate();
 
-            // Pitch Envelope (The "Scratch" movement)
-            osc.frequency.setValueAtTime(startFreq, startTime);
-            osc.frequency.exponentialRampToValueAtTime(endFreq, startTime + duration);
+        // Cancel any existing ramps (naive implementation)
+        if (this._scratchInterval) clearInterval(this._scratchInterval);
 
-            // Volume Envelope
-            gain.gain.setValueAtTime(0, startTime);
-            gain.gain.linearRampToValueAtTime(vol, startTime + 0.01);
-            gain.gain.linearRampToValueAtTime(0, startTime + duration);
+        // Animate Rate Down
+        let i = 0;
+        this._scratchInterval = setInterval(() => {
+            i++;
+            const progress = i / steps;
+            // Linear drop
+            const newRate = Math.max(0.1, currentRate * (1 - progress));
+            this.howl.rate(newRate);
 
-            osc.connect(filter);
-            filter.connect(gain);
-            gain.connect(ctx.destination);
+            if (i >= steps) {
+                clearInterval(this._scratchInterval);
 
-            osc.start(startTime);
-            osc.stop(startTime + duration);
-        };
-
-        // Movement 1: Forward (Sharp High Chirp) "Wiki"
-        playScratchChirp(now, 0.08, 1000, 3000, 0.3);
-
-        // Movement 2: Backward (Lower Drag) "Wiki"
-        playScratchChirp(now + 0.09, 0.10, 2500, 500, 0.4);
-
-        // Movement 3: Short Finisher
-        playScratchChirp(now + 0.20, 0.05, 800, 1500, 0.2);
+                // Hold the "stop" momentarily
+                setTimeout(() => {
+                    // Snap back to normal (Release the record)
+                    this.howl.rate(1.0);
+                    this.howl.fade(this.howl.volume(), originalVol, 100);
+                }, 100);
+            }
+        }, stepTime);
     }
 
     _playCurrentOfflineTrack() {

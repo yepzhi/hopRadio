@@ -447,8 +447,8 @@ function App() {
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
           </button>
-          <span className="text-[10px] uppercase font-bold text-gray-600 tracking-widest pointer-events-none select-none animate-pulse">
-            Scratch it! 🎧
+          <span className="text-[10px] font-bold text-gray-600 tracking-widest pointer-events-none select-none animate-pulse">
+            Scratch it!
           </span>
         </div>
 
@@ -546,7 +546,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.2.15
+            v2.3.0
           </div>
         </div>
 
