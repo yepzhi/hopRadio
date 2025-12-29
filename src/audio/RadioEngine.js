@@ -122,15 +122,18 @@ export const radio = new class RadioEngine {
         if (!Howler.ctx) return;
         const ctx = Howler.ctx;
 
-        // Synthesizing a "Baby Scratch" (Sharp, percussive cut)
+        // Synthesizing the Classic Hip-Hop "Ahhh" Scratch
+        // To make it sound like a record and not just noise, we need FORMANT FILTERS.
+        // The "Ahhh" vowel has specific resonance peaks (F1: ~700Hz, F2: ~1200Hz, F3: ~2500Hz).
+
         const t = ctx.currentTime;
 
-        const playScratchSlice = (startTime, duration, startFreq, endFreq, startRate, endRate, volume) => {
+        const playScratchSlice = (startTime, duration, startRate, endRate, volume) => {
+            // Source: Pink Noise (better spectrum for vinyl than white noise)
             const bufferSize = ctx.sampleRate * duration;
             const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
             const data = buffer.getChannelData(0);
 
-            // Texturize the noise (Pink-ish noise)
             let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
             for (let i = 0; i < bufferSize; i++) {
                 const white = Math.random() * 2 - 1;
@@ -141,46 +144,82 @@ export const radio = new class RadioEngine {
                 b4 = 0.55000 * b4 + white * 0.5329522;
                 b5 = -0.7616 * b5 - white * 0.0168980;
                 data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-                data[i] *= 3.5;
+                data[i] *= 0.8; // Normalize pink noise
                 b6 = white * 0.115926;
             }
 
             const noise = ctx.createBufferSource();
             noise.buffer = buffer;
 
-            const filter = ctx.createBiquadFilter();
-            filter.type = 'lowpass'; // Lowpass sounds warmer/vinyl-like
-            filter.Q.value = 5.0;
+            // --- FORMANT FILTER BANK ("Voice" Shaping) ---
+            // F1 (Ahhh - 700Hz)
+            const f1 = ctx.createBiquadFilter();
+            f1.type = 'bandpass';
+            f1.frequency.value = 700;
+            f1.Q.value = 3.0;
+
+            // F2 (Ahhh - 1200Hz)
+            const f2 = ctx.createBiquadFilter();
+            f2.type = 'bandpass';
+            f2.frequency.value = 1200;
+            f2.Q.value = 3.5;
+
+            // F3 (Ahhh - 2600Hz)
+            const f3 = ctx.createBiquadFilter();
+            f3.type = 'bandpass';
+            f3.frequency.value = 2600;
+            f3.Q.value = 4.0;
+
+            // Parallel connection for formants
+            const formantInput = ctx.createGain();
+            const formantOutput = ctx.createGain();
+
+            formantInput.connect(f1);
+            formantInput.connect(f2);
+            formantInput.connect(f3);
+            f1.connect(formantOutput);
+            f2.connect(formantOutput);
+            f3.connect(formantOutput);
+
+            // Resonant Filter (Vinyl Movement "Wah") - Applied AFTER formants
+            const movementFilter = ctx.createBiquadFilter();
+            movementFilter.type = 'lowpass';
+            movementFilter.Q.value = 1.0;
 
             const gainNode = ctx.createGain();
 
-            // Pitch/Speed Envelope (Tighter movement)
+            // --- ENVELOPES ---
+
+            // 1. Playback Rate (The actual scratch push/pull)
+            // Simulates the hand stopping the record and pushing it
             noise.playbackRate.setValueAtTime(startRate, startTime);
             noise.playbackRate.linearRampToValueAtTime(endRate, startTime + duration);
 
-            // Filter Envelope (The "Wah")
-            filter.frequency.setValueAtTime(startFreq, startTime);
-            filter.frequency.exponentialRampToValueAtTime(endFreq, startTime + duration);
+            // 2. Filter Sweep (Vinyl speed effect on formants)
+            // As playing faster, formants shift up slightly
+            movementFilter.frequency.setValueAtTime(startRate * 800, startTime);
+            movementFilter.frequency.exponentialRampToValueAtTime(endRate * 800, startTime + duration);
 
-            // Volume Envelope (Sharp attack, quick decay)
+            // 3. Volume (Crossfader cut)
             gainNode.gain.setValueAtTime(0, startTime);
             gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.01);
-            gainNode.gain.linearRampToValueAtTime(volume * 0.5, startTime + (duration * 0.5));
+            gainNode.gain.linearRampToValueAtTime(volume * 0.6, startTime + (duration * 0.6));
             gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
 
-            noise.connect(filter);
-            filter.connect(gainNode);
+            // Connect Graph
+            noise.connect(formantInput);
+            formantOutput.connect(movementFilter);
+            movementFilter.connect(gainNode);
             gainNode.connect(ctx.destination);
+
             noise.start(startTime);
         };
 
-        // Movement 1: Forward Stab (High Pitch)
-        // Shorter duration, Lower max volume (0.4)
-        playScratchSlice(t, 0.08, 1200, 2500, 1.0, 2.0, 0.4);
-
-        // Movement 2: Backward Pull (Lower Pitch)
-        // Slightly delayed, dragging sound
-        playScratchSlice(t + 0.09, 0.12, 2000, 600, 1.8, 0.8, 0.3);
+        // "Wiki-Wiki" Pattern:
+        // 1. "Forward" (Sharp)
+        playScratchSlice(t, 0.09, 1.2, 2.8, 0.5);
+        // 2. "Back" (Drag)
+        playScratchSlice(t + 0.10, 0.14, 2.2, 0.4, 0.5);
     }
 
     _playCurrentOfflineTrack() {
