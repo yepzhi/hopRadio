@@ -28,6 +28,13 @@ export const radio = new class RadioEngine {
         this.onBufferingChange = null; // UI Hook
     }
 
+    reconnect() {
+        console.warn("RadioEngine: Manual/Forced Reconnect");
+        if (this.onBufferingChange) this.onBufferingChange(true);
+        this.pause();
+        setTimeout(() => this.play(), 100);
+    }
+
     async init() {
         console.log("RadioEngine: Initializing");
         // Initial fake metadata
@@ -100,6 +107,8 @@ export const radio = new class RadioEngine {
 
         // 5. Start Watchdog
         this._startBufferingWatchdog();
+        // 6. Start Silence Monitor (Live)
+        this._startSilenceMonitor();
     }
 
     _startBufferingWatchdog() {
@@ -231,10 +240,11 @@ export const radio = new class RadioEngine {
     }
 
     _startSilenceMonitor() {
-        if (!this.isOffline) return; // Only for offline mode
+        // Live & Offline Support
+        if (this.silenceMonitorId) cancelAnimationFrame(this.silenceMonitorId);
 
         const monitor = () => {
-            if (!this.isPlaying || !this.isOffline) {
+            if (!this.isPlaying) {
                 this.silenceMonitorId = null;
                 return;
             }
@@ -243,23 +253,26 @@ export const radio = new class RadioEngine {
             if (data) {
                 const avg = data.reduce((a, b) => a + b, 0) / data.length;
 
-                if (avg < 3) { // Near silence threshold
+                if (avg < 3) { // Silence
                     if (!this.silenceStartTime) {
                         this.silenceStartTime = Date.now();
-                    } else if (Date.now() - this.silenceStartTime > this.SILENCE_THRESHOLD) {
-                        console.log("RadioEngine: Silence > 5s detected, skipping...");
+                    } else if (Date.now() - this.silenceStartTime > 5000) { // 5s Silence
+                        console.warn("RadioEngine: Silence detected (>5s)");
                         this.silenceStartTime = null;
-                        this.playNextOffline();
+
+                        if (this.isOffline) {
+                            this.playNextOffline(); // Skip track
+                        } else {
+                            this.reconnect(); // Reconnect stream
+                        }
                         return;
                     }
                 } else {
                     this.silenceStartTime = null;
                 }
             }
-
             this.silenceMonitorId = requestAnimationFrame(monitor);
         };
-
         this.silenceMonitorId = requestAnimationFrame(monitor);
     }
 
