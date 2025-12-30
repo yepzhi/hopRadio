@@ -99,8 +99,8 @@ PLAYLIST = [
 ]
 
 CLIENTS = []
-# Global Circular Buffer for Burst-on-Connect
-BURST_BUFFER = deque(maxlen=10) 
+# Global Circular Buffer for Burst-on-Connect (~40-60 seconds for unstable connections)
+BURST_BUFFER = deque(maxlen=100) 
 CURRENT_TRACK_INFO = {"title": "Connecting...", "artist": "hopRadio"}
 
 # Track Manager Queue
@@ -210,8 +210,8 @@ def broadcast_stream():
             '-re', 
             '-i', local_path,
             '-f', 'mp3',
-            '-b:a', '192k',
-            '-bufsize', '512k',
+            '-b:a', '320k',
+            '-bufsize', '1024k',
             '-ac', '2',
             '-ar', '44100',
             '-loglevel', 'error',
@@ -263,7 +263,7 @@ threading.Thread(target=broadcast_stream, daemon=True).start()
 def index():
     return {
         "status": "radio_active", 
-        "quality": "192kbps CBR",
+        "quality": "320kbps CBR",
         "listeners": len(CLIENTS),
         "now_playing": CURRENT_TRACK_INFO,
         "queue": READY_TRACKS.qsize()

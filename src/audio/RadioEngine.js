@@ -266,45 +266,70 @@ export const radio = new class RadioEngine {
                     if (!node._source) {
                         const source = ctx.createMediaElementSource(node);
 
-                        // --- EQ & Compression (User Custom Settings) ---
+                        // === ADVANCED AUDIO PROCESSING CHAIN ===
+                        // Goal: heavy bass, scooped mids, big high end, energetic transient punch
 
-                        // 1. Dynamics Compressor (Radio Limiter / Glue)
-                        const compressor = ctx.createDynamicsCompressor();
-                        compressor.threshold.value = -12; // Standard radio threshold
-                        compressor.knee.value = 10;       // Soft/Hard hybrid
-                        compressor.ratio.value = 4;       // 4:1 compression
-                        compressor.attack.value = 0.003;
-                        compressor.release.value = 0.25;
+                        // --- A. FILTERS / EQ ---
 
-                        // 2. EQ Filters (User: +5 Bass, 0 Mids, +7 Treble)
-                        // Low Shelf (Bass)
+                        // 1. High Pass Filter (remove sub-rumble)
+                        const hpFilter = ctx.createBiquadFilter();
+                        hpFilter.type = 'highpass';
+                        hpFilter.frequency.value = 28;
+                        hpFilter.Q.value = 0.7;
+
+                        // 2. Low Shelf (body)
                         const lowShelf = ctx.createBiquadFilter();
                         lowShelf.type = 'lowshelf';
-                        lowShelf.frequency.value = 90;
-                        lowShelf.gain.value = 5.0;     // +5dB bass
+                        lowShelf.frequency.value = 95;
+                        lowShelf.gain.value = 7.0;  // +7 dB bass
 
-                        // Mid (Flat - no boost/cut)
+                        // 3. Bass Peak (sub-kick weight)
+                        const bassPeak = ctx.createBiquadFilter();
+                        bassPeak.type = 'peaking';
+                        bassPeak.frequency.value = 60;
+                        bassPeak.gain.value = 3.5;  // +3.5 dB peak
+                        bassPeak.Q.value = 1.0;
+
+                        // 4. Mid Scoop (clarity)
                         const mid = ctx.createBiquadFilter();
                         mid.type = 'peaking';
-                        mid.frequency.value = 1000;
-                        mid.gain.value = 0.0; // 0dB (flat mids)
+                        mid.frequency.value = 800;
+                        mid.gain.value = -6.0;  // -6 dB scoop
                         mid.Q.value = 1.0;
 
-                        // High Shelf (Treble)
+                        // 5. Upper-Mid Presence (percussion clarity)
+                        const upperMid = ctx.createBiquadFilter();
+                        upperMid.type = 'peaking';
+                        upperMid.frequency.value = 2500;
+                        upperMid.gain.value = 1.5;  // +1.5 dB
+                        upperMid.Q.value = 1.2;
+
+                        // 6. High Shelf (air & treble)
                         const highShelf = ctx.createBiquadFilter();
                         highShelf.type = 'highshelf';
-                        highShelf.frequency.value = 8000;
-                        highShelf.gain.value = 7.0;       // +7dB treble
+                        highShelf.frequency.value = 10000;
+                        highShelf.gain.value = 9.0;  // +9 dB treble
 
-                        // Master Gain (Headroom)
+                        // --- B. BUS COMPRESSOR (Glue for punch) ---
+                        const compressor = ctx.createDynamicsCompressor();
+                        compressor.threshold.value = -14;  // ~2-6 dB GR on peaks
+                        compressor.knee.value = 6;
+                        compressor.ratio.value = 3.8;      // Medium-strong
+                        compressor.attack.value = 0.008;   // 8ms (transient punch)
+                        compressor.release.value = 0.12;   // 120ms (fast energy)
+
+                        // --- MASTER GAIN ---
                         const masterGain = ctx.createGain();
-                        masterGain.gain.value = 0.65; // Headroom
+                        masterGain.gain.value = 0.93;  // 93% volume
 
-                        // Connect Graph: 
-                        // Source -> Low -> Mid -> High -> Compressor -> Master -> Analyser -> Destination
-                        source.connect(lowShelf);
-                        lowShelf.connect(mid);
-                        mid.connect(highShelf);
+                        // --- CONNECT GRAPH ---
+                        // Source -> HPF -> LowShelf -> BassPeak -> Mid -> UpperMid -> HighShelf -> Compressor -> Master -> Analyser -> Out
+                        source.connect(hpFilter);
+                        hpFilter.connect(lowShelf);
+                        lowShelf.connect(bassPeak);
+                        bassPeak.connect(mid);
+                        mid.connect(upperMid);
+                        upperMid.connect(highShelf);
                         highShelf.connect(compressor);
                         compressor.connect(masterGain);
                         masterGain.connect(this.analyser);
