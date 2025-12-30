@@ -262,11 +262,21 @@ threading.Thread(target=broadcast_stream, daemon=True).start()
 
 @app.get("/")
 def index():
+    next_track = None
+    if not READY_TRACKS.empty():
+        try:
+            # Peek at the next item in the queue (thread-safe enough for read-only UI)
+            item = READY_TRACKS.queue[0]
+            next_track = item['track']
+        except IndexError:
+            pass
+
     return {
         "status": "radio_active", 
         "quality": "320kbps CBR",
         "listeners": len(CLIENTS),
         "now_playing": CURRENT_TRACK_INFO,
+        "next_playing": next_track,
         "queue": READY_TRACKS.qsize()
     }
 

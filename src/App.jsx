@@ -46,8 +46,9 @@ function App() {
             setTrack(data.now_playing);
           }
           // Update next track for live mode
-          if (data.up_next) {
-            setNextTrack(data.up_next);
+          // Update next track for live mode
+          if (data.next_playing) {
+            setNextTrack(data.next_playing);
           }
         }
       } catch (e) {
@@ -476,12 +477,16 @@ function App() {
             <p className="text-gray-400 font-light text-lg mb-1">
               {track ? track.artist : 'HQ Audio Stream'}
             </p>
-            {/* Playing Next - 40% smaller */}
+            {/* Next Playing - Right Aligned & Small */}
             {nextTrack && (
-              <p className="text-gray-600 text-[9px] uppercase tracking-wider font-medium">
-                Playing next: {nextTrack.title}
-              </p>
+              <div className="w-full flex justify-end mt-1">
+                <div className="text-[10px] md:text-xs font-medium text-gray-500 bg-black/20 px-2 py-1 rounded-md backdrop-blur-sm border border-white/5 animate-in fade-in slide-in-from-bottom-1">
+                  <span className="text-red-500 font-bold mr-1 uppercase tracking-wider text-[9px]">Next:</span>
+                  <span className="text-gray-300 truncate max-w-[150px] inline-block align-bottom">{nextTrack.title}</span>
+                </div>
+              </div>
             )}
+
           </div>
         </div>
       </div>
