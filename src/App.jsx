@@ -378,7 +378,7 @@ function App() {
             We don't play what you want, we play what you need.
           </h2>
           <p className="text-[10px] md:text-xs font-medium bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 tracking-tight opacity-90 mt-1">
-            From New York to H City! Live 24/7.
+            From New York to H City! Live 24/7. No Ads.
           </p>
         </div>
       </div>
