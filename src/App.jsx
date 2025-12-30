@@ -214,6 +214,11 @@ function App() {
       setIsLive(true);
     };
 
+    // Watchdog Buffering Hook
+    radio.onBufferingChange = (state) => {
+      setIsBuffering(state);
+    };
+
     // Next Track Update (for "Playing next" indicator)
     radio.onNextTrackUpdate = (next) => {
       setNextTrack(next);
@@ -565,7 +570,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.5.1
+            v2.5.2
           </div>
         </div>
 
