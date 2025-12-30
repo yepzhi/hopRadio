@@ -17,6 +17,7 @@ function App() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [hasOfflineData, setHasOfflineData] = useState(false);
+  const [nextTrack, setNextTrack] = useState(null); // "Playing next" indicator
 
 
   // PWA State removed
@@ -43,6 +44,10 @@ function App() {
           // Auto-update track info from server (Metadata Sync)
           if (data.now_playing) {
             setTrack(data.now_playing);
+          }
+          // Update next track for live mode
+          if (data.up_next) {
+            setNextTrack(data.up_next);
           }
         }
       } catch (e) {
@@ -206,6 +211,11 @@ function App() {
     radio.onPlay = () => {
       setIsBuffering(false);
       setIsLive(true);
+    };
+
+    // Next Track Update (for "Playing next" indicator)
+    radio.onNextTrackUpdate = (next) => {
+      setNextTrack(next);
     };
 
     // Initialize Particles Logic
@@ -463,9 +473,15 @@ function App() {
             <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-md">
               {track ? track.title : 'hopRadio Live'}
             </h2>
-            <p className="text-gray-400 font-light text-lg mb-3">
+            <p className="text-gray-400 font-light text-lg mb-1">
               {track ? track.artist : 'HQ Audio Stream'}
             </p>
+            {/* Playing Next - 40% smaller */}
+            {nextTrack && (
+              <p className="text-gray-600 text-[9px] uppercase tracking-wider font-medium">
+                Playing next: {nextTrack.title}
+              </p>
+            )}
           </div>
         </div>
       </div>

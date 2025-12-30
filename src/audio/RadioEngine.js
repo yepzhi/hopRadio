@@ -11,11 +11,17 @@ export const radio = new class RadioEngine {
         this.onPlay = null;
         this.onLoadStart = null;
         this.onTrackChange = null;
+        this.onNextTrackUpdate = null; // For "Playing next" UI
 
         // Audio Graph
         this.context = null;
         this.analyser = null;
         this.dataArray = null;
+
+        // Silence Detection
+        this.silenceStartTime = null;
+        this.SILENCE_THRESHOLD = 4000; // 4 seconds
+        this.silenceMonitorId = null;
     }
 
     async init() {
@@ -126,9 +132,22 @@ export const radio = new class RadioEngine {
         const track = this.offlineQueue[this.offlineIndex];
         console.log("RadioEngine: Playing Offline Track", track.title);
 
+        // Notify about next track
+        if (this.onNextTrackUpdate && this.offlineQueue.length > 1) {
+            const nextIndex = (this.offlineIndex + 1) % this.offlineQueue.length;
+            this.onNextTrackUpdate(this.offlineQueue[nextIndex]);
+        }
+
         if (this.howl) {
             this.howl.unload();
         }
+
+        // Stop any previous silence monitor
+        if (this.silenceMonitorId) {
+            cancelAnimationFrame(this.silenceMonitorId);
+            this.silenceMonitorId = null;
+        }
+        this.silenceStartTime = null;
 
         if (this.onLoadStart) this.onLoadStart();
         if (this.onTrackChange) this.onTrackChange(track);
@@ -144,6 +163,7 @@ export const radio = new class RadioEngine {
                 if (this.onPlay) this.onPlay();
                 this._setupMediaSession(track);
                 this._connectVisualizer();
+                this._startSilenceMonitor(); // Start monitoring
             },
             onend: () => {
                 console.log("RadioEngine: Track ended, playing next...");
@@ -154,6 +174,39 @@ export const radio = new class RadioEngine {
                 this.playNextOffline(); // Skip bad track
             }
         });
+    }
+
+    _startSilenceMonitor() {
+        if (!this.isOffline) return; // Only for offline mode
+
+        const monitor = () => {
+            if (!this.isPlaying || !this.isOffline) {
+                this.silenceMonitorId = null;
+                return;
+            }
+
+            const data = this.getAudioData();
+            if (data) {
+                const avg = data.reduce((a, b) => a + b, 0) / data.length;
+
+                if (avg < 3) { // Near silence threshold
+                    if (!this.silenceStartTime) {
+                        this.silenceStartTime = Date.now();
+                    } else if (Date.now() - this.silenceStartTime > this.SILENCE_THRESHOLD) {
+                        console.log("RadioEngine: Silence > 5s detected, skipping...");
+                        this.silenceStartTime = null;
+                        this.playNextOffline();
+                        return;
+                    }
+                } else {
+                    this.silenceStartTime = null;
+                }
+            }
+
+            this.silenceMonitorId = requestAnimationFrame(monitor);
+        };
+
+        this.silenceMonitorId = requestAnimationFrame(monitor);
     }
 
     switchToLive() {
@@ -213,40 +266,39 @@ export const radio = new class RadioEngine {
                     if (!node._source) {
                         const source = ctx.createMediaElementSource(node);
 
-                        // --- EQ Restoration & "PowerHitz" Processing ---
+                        // --- EQ & Compression (User Custom Settings) ---
 
-                        // 1. Dynamics Compressor (Radio Limiter / Glue)
                         // 1. Dynamics Compressor (Radio Limiter / Glue)
                         const compressor = ctx.createDynamicsCompressor();
                         compressor.threshold.value = -12; // Standard radio threshold
                         compressor.knee.value = 10;       // Soft/Hard hybrid
-                        compressor.ratio.value = 8;       // 8:1 Tight radio compression (Powerhitz style)
-                        compressor.attack.value = 0.002;  // Fast attack to catch peaks
-                        compressor.release.value = 0.2;
+                        compressor.ratio.value = 4;       // 4:1 compression
+                        compressor.attack.value = 0.003;
+                        compressor.release.value = 0.25;
 
-                        // 2. EQ Filters (V-Shape / "Jamz" Style)
-                        // Low Shelf (Punchy Bass)
+                        // 2. EQ Filters (User: +5 Bass, 0 Mids, +7 Treble)
+                        // Low Shelf (Bass)
                         const lowShelf = ctx.createBiquadFilter();
                         lowShelf.type = 'lowshelf';
-                        lowShelf.frequency.value = 90; // Focused punch (Kick/Bass)
-                        lowShelf.gain.value = 6.0;     // +6dB (Strong but clean)
+                        lowShelf.frequency.value = 90;
+                        lowShelf.gain.value = 5.0;     // +5dB bass
 
-                        // Mid (Scoop - Clarity)
+                        // Mid (Flat - no boost/cut)
                         const mid = ctx.createBiquadFilter();
                         mid.type = 'peaking';
                         mid.frequency.value = 1000;
-                        mid.gain.value = -4.0; // Moderate scoop to remove boxiness
+                        mid.gain.value = 0.0; // 0dB (flat mids)
                         mid.Q.value = 1.0;
 
-                        // High Shelf (High Treble / Air - Not Harsh)
+                        // High Shelf (Treble)
                         const highShelf = ctx.createBiquadFilter();
                         highShelf.type = 'highshelf';
-                        highShelf.frequency.value = 8000; // Moved up to 8kHz for "Air" rather than 5kHz "Bite"
-                        highShelf.gain.value = 7.0;       // +7dB (Sparkle without hurting ears)
+                        highShelf.frequency.value = 8000;
+                        highShelf.gain.value = 7.0;       // +7dB treble
 
                         // Master Gain (Headroom)
                         const masterGain = ctx.createGain();
-                        masterGain.gain.value = 0.7; // Safe headroom after compression
+                        masterGain.gain.value = 0.65; // Headroom
 
                         // Connect Graph: 
                         // Source -> Low -> Mid -> High -> Compressor -> Master -> Analyser -> Destination
