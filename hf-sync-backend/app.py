@@ -204,11 +204,12 @@ def broadcast_stream():
         print(f"Now Playing: {track['title']}")
         CURRENT_TRACK_INFO = track
         
-        # FFmpeg Command
+        # FFmpeg Command with silence trimming
         cmd = [
             'ffmpeg',
             '-re', 
             '-i', local_path,
+            '-af', 'silenceremove=stop_periods=-1:stop_duration=2:stop_threshold=-50dB',  # Trim silence at end (>2s, <-50dB)
             '-f', 'mp3',
             '-b:a', '320k',
             '-bufsize', '1024k',
