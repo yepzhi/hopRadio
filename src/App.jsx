@@ -565,7 +565,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.5.0
+            v2.5.1
           </div>
         </div>
 
