@@ -26,6 +26,11 @@ export const radio = new class RadioEngine {
         // Watchdog & Buffering
         this.watchdogInterval = null;
         this.onBufferingChange = null; // UI Hook
+
+        // Network Stats (Added v2.6.4)
+        this.onNetworkStats = null;
+        this.lastBufferedParams = { end: 0 };
+        this.sessionTotalBytes = 0;
     }
 
     reconnect() {
@@ -143,6 +148,30 @@ export const radio = new class RadioEngine {
             }
 
             lastTime = currentTime;
+
+            // --- Network Stats Calculation (v2.6.4) ---
+            if (this.howl && this.howl._sounds.length > 0) {
+                const sound = this.howl._sounds[0];
+                if (sound._node && sound._node.buffered && sound._node.buffered.length > 0) {
+                    const bufferedEnd = sound._node.buffered.end(sound._node.buffered.length - 1);
+
+                    if (this.lastBufferedParams.end > 0) {
+                        const delta = bufferedEnd - this.lastBufferedParams.end;
+                        if (delta > 0) {
+                            // 320kbps = 40,000 bytes/sec approx (Audio Density)
+                            const bytes = delta * 40000;
+                            this.sessionTotalBytes += bytes;
+
+                            // Speed = bytes per second (since interval is 1s)
+                            if (this.onNetworkStats) this.onNetworkStats({ speed: bytes, total: this.sessionTotalBytes });
+                        } else {
+                            if (this.onNetworkStats) this.onNetworkStats({ speed: 0, total: this.sessionTotalBytes });
+                        }
+                    }
+                    this.lastBufferedParams.end = bufferedEnd;
+                }
+            }
+            // ------------------------------------------
 
             // TRIGGER: Force Reconnect if stuck > 5s
             if (stuckTime > 5000) {

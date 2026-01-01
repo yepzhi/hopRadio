@@ -1,8 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import { radio } from './audio/RadioEngine';
-import { WifiOff, Play, Pause, User, RefreshCw } from 'lucide-react';
+import { WifiOff, Play, Pause, User, RefreshCw, Activity } from 'lucide-react';
 import AdSpace from './components/AdSpace';
 import './App.css';
+
+// Data Monitor Component (v2.6.4)
+const DataMonitor = ({ speed, total }) => {
+  if (speed === 0 && total === 0) return null;
+  return (
+    <div className="flex flex-col items-start mt-2 space-y-0.5 animate-in fade-in duration-700">
+      <div className="flex items-center space-x-1.5 opacity-80">
+        <Activity size={10} className="text-emerald-400" />
+        <span className="text-[9px] font-mono font-bold tracking-wider text-gray-500">
+          {speed < 1024 ? `${Math.round(speed / 1024)} KB/s` : `${(speed / (1024 * 1024)).toFixed(1)} MB/s`}
+        </span>
+      </div>
+      <div className="text-[8px] font-mono text-gray-600 tracking-wider pl-4">
+        {Math.round(total / (1024 * 1024))} MB TOT
+      </div>
+    </div>
+  );
+};
 
 function App() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -11,6 +29,7 @@ function App() {
   const [isBuffering, setIsBuffering] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isReady, setIsReady] = useState(false); // Radio ready state
+  const [netStats, setNetStats] = useState({ speed: 0, total: 0 }); // v2.6.4
 
   // Offline Mode State
   const [offlineProgress, setOfflineProgress] = useState(0); // 0-100
@@ -219,6 +238,11 @@ function App() {
       setIsBuffering(state);
     };
 
+    // Network Stats Hook (v2.6.4)
+    radio.onNetworkStats = (stats) => {
+      setNetStats(stats);
+    };
+
     // Next Track Update (for "Playing next" indicator)
     radio.onNextTrackUpdate = (next) => {
       setNextTrack(next);
@@ -411,13 +435,17 @@ function App() {
 
         {/* Top LEFT Status (v2.6.2) */}
         {(isPlaying || isBuffering) && (
-          <div className="absolute top-6 left-6 z-20 flex items-center space-x-2 animate-in fade-in duration-500">
+          <div className="absolute top-6 left-6 z-20 flex flex-col items-start gap-2 animate-in fade-in duration-500">
+            {/* Status Badge */}
             <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-full bg-gray-900/90 border border-white/10 shadow-lg transition-all duration-300 ${isBuffering ? 'animate-pulse border-yellow-500/50' : ''}`}>
               <div className={`w-1.5 h-1.5 rounded-full ${isBuffering ? 'bg-yellow-500' : (!isOnline ? 'bg-red-500' : 'bg-emerald-400')}`}></div>
               <span className={`text-[9px] uppercase tracking-widest font-bold ${isBuffering ? 'text-yellow-500' : (!isOnline ? 'text-red-500' : 'text-emerald-400')}`}>
                 {isBuffering ? 'Reconnecting...' : (!isOnline ? 'Unstable' : 'Stable')}
               </span>
             </div>
+
+            {/* Data Monitor (v2.6.4) */}
+            <DataMonitor speed={netStats.speed} total={netStats.total} />
           </div>
         )}
 
@@ -593,7 +621,7 @@ function App() {
             @yepzhi
           </a>
           <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.6.3
+            v2.6.4
           </div>
         </div>
 
