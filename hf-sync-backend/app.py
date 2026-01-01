@@ -209,7 +209,7 @@ def broadcast_stream():
             'ffmpeg',
             '-re', 
             '-i', local_path,
-            '-af', 'highpass=f=28,lowshelf=g=7:f=95,equalizer=f=60:width_type=o:width=1:g=3.5,equalizer=f=800:width_type=o:width=1:g=-6,equalizer=f=2500:width_type=o:width=1.2:g=1.5,highshelf=g=9:f=10000,acompressor=threshold=-14dB:ratio=3:attack=8:release=250',
+            '-af', 'highpass=f=28,lowshelf=g=6:f=95,equalizer=f=60:width_type=o:width=1:g=4,equalizer=f=800:width_type=o:width=1:g=-2,highshelf=g=9:f=10000,acompressor=threshold=-14dB:ratio=3:attack=8:release=250',
             '-f', 'mp3',
             '-b:a', '320k',
             '-bufsize', '1024k',
