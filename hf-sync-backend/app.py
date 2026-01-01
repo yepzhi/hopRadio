@@ -93,7 +93,7 @@ PLAYLIST = [
     {"id": "t61", "title": "WTHELLY", "artist": "Rob49", "file": "Rob49 - WTHELLY [Clean] - Sock With A Glock.mp3", "weight": 6},
     {"id": "t62", "title": "Get It Sexyy", "artist": "Sexyy Red", "file": "Sexy Red - Get it Sexyy (clean + lyrics! - Lyrics hours.mp3", "weight": 9},
     {"id": "t63", "title": "U My Everything", "artist": "Sexyy Red & Drake", "file": "Sexyy Red & Drake - U My Everything (Clean) (Lyrics) - Audio at 192khz - Helfmadian.mp3", "weight": 9},
-    {"id": "t64", "title": "Die For You", "artist": "The Weeknd", "file": "The Weeknd  - Die For You (Clean) - Ultron Music and DD2 Arts.mp3", "weight": 9},
+    {"id": "t64", "version": "2.6.5", "title": "Die For You", "artist": "The Weeknd", "file": "The Weeknd  - Die For You (Clean) - Ultron Music and DD2 Arts.mp3", "weight": 9},
     {"id": "t65", "title": "Falsetto", "artist": "The-Dream", "file": "The-Dream - Falsetto (Clean_Radio Edit) - Clean Radio Promo.mp3", "weight": 8},
     {"id": "t66", "title": "Carnival", "artist": "Kanye West & Ty Dolla $ign", "file": "¥, Kanye West & Ty Dolla ign, Rich The Kid & Playboi Carti - Carnival (Clean Lyrics) - Clean Recordz.mp3", "weight": 9},
 ]
@@ -209,7 +209,7 @@ def broadcast_stream():
             'ffmpeg',
             '-re', 
             '-i', local_path,
-            '-af', 'silenceremove=stop_periods=-1:stop_duration=2:stop_threshold=-50dB',  # Trim silence at end (>2s, <-50dB)
+            '-af', 'highpass=f=28,lowshelf=g=7:f=95,equalizer=f=60:width_type=o:width=1:g=3.5,equalizer=f=800:width_type=o:width=1:g=-6,equalizer=f=2500:width_type=o:width=1.2:g=1.5,highshelf=g=9:f=10000,acompressor=threshold=-14dB:ratio=3:attack=8:release=250',
             '-f', 'mp3',
             '-b:a', '320k',
             '-bufsize', '1024k',

@@ -370,68 +370,10 @@ export const radio = new class RadioEngine {
 
                         // --- A. FILTERS / EQ ---
 
-                        // 1. High Pass Filter (remove sub-rumble)
-                        const hpFilter = ctx.createBiquadFilter();
-                        hpFilter.type = 'highpass';
-                        hpFilter.frequency.value = 28;
-                        hpFilter.Q.value = 0.7;
-
-                        // 2. Low Shelf (body)
-                        const lowShelf = ctx.createBiquadFilter();
-                        lowShelf.type = 'lowshelf';
-                        lowShelf.frequency.value = 95;
-                        lowShelf.gain.value = 7.0;  // +7 dB bass
-
-                        // 3. Bass Peak (sub-kick weight)
-                        const bassPeak = ctx.createBiquadFilter();
-                        bassPeak.type = 'peaking';
-                        bassPeak.frequency.value = 60;
-                        bassPeak.gain.value = 3.5;  // +3.5 dB peak
-                        bassPeak.Q.value = 1.0;
-
-                        // 4. Mid Scoop (clarity)
-                        const mid = ctx.createBiquadFilter();
-                        mid.type = 'peaking';
-                        mid.frequency.value = 800;
-                        mid.gain.value = -6.0;  // -6 dB scoop
-                        mid.Q.value = 1.0;
-
-                        // 5. Upper-Mid Presence (percussion clarity)
-                        const upperMid = ctx.createBiquadFilter();
-                        upperMid.type = 'peaking';
-                        upperMid.frequency.value = 2500;
-                        upperMid.gain.value = 1.5;  // +1.5 dB
-                        upperMid.Q.value = 1.2;
-
-                        // 6. High Shelf (air & treble)
-                        const highShelf = ctx.createBiquadFilter();
-                        highShelf.type = 'highshelf';
-                        highShelf.frequency.value = 10000;
-                        highShelf.gain.value = 9.0;  // +9 dB treble
-
-                        // --- B. BUS COMPRESSOR (Glue for punch) ---
-                        const compressor = ctx.createDynamicsCompressor();
-                        compressor.threshold.value = -14;  // ~2-6 dB GR on peaks
-                        compressor.knee.value = 6;
-                        compressor.ratio.value = 3.0;      // Gentler squeeze (was 3.8)
-                        compressor.attack.value = 0.008;   // 8ms
-                        compressor.release.value = 0.25;   // 250ms (smoother, less pumping)
-
-                        // --- MASTER GAIN ---
-                        const masterGain = ctx.createGain();
-                        masterGain.gain.value = 0.93;  // 93% volume
-
-                        // --- CONNECT GRAPH ---
-                        // Source -> HPF -> LowShelf -> BassPeak -> Mid -> UpperMid -> HighShelf -> Compressor -> Master -> Analyser -> Out
-                        source.connect(hpFilter);
-                        hpFilter.connect(lowShelf);
-                        lowShelf.connect(bassPeak);
-                        bassPeak.connect(mid);
-                        mid.connect(upperMid);
-                        upperMid.connect(highShelf);
-                        highShelf.connect(compressor);
-                        compressor.connect(masterGain);
-                        masterGain.connect(this.analyser);
+                        // --- CONNECT GRAPH (Clean v2.6.5) ---
+                        // Backend now handles EQ/Compression. Client just visualizes.
+                        // Source -> Analyser -> Out
+                        source.connect(this.analyser);
                         this.analyser.connect(ctx.destination);
 
                         node._source = source; // Cache it
