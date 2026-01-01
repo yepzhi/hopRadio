@@ -55,7 +55,7 @@ PLAYLIST = [
     {"id": "t23", "title": "3AM", "artist": "Loe Shimmy", "file": "Loe Shimmy & Don Toliver - 3am [Clean] - Sock With A Glock.mp3", "weight": 7},
     {"id": "t24", "title": "Turn Yo Clic Up", "artist": "Quavo & Future", "file": "Quavo & Future - Turn Yo Clic Up [Clean] - Sock With A Glock.mp3", "weight": 8},
     {"id": "t25", "title": "Buy You A Drank", "artist": "T-Pain", "file": "T-Pain - Buy You A Drank (Shawty Snappin') (Feat. Yung Joc) (Clean) - DJRatAttack.mp3", "weight": 9},
-    {"id": "t26", "title": "FE!N", "artist": "Travis Scott", "file": "Travis Scott - FE!N (Clean - Lyrics) feat. Playboi Carti - Polar Records.mp3", "weight": 10},
+
     {"id": "t27", "title": "IS IT", "artist": "Tyla", "file": "Tyla - IS IT (Clean) - XeonBeats.mp3", "weight": 7},
     {"id": "t28", "title": "Jan 31st", "artist": "YFN Lucci", "file": "YFN Lucci - Jan. 31st (My Truth) [Clean] - Sock With A Glock.mp3", "weight": 6},
     {"id": "t29", "title": "Uh Oh", "artist": "Zeddy Will", "file": "Zeddy Will Uh Oh Clean - DecaturQ.mp3", "weight": 7},
@@ -77,7 +77,7 @@ PLAYLIST = [
     {"id": "t45", "title": "Not Like Us", "artist": "Kendrick Lamar", "file": "Kendrick Lamar - Not Like Us [Clean] - Sock With A Glock.mp3", "weight": 10},
     {"id": "t46", "title": "TV Off", "artist": "Kendrick Lamar", "file": "Kendrick Lamar - tv off (Clean) - XeonBeats.mp3", "weight": 7},
     {"id": "t47", "title": "ZEZE", "artist": "Kodak Black", "file": "Kodak Black - ZEZE (Clean) ft. Travis Scott & Offset - Sir Sammy.mp3", "weight": 9},
-    {"id": "t48", "title": "Like A Wife", "artist": "Tre Savage", "file": "LIKE A WIFE - Tre Savage.mp3", "weight": 6},
+    # REMOVED: "Like A Wife" - Tre Savage (Distorted Source)
     {"id": "t49", "title": "Big Energy", "artist": "Latto", "file": "Latto - Big Energy (Clean - Lyrics) - TrendingTracks.mp3", "weight": 8},
     {"id": "t50", "title": "All My Life", "artist": "Lil Durk", "file": "Lil Durk - All My Life (Clean - Lyrics) feat. J. Cole - Polar Records.mp3", "weight": 8},
     {"id": "t51", "title": "Love Me", "artist": "Lil Wayne", "file": "Lil Wayne - Love Me (Clean) ft. Drake, Future - LilWayneVEVO.mp3", "weight": 9},
