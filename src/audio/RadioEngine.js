@@ -12,6 +12,7 @@ export const radio = new class RadioEngine {
         this.onPlay = null;
         this.onLoadStart = null;
         this.onTrackChange = null;
+        this.onQualityChange = null; // Sync UI with Engine
         this.onNextTrackUpdate = null; // For "Playing next" UI
 
         // Audio Graph
@@ -50,6 +51,7 @@ export const radio = new class RadioEngine {
         } else if (navigator.connection && (navigator.connection.saveData || navigator.connection.type === 'cellular' || navigator.connection.effectiveType === '2g' || navigator.connection.effectiveType === '3g')) {
             this.currentQuality = '192';
             console.log("Auto-switched to Data Saver (192kbps) - Cellular/Slow Network Detected");
+            if (this.onQualityChange) this.onQualityChange('192');
         } else {
             // Default to HQ on WiFi/Good Connection
             console.log("WiFi/Fast Connection Detected - Defaulting to HQ (320kbps)");
@@ -57,6 +59,31 @@ export const radio = new class RadioEngine {
 
         // Initial fake metadata
         this._updateMetadata();
+
+        // Dynamic Network Listener
+        this._setupNetworkListeners();
+    }
+
+    _setupNetworkListeners() {
+        if (navigator.connection) {
+            navigator.connection.addEventListener('change', () => {
+                // Only auto-switch if user hasn't manually set a preference
+                if (!localStorage.getItem('hop_quality')) {
+                    const conn = navigator.connection;
+                    if (conn.saveData || conn.type === 'cellular' || ['2g', '3g'].includes(conn.effectiveType)) {
+                        if (this.currentQuality !== '192') {
+                            console.log("Network Change: Switching to ECO (192kbps)");
+                            this.setQuality('192');
+                        }
+                    } else {
+                        if (this.currentQuality !== '320') {
+                            console.log("Network Change: Switching to HQ (320kbps)");
+                            this.setQuality('320');
+                        }
+                    }
+                }
+            });
+        }
     }
 
     setQuality(q) {
@@ -64,6 +91,9 @@ export const radio = new class RadioEngine {
         console.log(`RadioEngine: Switching Quality to ${q}kbps`);
         this.currentQuality = q;
         localStorage.setItem('hop_quality', q);
+
+        // UI Hook
+        if (this.onQualityChange) this.onQualityChange(q);
 
         // Reconnect stream if playing
         if (this.isPlaying) {
