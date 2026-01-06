@@ -29,6 +29,7 @@ function App() {
   const [isOnline, setIsOnline] = useState(true);
   const [quality, setQuality] = useState(radio.currentQuality || '320'); // Track quality state
   const [netStats, setNetStats] = useState({ speed: 0, total: 0 }); // v2.6.4
+  const [isReady, setIsReady] = useState(false); // Radio ready state
 
   // Offline Mode State
   const [offlineProgress, setOfflineProgress] = useState(0); // 0-100
