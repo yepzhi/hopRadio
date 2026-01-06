@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { radio } from './audio/RadioEngine';
-import { WifiOff, Play, Pause, User, RefreshCw, Activity } from 'lucide-react';
+import { Play, Pause, User, RefreshCw, WifiOff, Info, Activity } from 'lucide-react';
 import AdSpace from './components/AdSpace';
 import './App.css';
 
@@ -38,6 +38,7 @@ function App() {
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [hasOfflineData, setHasOfflineData] = useState(false);
   const [nextTrack, setNextTrack] = useState(null); // "Playing next" indicator
+  const [showInfo, setShowInfo] = useState(false); // Info Modal State
 
 
   // PWA State removed
@@ -454,17 +455,29 @@ function App() {
           </div>
         )}
 
-        {/* Quality Toggle (Bottom Right) */}
+        {/* Quality Toggle & Info (Bottom Right) */}
         {(isPlaying || isBuffering) && (
-          <button
-            onClick={toggleQuality}
-            className="absolute bottom-6 right-6 z-20 px-3 py-1 rounded-full bg-black/40 hover:bg-black/60 text-[9px] font-bold text-gray-400 hover:text-white border border-white/5 hover:border-white/20 shadow-lg backdrop-blur-md transition-all active:scale-95 uppercase tracking-wider flex items-center gap-2"
-            title="Switch Audio Quality"
-          >
-            <span className={quality === '320' ? 'text-green-400' : 'text-gray-600'}>HQ</span>
-            <span className="text-gray-600">/</span>
-            <span className={quality === '192' ? 'text-yellow-400' : 'text-gray-600'}>ECO</span>
-          </button>
+          <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2">
+
+            {/* Info Button */}
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowInfo(true); }}
+              className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-gray-400 hover:text-white border border-white/5 hover:border-white/20 backdrop-blur-md transition-all active:scale-95"
+            >
+              <Info size={12} />
+            </button>
+
+            {/* Toggle */}
+            <button
+              onClick={toggleQuality}
+              className="px-3 py-1 rounded-full bg-black/40 hover:bg-black/60 text-[9px] font-bold text-gray-400 hover:text-white border border-white/5 hover:border-white/20 shadow-lg backdrop-blur-md transition-all active:scale-95 uppercase tracking-wider flex items-center gap-2"
+              title="Switch Audio Quality"
+            >
+              <span className={quality === '320' ? 'text-green-400' : 'text-gray-600'}>HQ</span>
+              <span className="text-gray-600">/</span>
+              <span className={quality === '192' ? 'text-yellow-400' : 'text-gray-600'}>ECO</span>
+            </button>
+          </div>
         )}
 
         {/* Bottom LEFT Refresh Button (v2.6.2) */}
@@ -597,23 +610,42 @@ function App() {
         </a>
       </div>
 
-      {/* Footer / Disclaimer */}
-      <div className="mt-12 mb-4 text-center max-w-2xl px-6 opacity-60 hover:opacity-100 transition-opacity duration-500">
-        <p className="text-[10px] text-gray-500 font-medium leading-relaxed">
-          Made by <span className="text-gray-400">@yepzhi</span>, design and music selection for hopRadio. SERGRadio mixes by <span className="text-gray-400">@SERG</span>.
-        </p>
-        <p className="text-[9px] text-gray-600 mt-2 leading-relaxed">
-          This radio station consumes <span className="text-gray-500">140MB/hour</span> at maximum lossless audio (320kbps) and <span className="text-gray-500">84MB/hour</span> at normal quality (192kbps).
-          EQ settings applied to improve quality audio for listeners. We don't play what you want, we play what you need.
-        </p>
-        <p className="text-[9px] text-gray-600 mt-1 uppercase tracking-widest">
-          hopRadio/SERGRadio are property of @yepzhi, All Rights Reserved 2025 • v3.0.0
-        </p>
-      </div>
+      {/* Info Modal */}
+      {showInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={() => setShowInfo(false)}>
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setShowInfo(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2"><Info size={20} className="text-blue-500" /> Audio Quality</h3>
 
-      {/* Invest Button (Preserved) */}
-      <div className="w-full max-w-[450px] flex flex-col items-center gap-4 mt-2 pb-6 z-20 pointer-events-auto">
-        {/* Offline Controls (Preserved) */}
+            <div className="space-y-4 text-sm text-gray-300">
+              <div className="p-3 bg-black/30 rounded-lg border border-gray-800">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-bold text-green-400">HQ (320kbps)</span>
+                  <span className="text-xs text-gray-500">~140 MB/hr</span>
+                </div>
+                <p className="text-xs text-gray-500">Maximum fidelity. Best for WiFi or Unlimited Data.</p>
+              </div>
+
+              <div className="p-3 bg-black/30 rounded-lg border border-gray-800">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-bold text-yellow-400">ECO (192kbps)</span>
+                  <span className="text-xs text-gray-500">~84 MB/hr</span>
+                </div>
+                <p className="text-xs text-gray-500">Data saver mode. Auto-selected on mobile networks.</p>
+              </div>
+
+              <p className="text-[10px] text-gray-500 pt-2 italic text-center">
+                * App automatically detects network type on startup. Your manual selection is saved.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer Container */}
+      <div className="w-full max-w-[450px] flex flex-col items-center gap-4 mt-8 pb-6 z-20 pointer-events-auto">
+
+        {/* Offline Controls */}
         <div className="flex items-center gap-2">
           {isDownloading ? (
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900/80 border border-gray-700 text-xs font-mono text-green-400">
@@ -640,9 +672,30 @@ function App() {
           )}
         </div>
 
+        {/* Invest Button */}
         <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="w-full max-w-[300px] px-4 py-2 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-700 transition-all text-[10px] font-medium block text-center leading-tight shadow-lg backdrop-blur-md">
           Do you like this? 💙 <span className="font-bold text-gray-400 group-hover:text-white">Lets make this a real radio 📡</span>
         </a>
+
+        {/* Legal Text & Credits (Merged) */}
+        <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <span className="text-gray-500 text-[10px] tracking-wide font-medium mr-1">Created by</span>
+            <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-3 py-1 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-red-500 hover:text-red-400 hover:border-red-900 transition-all font-bold shadow-sm text-[10px]">
+              @yepzhi
+            </a>
+            <span className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">v3.0.0</span>
+          </div>
+
+          <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
+            hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
+            <br />
+            Made by @yepzhi, design and music selection for hopRadio. SERGRadio mixes by @SERG.
+            <br />
+            We don't play what you want, we play what you need.
+          </p>
+        </div>
+
       </div>
 
     </div>
