@@ -22,6 +22,45 @@ const DataMonitor = ({ speed, total }) => {
   );
 };
 
+
+const CountdownTimer = ({ startedAt, duration }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    if (!startedAt || !duration) return;
+
+    const tick = () => {
+      const now = Date.now() / 1000;
+      const elapsed = now - startedAt;
+      const remaining = duration - elapsed;
+
+      if (remaining <= 0) {
+        setTimeLeft('00:00');
+        return;
+      }
+
+      const h = Math.floor(remaining / 3600);
+      const m = Math.floor((remaining % 3600) / 60);
+      const s = Math.floor(remaining % 60);
+
+      if (h > 0) {
+        setTimeLeft(`${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
+      } else {
+        setTimeLeft(`${m}:${s.toString().padStart(2, '0')}`);
+      }
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [startedAt, duration]);
+
+  if (!timeLeft) return null;
+
+  return <span>{timeLeft}</span>;
+};
+
+
 function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [track, setTrack] = useState(null);
@@ -517,6 +556,16 @@ function App() {
           </div>
           {/* HD Radio Logo - Top Right */}
           <img src="/hopRadio/hd-logo.png" alt="HD Radio" className={`h-5 opacity-90 mt-1 ${isOfflineMode ? 'grayscale brightness-50' : ''}`} />
+          {/* Timer - Force Right Side (v3.0.7) */}
+          {track && track.duration > 0 && (
+            <div className="flex flex-col items-end mt-2 opacity-80">
+              <span className="text-[8px] text-gray-500 font-bold tracking-wider">Ends in:</span>
+              <span className="text-[8px] text-red-500 font-mono tracking-wider">
+                <CountdownTimer startedAt={track.started_at} duration={track.duration} />
+              </span>
+            </div>
+          )}
+
         </div>
 
 
@@ -689,7 +738,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.0.6, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.0.7, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
