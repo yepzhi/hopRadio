@@ -614,25 +614,25 @@ function App() {
         </a>
       </div>
 
-            {/* Info Floating Toast (Centered & Simplified) */}
+      {/* Info Floating Toast (Centered & Simplified) */}
       {showInfo && (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl min-w-[200px]">
-                <div className="flex flex-col gap-2">
-                    <div className="flex justify-between items-center text-[10px] border-b border-white/5 pb-2">
-                        <span className="font-bold text-gray-200 tracking-wider">DATA USAGE</span>
-                        <Info size={12} className="text-red-500"/>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-green-400 font-bold">HQ</span>
-                        <span className="text-[10px] text-gray-300 font-mono">140 MB/h</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-yellow-400 font-bold">ECO</span>
-                        <span className="text-[10px] text-gray-300 font-mono">84 MB/h</span>
-                    </div>
-                </div>
+          <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl min-w-[200px]">
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center text-[10px] border-b border-white/5 pb-2">
+                <span className="font-bold text-gray-200 tracking-wider">DATA USAGE</span>
+                <Info size={12} className="text-red-500" />
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-green-400 font-bold">HQ</span>
+                <span className="text-[10px] text-gray-300 font-mono">140 MB/h</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-yellow-400 font-bold">ECO</span>
+                <span className="text-[10px] text-gray-300 font-mono">84 MB/h</span>
+              </div>
             </div>
+          </div>
         </div>
       )}
 
@@ -671,23 +671,16 @@ function App() {
           Do you like this? 💙 <span className="font-bold text-gray-400 group-hover:text-white">Lets make this a real radio 📡</span>
         </a>
 
-        {/* Legal Text & Credits (Merged) */}
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="text-gray-500 text-[10px] tracking-wide font-medium mr-1">Created by</span>
-            <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-3 py-1 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-red-500 hover:text-red-400 hover:border-red-900 transition-all font-bold shadow-sm text-[10px]">
-              @yepzhi
-            </a>
-            <span className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">v3.0.3</span>
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
+              v3.0.5, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              <br />
+              hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
+              <br />
+              We don't play what you want, we play what you need.
+            </p>
           </div>
-
-          <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-            hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
-            <br />
-            Made by @yepzhi, design and music selection for hopRadio. SERGRadio mixes by @SERG.
-            <br />
-            We don't play what you want, we play what you need.
-          </p>
         </div>
 
       </div>
