@@ -202,9 +202,8 @@ function App() {
 
           if (!trackRes.ok) throw new Error(`HTTP ${trackRes.status}`);
 
-          // Clone to validate size
-          const clone = trackRes.clone();
-          const blob = await clone.blob();
+          // Read blob directly (consume response body once)
+          const blob = await trackRes.blob();
 
           console.log(`[OFFLINE DOWNLOAD] ${i + 1}/${total} Blob size:`, blob.size, "bytes");
 
@@ -213,7 +212,14 @@ function App() {
             throw new Error("File too small (Corrupt/Empty)");
           }
 
-          await cache.put(item.download_url, trackRes);
+          // Create a FRESH Response from the blob (critical fix - v3.1.1)
+          // This ensures the cached response has a complete, readable body
+          const freshResponse = new Response(blob, {
+            status: 200,
+            headers: { 'Content-Type': 'audio/mpeg' }
+          });
+
+          await cache.put(item.download_url, freshResponse);
           console.log(`[OFFLINE DOWNLOAD] ${i + 1}/${total} Cached successfully:`, item.title);
 
           metadata.push(item);
