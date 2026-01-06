@@ -154,6 +154,16 @@ CURRENT_TRACK_INFO = {"title": "Connecting...", "artist": "hopRadio"}
 # Track Manager Queue
 READY_TRACKS = Queue(maxsize=3)
 
+def get_track_duration(file_path):
+    try:
+        cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", file_path]
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        return float(result.stdout.strip())
+    except Exception as e:
+        print(f"Error getting duration for {file_path}: {e}")
+        return 0
+
+
 def download_track(filename):
     url = f"https://yepzhi.com/hopRadio/tracks/{filename}"
     local_path = os.path.join(TRACKS_DIR, filename)
@@ -194,6 +204,13 @@ def track_manager_loop():
                 # Download (Blocking, but in this separate thread)
                 path = download_track(selected_track['file'])
                 if path:
+                    # Get/Cache Duration
+                    if 'duration' not in selected_track:
+                         dur = get_track_duration(path)
+                         if dur > 0:
+                             selected_track['duration'] = dur
+                             print(f"Duration cached for {selected_track['title']}: {dur}s")
+
                     READY_TRACKS.put({'track': selected_track, 'path': path})
                 else:
                     time.sleep(2) # Retry delay if download fails
@@ -249,6 +266,10 @@ def broadcast_stream():
         local_path = item['path']
             
         print(f"Now Playing: {track['title']}")
+        
+        # Set Start Time (for frontend sync)
+        track['started_at'] = time.time()
+        
         CURRENT_TRACK_INFO = track
         
         # --- Stream A: 320kbps (HQ) ---
