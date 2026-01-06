@@ -190,13 +190,15 @@ function App() {
 
       // 2. Download & Cache
       // Process sequentially to avoid main thread freeze
+      console.log("[OFFLINE DOWNLOAD] Starting download of", total, "tracks");
       for (let i = 0; i < total; i++) {
         const item = queue[i];
         try {
-          // Enforce fresh download (Bypass check)
-          // const existingMatches = await cache.match(item.download_url); << Removed (v3.1.1)
+          console.log(`[OFFLINE DOWNLOAD] ${i + 1}/${total} Fetching:`, item.title, item.download_url);
 
           const trackRes = await fetch(item.download_url, { cache: 'reload' }); // Force Network
+
+          console.log(`[OFFLINE DOWNLOAD] ${i + 1}/${total} Response:`, trackRes.status, trackRes.headers.get('content-type'));
 
           if (!trackRes.ok) throw new Error(`HTTP ${trackRes.status}`);
 
@@ -204,16 +206,15 @@ function App() {
           const clone = trackRes.clone();
           const blob = await clone.blob();
 
+          console.log(`[OFFLINE DOWNLOAD] ${i + 1}/${total} Blob size:`, blob.size, "bytes");
+
           if (blob.size < 100000) { // 100KB Minimum
-            console.warn("Skipping too small file:", item.title, blob.size);
+            console.warn("[OFFLINE DOWNLOAD] Skipping too small file:", item.title, blob.size);
             throw new Error("File too small (Corrupt/Empty)");
           }
 
-          // Important: We must store the ORIGINAL response (trackRes), not clone/blob, 
-          // because Cache API expects a Response object.
-          // Since we read the clone's body, the original response body is still intact? 
-          // NO! verify: response.clone() allows reading one copy without disturbing the other. Yes.
           await cache.put(item.download_url, trackRes);
+          console.log(`[OFFLINE DOWNLOAD] ${i + 1}/${total} Cached successfully:`, item.title);
 
           metadata.push(item);
           completed++;
@@ -227,13 +228,14 @@ function App() {
           await new Promise(r => setTimeout(r, 10));
 
         } catch (e) {
-          console.error("Download failed for track", item.title, e);
+          console.error("[OFFLINE DOWNLOAD] FAILED:", item.title, e.message);
           if (e.name === 'QuotaExceededError') {
             alert("Storage Full! Cannot download more tracks.");
             break; // Stop completely
           }
         }
       }
+      console.log("[OFFLINE DOWNLOAD] Finished. Successfully cached:", completed, "/", total);
 
       // Save Metadata Map
       localStorage.setItem('hopradio-offline-meta', JSON.stringify(metadata));
