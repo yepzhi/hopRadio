@@ -776,7 +776,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.1.1, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.1.2, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
