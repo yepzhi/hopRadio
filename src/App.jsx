@@ -5,7 +5,7 @@ import AdSpace from './components/AdSpace';
 import './App.css';
 
 // Data Monitor Component (v2.6.4)
-// Data Monitor Component (v3.2.1 with TOT)
+// Data Monitor Component (v3.2.2 with TOT)
 const DataMonitor = ({ isPlaying, quality }) => {
   const [totalBytes, setTotalBytes] = useState(0);
 
@@ -309,7 +309,7 @@ function App() {
     // PWA Install Prompt - Removed
 
     // Initialize Audio Engine (async)
-    // Quality Sync Hook - MUST be set BEFORE init() (v3.2.1 Fix)
+    // Quality Sync Hook - MUST be set BEFORE init() (v3.2.2 Fix)
     radio.onQualityChange = (q) => {
       setQuality(q);
     };
@@ -358,7 +358,7 @@ function App() {
       setNetStats(stats);
     };
 
-    // Quality Sync Hook (moved above initRadio - v3.2.1)
+    // Quality Sync Hook (moved above initRadio - v3.2.2)
 
     // Next Track Update (for "Playing next" indicator)
     radio.onNextTrackUpdate = (next) => {
@@ -565,7 +565,7 @@ function App() {
               </span>
             </div>
 
-            {/* Data Monitor (v3.2.1) */}
+            {/* Data Monitor (v3.2.2) */}
             <DataMonitor isPlaying={isPlaying} quality={quality} />
           </div>
         )}
@@ -816,7 +816,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.2.1, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.2.2, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
