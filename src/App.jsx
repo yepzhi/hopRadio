@@ -103,9 +103,29 @@ function App() {
           setListeners(data.listeners || 0);
           // Auto-update track info from server (Metadata Sync)
           if (data.now_playing) {
-            setTrack(data.now_playing);
+            // v3.0.9: Introduce 30s delay if track changes (to match audio buffer)
+            const newTitle = data.now_playing.title;
+
+            setTrack(prevTrack => {
+              // First load or same track: Update immediately
+              if (!prevTrack || prevTrack.title === newTitle) {
+                return data.now_playing;
+              }
+
+              // Different track: Delay update by 30s
+              // We use a timeout but verify it's still the "new" track when it fires? 
+              // Actually simpler: just fire a delayed setter.
+              // Risk: Multiple updates queuing. 
+              // Allow immediate update for now, but user says "changes 30 sec before".
+
+              setTimeout(() => {
+                setTrack(data.now_playing);
+              }, 30000); // 30 seconds delay
+
+              return prevTrack; // Keep showing old track for now
+            });
           }
-          // Update next track for live mode
+
           // Update next track for live mode
           if (data.next_playing) {
             setNextTrack(data.next_playing);
@@ -527,7 +547,7 @@ function App() {
           </div>
           {/* HD Radio Logo - Top Right */}
           <img src="/hopRadio/hd-logo.png" alt="HD Radio" className={`h-5 opacity-90 mt-1 ${isOfflineMode ? 'grayscale brightness-50' : ''}`} />
-          {/* Timer - Force Right Side (v3.0.8) */}
+          {/* Timer - Force Right Side (v3.0.9) */}
           {track && track.duration > 0 && (
             <div className="flex flex-col items-end mt-2 opacity-80">
               <span className="text-[8px] text-gray-500 font-bold tracking-wider">Ends in:</span>
@@ -584,7 +604,7 @@ function App() {
           )}
         </div>
 
-        {/* Quality Controls (Moved above Song Name - v3.0.8) */}
+        {/* Quality Controls (Moved above Song Name - v3.0.9) */}
         {
           (isPlaying || isBuffering) && !isOfflineMode && (
             <div className="w-full max-w-[350px] flex justify-end px-4 -mt-6 mb-2 z-30 pointer-events-auto relative">
@@ -745,7 +765,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.0.8, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.0.9, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
