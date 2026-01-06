@@ -5,7 +5,7 @@ import AdSpace from './components/AdSpace';
 import './App.css';
 
 // Data Monitor Component (v2.6.4)
-// Data Monitor Component (v3.1.5 with TOT)
+// Data Monitor Component (v3.1.6 with TOT)
 const DataMonitor = ({ isPlaying, quality }) => {
   const [totalBytes, setTotalBytes] = useState(0);
 
@@ -553,7 +553,7 @@ function App() {
               </span>
             </div>
 
-            {/* Data Monitor (v3.1.5) */}
+            {/* Data Monitor (v3.1.6) */}
             <DataMonitor isPlaying={isPlaying} quality={quality} />
           </div>
         )}
@@ -636,7 +636,7 @@ function App() {
         {/* Quality Controls (Moved above Song Name - v3.0.11) */}
         {
           (isPlaying || isBuffering) && !isOfflineMode && (
-            <div className="w-full max-w-[350px] flex justify-end px-4 mt-0 mb-1 z-30 pointer-events-auto relative">
+            <div className="w-full max-w-[350px] flex justify-end px-4 -mt-4 mb-0 z-30 pointer-events-auto relative">
               <div className="flex items-center gap-2">
                 {/* Toggle */}
                 <button
@@ -804,7 +804,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.1.5, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.1.6, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
