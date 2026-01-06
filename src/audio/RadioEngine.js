@@ -258,6 +258,7 @@ export const radio = new class RadioEngine {
         this.isOffline = true;
         this.offlineQueue = playlist; // Array of { blobUrl, title, artist, ... }
         this.offlineIndex = 0;
+        this.offlineErrorCount = 0; // Prevent infinite loops
 
         this._playCurrentOfflineTrack();
     }
@@ -311,6 +312,7 @@ export const radio = new class RadioEngine {
             autoplay: true,
             onplay: () => {
                 this.isPlaying = true;
+                this.offlineErrorCount = 0; // Reset error counter on success
                 if (this.onPlay) this.onPlay();
                 this._setupMediaSession(track);
                 this._connectVisualizer();
@@ -322,7 +324,16 @@ export const radio = new class RadioEngine {
             },
             onloaderror: (id, err) => {
                 console.error("RadioEngine: Offline Playback Error", err);
-                this.playNextOffline(); // Skip bad track
+
+                this.offlineErrorCount++;
+                if (this.offlineErrorCount >= this.offlineQueue.length) {
+                    console.error("RadioEngine: All offline tracks failed! Stopping.");
+                    this.pause();
+                    return;
+                }
+
+                // Delay to prevent "spinning" UI
+                setTimeout(() => this.playNextOffline(), 1000);
             }
         });
     }
