@@ -25,10 +25,9 @@ const DataMonitor = ({ speed, total }) => {
 function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [track, setTrack] = useState(null);
-  const [isLive, setIsLive] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [isReady, setIsReady] = useState(false); // Radio ready state
+  const [isOnline, setIsOnline] = useState(true);
+  const [quality, setQuality] = useState(radio.currentQuality || '320'); // Track quality state
   const [netStats, setNetStats] = useState({ speed: 0, total: 0 }); // v2.6.4
 
   // Offline Mode State
@@ -367,7 +366,11 @@ function App() {
     setIsPlaying(!isPlaying);
   };
 
-
+  const toggleQuality = () => {
+    const newQ = quality === '320' ? '192' : '320';
+    setQuality(newQ);
+    radio.setQuality(newQ);
+  };
 
 
   return (
@@ -447,6 +450,19 @@ function App() {
             {/* Data Monitor (v2.6.4) */}
             <DataMonitor speed={netStats.speed} total={netStats.total} />
           </div>
+        )}
+
+        {/* Quality Toggle (Bottom Right) */}
+        {(isPlaying || isBuffering) && (
+          <button
+            onClick={toggleQuality}
+            className="absolute bottom-6 right-6 z-20 px-3 py-1 rounded-full bg-black/40 hover:bg-black/60 text-[9px] font-bold text-gray-400 hover:text-white border border-white/5 hover:border-white/20 shadow-lg backdrop-blur-md transition-all active:scale-95 uppercase tracking-wider flex items-center gap-2"
+            title="Switch Audio Quality"
+          >
+            <span className={quality === '320' ? 'text-green-400' : 'text-gray-600'}>HQ</span>
+            <span className="text-gray-600">/</span>
+            <span className={quality === '192' ? 'text-yellow-400' : 'text-gray-600'}>ECO</span>
+          </button>
         )}
 
         {/* Bottom LEFT Refresh Button (v2.6.2) */}
@@ -579,10 +595,23 @@ function App() {
         </a>
       </div>
 
-      {/* Flex Column Container for Bottom Elements to avoid cramping */}
-      <div className="w-full max-w-[450px] flex flex-col items-center gap-4 mt-2 pb-6 z-20 pointer-events-auto">
+      {/* Footer / Disclaimer */}
+      <div className="mt-12 mb-4 text-center max-w-2xl px-6 opacity-60 hover:opacity-100 transition-opacity duration-500">
+        <p className="text-[10px] text-gray-500 font-medium leading-relaxed">
+          Made by <span className="text-gray-400">@yepzhi</span>, design and music selection for hopRadio. SERGRadio mixes by <span className="text-gray-400">@SERG</span>.
+        </p>
+        <p className="text-[9px] text-gray-600 mt-2 leading-relaxed">
+          This radio station consumes <span className="text-gray-500">140MB/hour</span> at maximum lossless audio (320kbps) and <span className="text-gray-500">84MB/hour</span> at normal quality (192kbps).
+          EQ settings applied to improve quality audio for listeners. We don't play what you want, we play what you need.
+        </p>
+        <p className="text-[9px] text-gray-600 mt-1 uppercase tracking-widest">
+          hopRadio/SERGRadio are property of @yepzhi, All Rights Reserved 2025 • v3.0.0
+        </p>
+      </div>
 
-        {/* Offline Controls */}
+      {/* Invest Button (Preserved) */}
+      <div className="w-full max-w-[450px] flex flex-col items-center gap-4 mt-2 pb-6 z-20 pointer-events-auto">
+        {/* Offline Controls (Preserved) */}
         <div className="flex items-center gap-2">
           {isDownloading ? (
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900/80 border border-gray-700 text-xs font-mono text-green-400">
@@ -609,22 +638,9 @@ function App() {
           )}
         </div>
 
-        {/* Invest Button */}
         <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="w-full max-w-[300px] px-4 py-2 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-700 transition-all text-[10px] font-medium block text-center leading-tight shadow-lg backdrop-blur-md">
           Do you like this? 💙 <span className="font-bold text-gray-400 group-hover:text-white">Lets make this a real radio 📡</span>
         </a>
-
-        {/* Footer info inline (mobile friendly) */}
-        <div className="flex items-center gap-2 mt-2">
-          <span className="text-gray-500 text-[10px] tracking-wide font-medium mr-1">Created by</span>
-          <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-3 py-1 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-red-500 hover:text-red-400 hover:border-red-900 transition-all font-bold shadow-sm text-[10px]">
-            @yepzhi
-          </a>
-          <div className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">
-            v2.6.7
-          </div>
-        </div>
-
       </div>
 
     </div>

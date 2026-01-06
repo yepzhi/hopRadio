@@ -6,6 +6,7 @@ export const radio = new class RadioEngine {
         this.howl = null;
         this.isPlaying = false;
         this.volume = 0.6;
+        this.currentQuality = '320'; // Default
 
         // Hooks
         this.onPlay = null;
@@ -42,8 +43,29 @@ export const radio = new class RadioEngine {
 
     async init() {
         console.log("RadioEngine: Initializing");
+        // Auto-detect quality preference
+        const saved = localStorage.getItem('hop_quality');
+        if (saved) {
+            this.currentQuality = saved;
+        } else if (navigator.connection && (navigator.connection.saveData || navigator.connection.effectiveType === '2g' || navigator.connection.effectiveType === '3g')) {
+            this.currentQuality = '192';
+            console.log("Auto-switched to Data Saver (192kbps)");
+        }
+
         // Initial fake metadata
         this._updateMetadata();
+    }
+
+    setQuality(q) {
+        if (q === this.currentQuality) return;
+        console.log(`RadioEngine: Switching Quality to ${q}kbps`);
+        this.currentQuality = q;
+        localStorage.setItem('hop_quality', q);
+
+        // Reconnect stream if playing
+        if (this.isPlaying) {
+            this.reconnect();
+        }
     }
 
     _updateMetadata() {
@@ -75,8 +97,12 @@ export const radio = new class RadioEngine {
         }
 
         // 2. Create new Howl instance
+        // 2. Create new Howl instance
+        const finalUrl = `${this.streamUrl}?q=${this.currentQuality}&t=${Date.now()}`;
+        console.log("Loading Stream:", finalUrl);
+
         this.howl = new Howl({
-            src: [this.streamUrl],
+            src: [finalUrl],
             format: ['mp3'],
             html5: true, // Required for long streams & iOS background audio
             volume: this.volume,
