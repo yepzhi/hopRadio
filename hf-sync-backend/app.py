@@ -146,8 +146,12 @@ CLIENTS = []      # 320kbps Clients
 CLIENTS_192 = []  # 192kbps Clients
 
 # Global Circular Buffers
-BURST_BUFFER = deque(maxlen=100)      # 320kbps
-BURST_BUFFER_192 = deque(maxlen=100)  # 192kbps
+# BURST_BUFFER: Pre-fills new clients for instant playback
+# Adjusted for ~20 seconds of audio to keep start times aligned across qualities
+# 320k: ~40KB/s -> 20s = 800KB. Chunks=16KB -> 50 chunks
+# 192k: ~24KB/s -> 20s = 480KB. Chunks=16KB -> 30 chunks
+BURST_BUFFER = deque(maxlen=50)      # 320kbps
+BURST_BUFFER_192 = deque(maxlen=30)  # 192kbps
 
 CURRENT_TRACK_INFO = {"title": "Connecting...", "artist": "hopRadio"}
 
@@ -267,10 +271,25 @@ def broadcast_stream():
             
         print(f"Now Playing: {track['title']}")
         
-        # Set Start Time (for frontend sync)
-        track['started_at'] = time.time()
+        # DELAYED METADATA UPDATE (Sync with Audio Buffer)
+        # Buffer is ~20s deep, but we want the UI to update when audio arrives?
+        # Actually, with the burst buffer reducation (20s), a 5s delay is a good safe zone
+        # to ensure the previous track has finished playing on the client.
+        def update_meta_delayed():
+             global CURRENT_TRACK_INFO
+             
+             # Calculate Duration (Accurate)
+             dur = get_track_duration(local_path)
+             if dur == 0: dur = os.path.getsize(local_path) / 40000 
+             
+             track['duration'] = dur
+             track['started_at'] = time.time()
+             
+             CURRENT_TRACK_INFO = track
+             print(f"METADATA UPDATED: {track['title']} (Duration: {dur/60:.1f}m)")
         
-        CURRENT_TRACK_INFO = track
+        # 5 second delay to match buffer flush
+        threading.Timer(5.0, update_meta_delayed).start()
         
         # --- Stream A: 320kbps (HQ) ---
         cmd_320 = [
