@@ -509,240 +509,252 @@ function App() {
           </div>
         )}
 
-        {/* Quality Toggle & Info (Bottom Right) */}
-        {isPlaying && isLive && <span className="w-2 h-2 rounded-full bg-red-600 live-dot-anim relative top-[0.5px]"></span>}
-        {isOfflineMode ? 'OFFLINE MODE' : (isPlaying ? (isBuffering ? 'BUFFERING...' : 'LIVE') : '')}
-      </div>
-      {/* HD Radio Logo - Top Right */}
-      <img src="/hopRadio/hd-logo.png" alt="HD Radio" className={`h-5 opacity-90 mt-1 ${isOfflineMode ? 'grayscale brightness-50' : ''}`} />
-      {/* Timer - Force Right Side (v3.0.8) */}
-      {track && track.duration > 0 && (
-        <div className="flex flex-col items-end mt-2 opacity-80">
-          <span className="text-[8px] text-gray-500 font-bold tracking-wider">Ends in:</span>
-          <span className="text-[8px] text-red-500 font-mono tracking-wider">
-            <CountdownTimer startedAt={track.started_at} duration={track.duration} />
-          </span>
-        </div>
-      )}
-
-    </div>
-
-
-      {/* Play Button Container with Offline Controls */ }
-  <div className="flex items-center justify-center gap-6 mt-4 relative z-10">
-
-    {/* Offline Prev (Hidden if Online) */}
-    {isOfflineMode && (
-      <button
-        onClick={() => radio.playPrevOffline()}
-        className="text-white hover:text-red-400 transition-colors p-3 bg-white/10 rounded-full backdrop-blur-sm active:scale-95"
-        title="Previous Song"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
-      </button>
-    )}
-
-    {/* Main Play Button */}
-    <button
-      onClick={togglePlay}
-      className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-white transition-colors cursor-pointer relative group ${isBuffering ? 'animate-pulse' : ''}`}
-    >
-      {/* Spinner Ring if buffering */}
-      {isBuffering && isPlaying ? (
-        <div className="absolute inset-0 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
-      ) : null}
-      <div className="relative z-10">
-        {isPlaying ? (
-          isBuffering ? null : <Pause size={48} fill="currentColor" />
-        ) : (
-          <Play size={48} fill="currentColor" className="ml-2" />
+        {/* Bottom LEFT Refresh Button (v2.6.2) */}
+        {(isPlaying || isBuffering) && (
+          <button
+            onClick={() => radio.reconnect()}
+            className="absolute bottom-6 left-6 z-20 p-2 rounded-full bg-gray-900/50 hover:bg-gray-800 text-gray-500 hover:text-white transition-all active:scale-90 border border-white/5 hover:border-white/20 shadow-lg backdrop-blur-md"
+            title="Force Refresh Connection">
+            <RefreshCw size={14} />
+          </button>
         )}
-      </div>
-    </button>
 
-    {/* Offline Next (Hidden if Online) */}
-    {isOfflineMode && (
-      <button
-        onClick={() => radio.playNextOffline()}
-        className="text-white hover:text-red-400 transition-colors p-3 bg-white/10 rounded-full backdrop-blur-sm active:scale-95"
-        title="Next Song"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
-      </button>
-    )}
-  </div>
+        {/* Top Right Status & Logo */}
+        <div className="absolute top-6 right-6 z-20 flex flex-col items-end gap-1">
+          <div className={`text-xs uppercase tracking-[2px] font-bold flex items-center gap-2 leading-none ${isLive ? 'text-red-500' : 'text-gray-500'}`}>
+            {isPlaying && isLive && <span className="w-2 h-2 rounded-full bg-red-600 live-dot-anim relative top-[0.5px]"></span>}
+            {isOfflineMode ? 'OFFLINE MODE' : (isPlaying ? (isBuffering ? 'BUFFERING...' : 'LIVE') : '')}
+          </div>
+          {/* HD Radio Logo - Top Right */}
+          <img src="/hopRadio/hd-logo.png" alt="HD Radio" className={`h-5 opacity-90 mt-1 ${isOfflineMode ? 'grayscale brightness-50' : ''}`} />
+          {/* Timer - Force Right Side (v3.0.8) */}
+          {track && track.duration > 0 && (
+            <div className="flex flex-col items-end mt-2 opacity-80">
+              <span className="text-[8px] text-gray-500 font-bold tracking-wider">Ends in:</span>
+              <span className="text-[8px] text-red-500 font-mono tracking-wider">
+                <CountdownTimer startedAt={track.started_at} duration={track.duration} />
+              </span>
+            </div>
+          )}
 
-  {/* Quality Controls (Moved above Song Name - v3.0.8) */ }
-  {
-    (isPlaying || isBuffering) && !isOfflineMode && (
-      <div className="w-full max-w-[350px] flex justify-end px-4 -mt-6 mb-2 z-30 pointer-events-auto relative">
+        </div>
+
+
+        {/* Play Button Container with Offline Controls */}
+        <div className="flex items-center justify-center gap-6 mt-4 relative z-10">
+
+          {/* Offline Prev (Hidden if Online) */}
+          {isOfflineMode && (
+            <button
+              onClick={() => radio.playPrevOffline()}
+              className="text-white hover:text-red-400 transition-colors p-3 bg-white/10 rounded-full backdrop-blur-sm active:scale-95"
+              title="Previous Song"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+            </button>
+          )}
+
+          {/* Main Play Button */}
+          <button
+            onClick={togglePlay}
+            className={`play-btn-glow w-28 h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center text-red-500 hover:text-white transition-colors cursor-pointer relative group ${isBuffering ? 'animate-pulse' : ''}`}
+          >
+            {/* Spinner Ring if buffering */}
+            {isBuffering && isPlaying ? (
+              <div className="absolute inset-0 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
+            ) : null}
+            <div className="relative z-10">
+              {isPlaying ? (
+                isBuffering ? null : <Pause size={48} fill="currentColor" />
+              ) : (
+                <Play size={48} fill="currentColor" className="ml-2" />
+              )}
+            </div>
+          </button>
+
+          {/* Offline Next (Hidden if Online) */}
+          {isOfflineMode && (
+            <button
+              onClick={() => radio.playNextOffline()}
+              className="text-white hover:text-red-400 transition-colors p-3 bg-white/10 rounded-full backdrop-blur-sm active:scale-95"
+              title="Next Song"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+            </button>
+          )}
+        </div>
+
+        {/* Quality Controls (Moved above Song Name - v3.0.8) */}
+        {
+          (isPlaying || isBuffering) && !isOfflineMode && (
+            <div className="w-full max-w-[350px] flex justify-end px-4 -mt-6 mb-2 z-30 pointer-events-auto relative">
+              <div className="flex items-center gap-2">
+                {/* Toggle */}
+                <button
+                  onClick={toggleQuality}
+                  className="px-3 py-1 rounded-full bg-black/40 hover:bg-black/60 text-[9px] font-bold text-gray-400 hover:text-white border border-white/5 hover:border-white/20 shadow-lg backdrop-blur-md transition-all active:scale-95 uppercase tracking-wider flex items-center gap-2"
+                  title="Switch Audio Quality"
+                >
+                  <span className={quality === '320' ? 'text-green-400' : 'text-gray-600'}>HQ</span>
+                  <span className="text-gray-600">/</span>
+                  <span className={quality === '192' ? 'text-yellow-400' : 'text-gray-600'}>ECO</span>
+                </button>
+
+                {/* Info Button (Press-to-Hold) */}
+                <button
+                  onMouseDown={(e) => { e.stopPropagation(); setShowInfo(true); }}
+                  onMouseUp={(e) => { e.stopPropagation(); setShowInfo(false); }}
+                  onMouseLeave={(e) => { e.stopPropagation(); setShowInfo(false); }}
+                  onTouchStart={(e) => { e.stopPropagation(); setShowInfo(true); }}
+                  onTouchEnd={(e) => { e.stopPropagation(); setShowInfo(false); }}
+                  className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-gray-400 hover:text-white border border-white/5 hover:border-white/20 backdrop-blur-md transition-all active:scale-95 select-none"
+                >
+                  <Info size={12} />
+                </button>
+              </div>
+            </div>
+          )
+        }
+
+        {/* Scratch Button Removed (v2.3.8) */}
+
+        {/* Now Playing Info */}
+        <div className="text-center min-h-[60px] flex flex-col items-center justify-center z-10">
+
+          {!isPlaying && !isBuffering && (
+            <div className="text-sm uppercase tracking-[2px] mb-2 font-medium text-gray-500">
+              {isOfflineMode ? 'OFFLINE READY' : 'CLICK TO START'}
+            </div>
+          )}
+
+
+          <div className={`transition-all duration-500 ${isPlaying ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-2'}`}>
+            <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-md">
+              {track ? track.title : 'hopRadio Live'}
+            </h2>
+            <p className="text-gray-400 font-light text-lg mb-1">
+              {track ? track.artist : 'HQ Audio Stream'}
+            </p>
+            {/* Next Playing - Centered (v3.0.4 Fix) */}
+            {nextTrack && (
+              <div className="w-full flex justify-center mt-2">
+                <div className="text-[10px] md:text-xs font-medium text-gray-500 bg-black/20 px-2 py-1 rounded-md backdrop-blur-sm border border-white/5 animate-in fade-in slide-in-from-bottom-1">
+                  <span className="text-red-500 font-bold mr-1 uppercase tracking-wider text-[9px]">Next:</span>
+                  <span className="text-gray-300 truncate max-w-[150px] inline-block align-bottom">{nextTrack.title}</span>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div >
+
+      {/* Listeners Info (Bottom Right of Player) */}
+      < div className="w-full md:w-auto min-w-[300px] md:min-w-[450px] flex justify-end px-4 mb-2 md:mb-3" >
+        <div className="text-gray-500 text-[10px] uppercase tracking-wider font-bold flex items-center space-x-1">
+          <User size={10} />
+          <span>{listeners} Listening</span>
+        </div>
+      </div >
+
+
+      {/* AdSpace */}
+      < div className="w-full flex justify-center mb-2 md:mb-4" >
+        {
+          isOfflineMode ? (
+            <div className="text-center text-gray-500 text-xs tracking-widest uppercase py-4" >
+              Local Playback Active
+            </div>
+          ) : (
+            <AdSpace />
+          )
+        }
+      </div >
+
+
+      {/* Cross Link: Hub */}
+      < div className="w-full flex justify-center mb-4 pointer-events-auto z-30" >
+        <a href="https://yepzhi.com/SERGRadio/" className="group relative px-6 py-2.5 bg-black/40 backdrop-blur-xl border border-blue-900/50 rounded-full flex items-center gap-3 hover:bg-black/80 transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(59,130,246,0.3)]">
+          <span className="text-xs text-gray-400 uppercase tracking-widest font-semibold group-hover:text-gray-300">Listen</span>
+          <h1 className="logo-base text-xl font-black tracking-tight mb-0 leading-none">
+            <span className="text-blue-700 tracking-tighter serg-blue-text">SERG</span><span className="radio-gradient-text">Radio</span>
+          </h1>
+          <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+        </a>
+      </div >
+
+      {/* Info Floating Toast (Centered & Simplified) */}
+      {
+        showInfo && (
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl min-w-[200px]">
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between items-center text-[10px] border-b border-white/5 pb-2">
+                  <span className="font-bold text-gray-200 tracking-wider">DATA USAGE</span>
+                  <Info size={12} className="text-red-500" />
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] text-green-400 font-bold">HQ</span>
+                  <span className="text-[10px] text-gray-300 font-mono">140 MB/h</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] text-yellow-400 font-bold">ECO</span>
+                  <span className="text-[10px] text-gray-300 font-mono">84 MB/h</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Footer Container */}
+      <div className="w-full max-w-[450px] flex flex-col items-center gap-4 mt-8 pb-6 z-20 pointer-events-auto">
+
+        {/* Offline Controls */}
         <div className="flex items-center gap-2">
-          {/* Toggle */}
-          <button
-            onClick={toggleQuality}
-            className="px-3 py-1 rounded-full bg-black/40 hover:bg-black/60 text-[9px] font-bold text-gray-400 hover:text-white border border-white/5 hover:border-white/20 shadow-lg backdrop-blur-md transition-all active:scale-95 uppercase tracking-wider flex items-center gap-2"
-            title="Switch Audio Quality"
-          >
-            <span className={quality === '320' ? 'text-green-400' : 'text-gray-600'}>HQ</span>
-            <span className="text-gray-600">/</span>
-            <span className={quality === '192' ? 'text-yellow-400' : 'text-gray-600'}>ECO</span>
-          </button>
+          {isDownloading ? (
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900/80 border border-gray-700 text-xs font-mono text-green-400">
+              <span>Downloading {offlineProgress}%</span>
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={downloadOfflineTracks}
+                className="px-4 py-2 rounded-full bg-black/40 border border-gray-700 hover:bg-gray-800 text-gray-400 hover:text-white transition-all text-[10px] tracking-wide font-bold backdrop-blur-md"
+              >
+                {hasOfflineData ? 'Update Offline' : 'Download 1-hour offline'}
+              </button>
 
-          {/* Info Button (Press-to-Hold) */}
-          <button
-            onMouseDown={(e) => { e.stopPropagation(); setShowInfo(true); }}
-            onMouseUp={(e) => { e.stopPropagation(); setShowInfo(false); }}
-            onMouseLeave={(e) => { e.stopPropagation(); setShowInfo(false); }}
-            onTouchStart={(e) => { e.stopPropagation(); setShowInfo(true); }}
-            onTouchEnd={(e) => { e.stopPropagation(); setShowInfo(false); }}
-            className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-gray-400 hover:text-white border border-white/5 hover:border-white/20 backdrop-blur-md transition-all active:scale-95 select-none"
-          >
-            <Info size={12} />
-          </button>
+              {hasOfflineData && (
+                <button
+                  onClick={toggleOfflineMode}
+                  className={`px-4 py-2 rounded-full border transition-all text-[10px] uppercase tracking-wider font-bold backdrop-blur-md ${isOfflineMode ? 'bg-red-600 border-red-500 text-white' : 'bg-black/40 border-gray-700 text-gray-400 hover:text-white'}`}
+                >
+                  {isOfflineMode ? 'Go Live' : 'Go Offline'}
+                </button>
+              )}
+            </>
+          )}
         </div>
-      </div>
-    )
-  }
 
-  {/* Scratch Button Removed (v2.3.8) */ }
+        {/* Invest Button */}
+        <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="w-full max-w-[300px] px-4 py-2 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-700 transition-all text-[10px] font-medium block text-center leading-tight shadow-lg backdrop-blur-md">
+          Do you like this? 💙 <span className="font-bold text-gray-400 group-hover:text-white">Lets make this a real radio 📡</span>
+        </a>
 
-  {/* Now Playing Info */ }
-  <div className="text-center min-h-[60px] flex flex-col items-center justify-center z-10">
-
-    {!isPlaying && !isBuffering && (
-      <div className="text-sm uppercase tracking-[2px] mb-2 font-medium text-gray-500">
-        {isOfflineMode ? 'OFFLINE READY' : 'CLICK TO START'}
-      </div>
-    )}
-
-
-    <div className={`transition-all duration-500 ${isPlaying ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-2'}`}>
-      <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-md">
-        {track ? track.title : 'hopRadio Live'}
-      </h2>
-      <p className="text-gray-400 font-light text-lg mb-1">
-        {track ? track.artist : 'HQ Audio Stream'}
-      </p>
-      {/* Next Playing - Centered (v3.0.4 Fix) */}
-      {nextTrack && (
-        <div className="w-full flex justify-center mt-2">
-          <div className="text-[10px] md:text-xs font-medium text-gray-500 bg-black/20 px-2 py-1 rounded-md backdrop-blur-sm border border-white/5 animate-in fade-in slide-in-from-bottom-1">
-            <span className="text-red-500 font-bold mr-1 uppercase tracking-wider text-[9px]">Next:</span>
-            <span className="text-gray-300 truncate max-w-[150px] inline-block align-bottom">{nextTrack.title}</span>
+        <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
+              v3.0.8, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              <br />
+              hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
+              <br />
+              We don't play what you want, we play what you need.
+            </p>
           </div>
         </div>
-      )}
 
-    </div>
-  </div>
-    </div >
-
-    {/* Listeners Info (Bottom Right of Player) */ }
-    < div className = "w-full md:w-auto min-w-[300px] md:min-w-[450px] flex justify-end px-4 mb-2 md:mb-3" >
-      <div className="text-gray-500 text-[10px] uppercase tracking-wider font-bold flex items-center space-x-1">
-        <User size={10} />
-        <span>{listeners} Listening</span>
       </div>
-  </div >
-
-
-    {/* AdSpace */ }
-    < div className = "w-full flex justify-center mb-2 md:mb-4" >
-    {
-      isOfflineMode?(
-      <div className = "text-center text-gray-500 text-xs tracking-widest uppercase py-4" >
-          Local Playback Active
-      </div>
-    ) : (
-    <AdSpace />
-  )
-}
-  </div >
-
-
-  {/* Cross Link: Hub */ }
-  < div className = "w-full flex justify-center mb-4 pointer-events-auto z-30" >
-    <a href="https://yepzhi.com/SERGRadio/" className="group relative px-6 py-2.5 bg-black/40 backdrop-blur-xl border border-blue-900/50 rounded-full flex items-center gap-3 hover:bg-black/80 transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(59,130,246,0.3)]">
-      <span className="text-xs text-gray-400 uppercase tracking-widest font-semibold group-hover:text-gray-300">Listen</span>
-      <h1 className="logo-base text-xl font-black tracking-tight mb-0 leading-none">
-        <span className="text-blue-700 tracking-tighter serg-blue-text">SERG</span><span className="radio-gradient-text">Radio</span>
-      </h1>
-      <svg className="w-5 h-5 text-gray-400 group-hover:text-white transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-    </a>
-  </div >
-
-  {/* Info Floating Toast (Centered & Simplified) */ }
-{
-  showInfo && (
-    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-200">
-      <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl min-w-[200px]">
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between items-center text-[10px] border-b border-white/5 pb-2">
-            <span className="font-bold text-gray-200 tracking-wider">DATA USAGE</span>
-            <Info size={12} className="text-red-500" />
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-[10px] text-green-400 font-bold">HQ</span>
-            <span className="text-[10px] text-gray-300 font-mono">140 MB/h</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-[10px] text-yellow-400 font-bold">ECO</span>
-            <span className="text-[10px] text-gray-300 font-mono">84 MB/h</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-{/* Footer Container */ }
-<div className="w-full max-w-[450px] flex flex-col items-center gap-4 mt-8 pb-6 z-20 pointer-events-auto">
-
-  {/* Offline Controls */}
-  <div className="flex items-center gap-2">
-    {isDownloading ? (
-      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900/80 border border-gray-700 text-xs font-mono text-green-400">
-        <span>Downloading {offlineProgress}%</span>
-      </div>
-    ) : (
-      <>
-        <button
-          onClick={downloadOfflineTracks}
-          className="px-4 py-2 rounded-full bg-black/40 border border-gray-700 hover:bg-gray-800 text-gray-400 hover:text-white transition-all text-[10px] tracking-wide font-bold backdrop-blur-md"
-        >
-          {hasOfflineData ? 'Update Offline' : 'Download 1-hour offline'}
-        </button>
-
-        {hasOfflineData && (
-          <button
-            onClick={toggleOfflineMode}
-            className={`px-4 py-2 rounded-full border transition-all text-[10px] uppercase tracking-wider font-bold backdrop-blur-md ${isOfflineMode ? 'bg-red-600 border-red-500 text-white' : 'bg-black/40 border-gray-700 text-gray-400 hover:text-white'}`}
-          >
-            {isOfflineMode ? 'Go Live' : 'Go Offline'}
-          </button>
-        )}
-      </>
-    )}
-  </div>
-
-  {/* Invest Button */}
-  <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="w-full max-w-[300px] px-4 py-2 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-gray-500 hover:text-gray-300 hover:border-gray-700 transition-all text-[10px] font-medium block text-center leading-tight shadow-lg backdrop-blur-md">
-    Do you like this? 💙 <span className="font-bold text-gray-400 group-hover:text-white">Lets make this a real radio 📡</span>
-  </a>
-
-  <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
-    <div className="flex flex-col items-center gap-1">
-      <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-        v3.0.8, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
-        <br />
-        hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
-        <br />
-        We don't play what you want, we play what you need.
-      </p>
-    </div>
-  </div>
-
-</div>
 
     </div >
 
