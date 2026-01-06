@@ -21,7 +21,7 @@ const DataMonitor = ({ isPlaying, quality }) => {
     ? { rate: '192kbps', cons: '1.4 MB/min' }
     : { rate: '320kbps', cons: '2.4 MB/min' };
 
-  const totalMB = (totalBytes / (1024 * 1024)).toFixed(0);
+  const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
 
   return (
     <div className="flex flex-col items-start mt-2 space-y-0.5 animate-in fade-in duration-700">

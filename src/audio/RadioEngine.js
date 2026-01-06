@@ -138,6 +138,9 @@ export const radio = new class RadioEngine {
         const finalUrl = `${this.streamUrl}?q=${this.currentQuality}&t=${Date.now()}`;
         console.log("Loading Stream:", finalUrl);
 
+        // Reset buffer tracking to ensure we catch the start
+        this.lastBufferedParams = { end: 0 };
+
         this.howl = new Howl({
             src: [finalUrl],
             format: ['mp3'],
@@ -221,8 +224,11 @@ export const radio = new class RadioEngine {
                     if (this.lastBufferedParams.end > 0) {
                         const delta = bufferedEnd - this.lastBufferedParams.end;
                         if (delta > 0) {
-                            // 320kbps = 40,000 bytes/sec approx (Audio Density)
-                            const bytes = delta * 40000;
+                            // Dynamic Bitrate Calculation
+                            // 320kbps ~= 40KB/s
+                            // 192kbps ~= 24KB/s
+                            const bytesPerSecond = this.currentQuality === '192' ? 24000 : 40000;
+                            const bytes = delta * bytesPerSecond;
                             this.sessionTotalBytes += bytes;
 
                             // Speed = bytes per second (since interval is 1s)
