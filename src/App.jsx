@@ -459,7 +459,7 @@ function App() {
         {(isPlaying || isBuffering) && (
           <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2">
 
-                        {/* Toggle */}
+            {/* Toggle */}
             <button
               onClick={toggleQuality}
               className="px-3 py-1 rounded-full bg-black/40 hover:bg-black/60 text-[9px] font-bold text-gray-400 hover:text-white border border-white/5 hover:border-white/20 shadow-lg backdrop-blur-md transition-all active:scale-95 uppercase tracking-wider flex items-center gap-2"
@@ -471,7 +471,7 @@ function App() {
             </button>
 
             {/* Info Button (Right Side) */}
-            <button 
+            <button
               onClick={(e) => { e.stopPropagation(); setShowInfo(true); setTimeout(() => setShowInfo(false), 4000); }}
               className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-gray-400 hover:text-white border border-white/5 hover:border-white/20 backdrop-blur-md transition-all active:scale-95"
             >
@@ -610,25 +610,25 @@ function App() {
         </a>
       </div>
 
-            {/* Info Floating Toast (Transparent Announce) */}
+      {/* Info Floating Toast (Transparent Announce) */}
       {showInfo && (
         <div className="absolute bottom-20 right-6 z-30 pointer-events-none animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-xl max-w-[180px]">
-                <div className="flex flex-col gap-1.5">
-                    <div className="flex justify-between items-center text-[10px] border-b border-white/5 pb-1">
-                        <span className="font-bold text-gray-300">Data Usage</span>
-                        <Info size={10} className="text-red-500"/>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-green-400 font-bold">HQ 320</span>
-                        <span className="text-[9px] text-gray-400">140MB/h</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-[9px] text-yellow-400 font-bold">ECO 192</span>
-                        <span className="text-[9px] text-gray-400">84MB/h</span>
-                    </div>
-                </div>
+          <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-xl max-w-[180px]">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex justify-between items-center text-[10px] border-b border-white/5 pb-1">
+                <span className="font-bold text-gray-300">Data Usage</span>
+                <Info size={10} className="text-red-500" />
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[9px] text-green-400 font-bold">HQ 320</span>
+                <span className="text-[9px] text-gray-400">140MB/h</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[9px] text-yellow-400 font-bold">ECO 192</span>
+                <span className="text-[9px] text-gray-400">84MB/h</span>
+              </div>
             </div>
+          </div>
         </div>
       )}
 
@@ -674,7 +674,7 @@ function App() {
             <a href="https://yepzhi.com" target="_blank" rel="noreferrer" className="px-3 py-1 rounded-full bg-gradient-to-br from-gray-900 to-black border border-gray-800 text-red-500 hover:text-red-400 hover:border-red-900 transition-all font-bold shadow-sm text-[10px]">
               @yepzhi
             </a>
-            <span className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">v3.0.0</span>
+            <span className="text-gray-600 text-[9px] font-mono tracking-widest opacity-80 ml-2">v3.0.3</span>
           </div>
 
           <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
