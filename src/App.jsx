@@ -5,7 +5,7 @@ import AdSpace from './components/AdSpace';
 import './App.css';
 
 // Data Monitor Component (v2.6.4)
-// Data Monitor Component (v3.1.7 with TOT)
+// Data Monitor Component (v3.1.8 with TOT)
 const DataMonitor = ({ isPlaying, quality }) => {
   const [totalBytes, setTotalBytes] = useState(0);
 
@@ -193,13 +193,27 @@ function App() {
       for (let i = 0; i < total; i++) {
         const item = queue[i];
         try {
-          // Check if already cached
-          const existingMatches = await cache.match(item.download_url);
-          if (!existingMatches) {
-            const trackRes = await fetch(item.download_url);
-            if (!trackRes.ok) throw new Error(`HTTP ${trackRes.status}`);
-            await cache.put(item.download_url, trackRes);
+          // Enforce fresh download (Bypass check)
+          // const existingMatches = await cache.match(item.download_url); << Removed (v3.1.8)
+
+          const trackRes = await fetch(item.download_url, { cache: 'reload' }); // Force Network
+
+          if (!trackRes.ok) throw new Error(`HTTP ${trackRes.status}`);
+
+          // Clone to validate size
+          const clone = trackRes.clone();
+          const blob = await clone.blob();
+
+          if (blob.size < 100000) { // 100KB Minimum
+            console.warn("Skipping too small file:", item.title, blob.size);
+            throw new Error("File too small (Corrupt/Empty)");
           }
+
+          // Important: We must store the ORIGINAL response (trackRes), not clone/blob, 
+          // because Cache API expects a Response object.
+          // Since we read the clone's body, the original response body is still intact? 
+          // NO! verify: response.clone() allows reading one copy without disturbing the other. Yes.
+          await cache.put(item.download_url, trackRes);
 
           metadata.push(item);
           completed++;
@@ -553,7 +567,7 @@ function App() {
               </span>
             </div>
 
-            {/* Data Monitor (v3.1.7) */}
+            {/* Data Monitor (v3.1.8) */}
             <DataMonitor isPlaying={isPlaying} quality={quality} />
           </div>
         )}
@@ -636,7 +650,7 @@ function App() {
         {/* Quality Controls (Moved above Song Name - v3.0.11) */}
         {
           (isPlaying || isBuffering) && !isOfflineMode && (
-            <div className="w-full max-w-[350px] flex justify-end px-4 -mt-4 mb-0 z-30 pointer-events-auto relative">
+            <div className="w-full max-w-[350px] flex justify-end px-4 -mt-3 mb-0 z-30 pointer-events-auto relative">
               <div className="flex items-center gap-2">
                 {/* Toggle */}
                 <button
@@ -804,7 +818,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.1.7, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.1.8, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
