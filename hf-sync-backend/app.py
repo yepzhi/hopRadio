@@ -85,7 +85,7 @@ PLAYLIST = [
     {"id": "t53", "title": "Just Wanna Rock", "artist": "Lil Uzi Vert", "file": "JustWannaR.mp3", "weight": 7},
     {"id": "t54", "title": "Can't Tell Me Nothing", "artist": "Kanye West", "file": "Kanye West - Cant Tell Me Nothing.mp3", "weight": 7},
     {"id": "t55", "title": "Homecoming", "artist": "Kanye West", "file": "Kanye West - Homecoming.mp3", "weight": 7},
-    {"id": "t56", "title": "Mercy", "artist": "Kanye West", "file": "Kanye West - Mercy Explicit ft Big Sean Pusha T 2 Chainz.mp3", "weight": 7},
+    # REMOVED: Mercy (mislabeled file - was playing Devil in a New Dress)
     {"id": "t57", "title": "Not Like Us", "artist": "Kendrick Lamar", "file": "Kendrick Lamar - Not Like Us [Clean] - Sock With A Glock.mp3", "weight": 8},
     {"id": "t58", "title": "TV Off", "artist": "Kendrick Lamar", "file": "Kendrick Lamar - tv off (Clean) - XeonBeats.mp3", "weight": 7},
     {"id": "t59", "title": "ZEZE", "artist": "Kodak Black", "file": "Kodak Black - ZEZE (Clean) ft. Travis Scott & Offset - Sir Sammy.mp3", "weight": 7},
