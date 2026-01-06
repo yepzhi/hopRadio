@@ -5,7 +5,7 @@ import AdSpace from './components/AdSpace';
 import './App.css';
 
 // Data Monitor Component (v2.6.4)
-// Data Monitor Component (v3.2.0 with TOT)
+// Data Monitor Component (v3.2.1 with TOT)
 const DataMonitor = ({ isPlaying, quality }) => {
   const [totalBytes, setTotalBytes] = useState(0);
 
@@ -246,15 +246,25 @@ function App() {
       const cache = await caches.open('hopradio-v1');
       const playlist = [];
 
+      // Helper: Convert blob to data URL (bypass GitHub Pages CSP blocking blob:)
+      const blobToDataUrl = (blob) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      };
+
       for (const item of metadata) {
         const response = await cache.match(item.download_url);
         if (response) {
           const blob = await response.blob();
-          // Validate: Prevent corrupt/empty/html blobs (must be > 100KB)
           if (blob.size > 100000) {
+            const dataUrl = await blobToDataUrl(blob);
             playlist.push({
               ...item,
-              blobUrl: URL.createObjectURL(blob)
+              blobUrl: dataUrl // Now a data URL, not blob URL
             });
           } else {
             console.warn("Skipping invalid offline track:", item.title, "Size:", blob.size);
@@ -299,7 +309,7 @@ function App() {
     // PWA Install Prompt - Removed
 
     // Initialize Audio Engine (async)
-    // Quality Sync Hook - MUST be set BEFORE init() (v3.2.0 Fix)
+    // Quality Sync Hook - MUST be set BEFORE init() (v3.2.1 Fix)
     radio.onQualityChange = (q) => {
       setQuality(q);
     };
@@ -348,7 +358,7 @@ function App() {
       setNetStats(stats);
     };
 
-    // Quality Sync Hook (moved above initRadio - v3.2.0)
+    // Quality Sync Hook (moved above initRadio - v3.2.1)
 
     // Next Track Update (for "Playing next" indicator)
     radio.onNextTrackUpdate = (next) => {
@@ -555,7 +565,7 @@ function App() {
               </span>
             </div>
 
-            {/* Data Monitor (v3.2.0) */}
+            {/* Data Monitor (v3.2.1) */}
             <DataMonitor isPlaying={isPlaying} quality={quality} />
           </div>
         )}
@@ -806,7 +816,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.2.0, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.2.1, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
