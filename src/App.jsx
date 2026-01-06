@@ -230,10 +230,15 @@ function App() {
         const response = await cache.match(item.download_url);
         if (response) {
           const blob = await response.blob();
-          playlist.push({
-            ...item,
-            blobUrl: URL.createObjectURL(blob)
-          });
+          // Validate: Prevent corrupt/empty/html blobs (must be > 100KB)
+          if (blob.size > 100000) {
+            playlist.push({
+              ...item,
+              blobUrl: URL.createObjectURL(blob)
+            });
+          } else {
+            console.warn("Skipping invalid offline track:", item.title, "Size:", blob.size);
+          }
         }
       }
 
@@ -670,6 +675,10 @@ function App() {
               </div>
             )}
 
+            <p className="text-gray-600 text-[10px] tracking-wider font-medium mt-3 uppercase opacity-70">
+              Non-Stop Music, No Ads.
+            </p>
+
           </div>
         </div>
       </div >
@@ -776,7 +785,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.1.2, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.1.3, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
