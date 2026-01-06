@@ -26,6 +26,7 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [track, setTrack] = useState(null);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [isLive, setIsLive] = useState(false); // v2.6.2 State
   const [isOnline, setIsOnline] = useState(true);
   const [quality, setQuality] = useState(radio.currentQuality || '320'); // Track quality state
   const [netStats, setNetStats] = useState({ speed: 0, total: 0 }); // v2.6.4
