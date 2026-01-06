@@ -470,10 +470,14 @@ function App() {
               <span className={quality === '192' ? 'text-yellow-400' : 'text-gray-600'}>ECO</span>
             </button>
 
-            {/* Info Button (Right Side) */}
+            {/* Info Button (Press-to-Hold) */}
             <button
-              onClick={(e) => { e.stopPropagation(); setShowInfo(true); setTimeout(() => setShowInfo(false), 4000); }}
-              className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-gray-400 hover:text-white border border-white/5 hover:border-white/20 backdrop-blur-md transition-all active:scale-95"
+              onMouseDown={(e) => { e.stopPropagation(); setShowInfo(true); }}
+              onMouseUp={(e) => { e.stopPropagation(); setShowInfo(false); }}
+              onMouseLeave={(e) => { e.stopPropagation(); setShowInfo(false); }}
+              onTouchStart={(e) => { e.stopPropagation(); setShowInfo(true); }}
+              onTouchEnd={(e) => { e.stopPropagation(); setShowInfo(false); }}
+              className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-gray-400 hover:text-white border border-white/5 hover:border-white/20 backdrop-blur-md transition-all active:scale-95 select-none"
             >
               <Info size={12} />
             </button>
@@ -564,9 +568,9 @@ function App() {
             <p className="text-gray-400 font-light text-lg mb-1">
               {track ? track.artist : 'HQ Audio Stream'}
             </p>
-            {/* Next Playing - Right Aligned & Small */}
+            {/* Next Playing - Centered (v3.0.4 Fix) */}
             {nextTrack && (
-              <div className="w-full flex justify-end mt-1">
+              <div className="w-full flex justify-center mt-2">
                 <div className="text-[10px] md:text-xs font-medium text-gray-500 bg-black/20 px-2 py-1 rounded-md backdrop-blur-sm border border-white/5 animate-in fade-in slide-in-from-bottom-1">
                   <span className="text-red-500 font-bold mr-1 uppercase tracking-wider text-[9px]">Next:</span>
                   <span className="text-gray-300 truncate max-w-[150px] inline-block align-bottom">{nextTrack.title}</span>
@@ -610,25 +614,25 @@ function App() {
         </a>
       </div>
 
-      {/* Info Floating Toast (Transparent Announce) */}
+            {/* Info Floating Toast (Centered & Simplified) */}
       {showInfo && (
-        <div className="absolute bottom-20 right-6 z-30 pointer-events-none animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-xl max-w-[180px]">
-            <div className="flex flex-col gap-1.5">
-              <div className="flex justify-between items-center text-[10px] border-b border-white/5 pb-1">
-                <span className="font-bold text-gray-300">Data Usage</span>
-                <Info size={10} className="text-red-500" />
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[9px] text-green-400 font-bold">HQ 320</span>
-                <span className="text-[9px] text-gray-400">140MB/h</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[9px] text-yellow-400 font-bold">ECO 192</span>
-                <span className="text-[9px] text-gray-400">84MB/h</span>
-              </div>
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl min-w-[200px]">
+                <div className="flex flex-col gap-2">
+                    <div className="flex justify-between items-center text-[10px] border-b border-white/5 pb-2">
+                        <span className="font-bold text-gray-200 tracking-wider">DATA USAGE</span>
+                        <Info size={12} className="text-red-500"/>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-[10px] text-green-400 font-bold">HQ</span>
+                        <span className="text-[10px] text-gray-300 font-mono">140 MB/h</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-[10px] text-yellow-400 font-bold">ECO</span>
+                        <span className="text-[10px] text-gray-300 font-mono">84 MB/h</span>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
       )}
 
