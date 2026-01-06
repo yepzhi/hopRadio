@@ -308,13 +308,20 @@ export const radio = new class RadioEngine {
         if (this.onLoadStart) this.onLoadStart();
         if (this.onTrackChange) this.onTrackChange(track);
 
+        console.log("[OFFLINE DEBUG] Creating Howl for:", track.title, "BlobURL:", track.blobUrl?.substring(0, 50) + "...");
+
         this.howl = new Howl({
             src: [track.blobUrl],
             format: ['mp3'],
             html5: true, // Keep consistent for visualizer hook
             volume: this.volume,
-            autoplay: true,
+            autoplay: false, // Disabled to fix Safari autoplay issues
+            onload: () => {
+                console.log("[OFFLINE DEBUG] Howl LOADED successfully, now playing...");
+                this.howl.play();
+            },
             onplay: () => {
+                console.log("[OFFLINE DEBUG] Howl PLAYING:", track.title);
                 this.isPlaying = true;
                 this.offlineErrorCount = 0; // Reset error counter on success
                 if (this.onPlay) this.onPlay();
@@ -322,16 +329,24 @@ export const radio = new class RadioEngine {
                 this._connectVisualizer();
                 this._startSilenceMonitor(); // Start monitoring
             },
+            onplayerror: (id, err) => {
+                console.error("[OFFLINE DEBUG] PLAY ERROR:", err, "Attempting unlock...");
+                // Attempt to unlock audio context (Safari fix)
+                this.howl.once('unlock', () => {
+                    console.log("[OFFLINE DEBUG] Audio unlocked, retrying play...");
+                    this.howl.play();
+                });
+            },
             onend: () => {
-                console.log("RadioEngine: Track ended, playing next...");
+                console.log("[OFFLINE DEBUG] Track ENDED, playing next...");
                 this.playNextOffline();
             },
             onloaderror: (id, err) => {
-                console.error("RadioEngine: Offline Playback Error", err);
+                console.error("[OFFLINE DEBUG] LOAD ERROR:", err, "Track:", track.title);
 
                 this.offlineErrorCount++;
                 if (this.offlineErrorCount >= this.offlineQueue.length) {
-                    console.error("RadioEngine: All offline tracks failed! Stopping.");
+                    console.error("[OFFLINE DEBUG] All offline tracks failed! Stopping.");
                     this.pause();
                     return;
                 }

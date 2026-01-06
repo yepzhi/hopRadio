@@ -5,7 +5,7 @@ import AdSpace from './components/AdSpace';
 import './App.css';
 
 // Data Monitor Component (v2.6.4)
-// Data Monitor Component (v3.1.8 with TOT)
+// Data Monitor Component (v3.1.9 with TOT)
 const DataMonitor = ({ isPlaying, quality }) => {
   const [totalBytes, setTotalBytes] = useState(0);
 
@@ -194,7 +194,7 @@ function App() {
         const item = queue[i];
         try {
           // Enforce fresh download (Bypass check)
-          // const existingMatches = await cache.match(item.download_url); << Removed (v3.1.8)
+          // const existingMatches = await cache.match(item.download_url); << Removed (v3.1.9)
 
           const trackRes = await fetch(item.download_url, { cache: 'reload' }); // Force Network
 
@@ -567,7 +567,7 @@ function App() {
               </span>
             </div>
 
-            {/* Data Monitor (v3.1.8) */}
+            {/* Data Monitor (v3.1.9) */}
             <DataMonitor isPlaying={isPlaying} quality={quality} />
           </div>
         )}
@@ -818,7 +818,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.1.8, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.1.9, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
