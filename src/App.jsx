@@ -5,18 +5,24 @@ import AdSpace from './components/AdSpace';
 import './App.css';
 
 // Data Monitor Component (v2.6.4)
-const DataMonitor = ({ speed, total }) => {
-  if (speed === 0 && total === 0) return null;
+// Data Monitor Component (v3.1.4 Stable)
+const DataMonitor = ({ isPlaying, quality }) => {
+  if (!isPlaying) return null;
+
+  const info = quality === '192'
+    ? { rate: '192kbps', cons: '1.4 MB/min' }
+    : { rate: '320kbps', cons: '2.4 MB/min' };
+
   return (
     <div className="flex flex-col items-start mt-2 space-y-0.5 animate-in fade-in duration-700">
       <div className="flex items-center space-x-1.5 opacity-80">
         <Activity size={10} className="text-emerald-400" />
         <span className="text-[9px] font-mono font-bold tracking-wider text-gray-500">
-          {speed < 1024 ? `${Math.round(speed / 1024)} KB/s` : `${(speed / (1024 * 1024)).toFixed(1)} MB/s`}
+          {info.rate}
         </span>
       </div>
       <div className="text-[8px] font-mono text-gray-600 tracking-wider pl-4">
-        {Math.round(total / (1024 * 1024))} MB TOT
+        {info.cons}
       </div>
     </div>
   );
@@ -534,8 +540,8 @@ function App() {
               </span>
             </div>
 
-            {/* Data Monitor (v2.6.4) */}
-            <DataMonitor speed={netStats.speed} total={netStats.total} />
+            {/* Data Monitor (v3.1.4) */}
+            <DataMonitor isPlaying={isPlaying} quality={quality} />
           </div>
         )}
 
@@ -785,7 +791,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.1.3, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.1.4, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
