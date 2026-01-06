@@ -5,13 +5,23 @@ import AdSpace from './components/AdSpace';
 import './App.css';
 
 // Data Monitor Component (v2.6.4)
-// Data Monitor Component (v3.1.4 Stable)
+// Data Monitor Component (v3.1.5 with TOT)
 const DataMonitor = ({ isPlaying, quality }) => {
+  const [totalBytes, setTotalBytes] = useState(0);
+
+  useEffect(() => {
+    const onStats = (s) => setTotalBytes(s.total);
+    radio.onNetworkStats = onStats;
+    return () => { radio.onNetworkStats = null; };
+  }, []);
+
   if (!isPlaying) return null;
 
   const info = quality === '192'
     ? { rate: '192kbps', cons: '1.4 MB/min' }
     : { rate: '320kbps', cons: '2.4 MB/min' };
+
+  const totalMB = (totalBytes / (1024 * 1024)).toFixed(0);
 
   return (
     <div className="flex flex-col items-start mt-2 space-y-0.5 animate-in fade-in duration-700">
@@ -23,6 +33,9 @@ const DataMonitor = ({ isPlaying, quality }) => {
       </div>
       <div className="text-[8px] font-mono text-gray-600 tracking-wider pl-4">
         {info.cons}
+      </div>
+      <div className="text-[8px] font-mono text-gray-400 tracking-wider pl-4 font-bold">
+        TOT {totalMB} MB
       </div>
     </div>
   );
@@ -540,7 +553,7 @@ function App() {
               </span>
             </div>
 
-            {/* Data Monitor (v3.1.4) */}
+            {/* Data Monitor (v3.1.5) */}
             <DataMonitor isPlaying={isPlaying} quality={quality} />
           </div>
         )}
@@ -791,7 +804,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.1.4, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.1.5, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
