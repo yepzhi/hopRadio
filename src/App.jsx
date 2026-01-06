@@ -5,7 +5,7 @@ import AdSpace from './components/AdSpace';
 import './App.css';
 
 // Data Monitor Component (v2.6.4)
-// Data Monitor Component (v3.1.6 with TOT)
+// Data Monitor Component (v3.1.7 with TOT)
 const DataMonitor = ({ isPlaying, quality }) => {
   const [totalBytes, setTotalBytes] = useState(0);
 
@@ -548,12 +548,12 @@ function App() {
             {/* Status Badge */}
             <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-full bg-gray-900/90 border border-white/10 shadow-lg transition-all duration-300 ${isBuffering ? 'animate-pulse border-yellow-500/50' : ''}`}>
               <div className={`w-1.5 h-1.5 rounded-full ${isBuffering ? 'bg-yellow-500' : (!isOnline ? 'bg-red-500' : 'bg-emerald-400')}`}></div>
-              <span className={`text-[9px] uppercase tracking-widest font-bold ${isBuffering ? 'text-yellow-500' : (!isOnline ? 'text-red-500' : 'text-emerald-400')}`}>
-                {isBuffering ? 'Reconnecting...' : (!isOnline ? 'Unstable' : 'Stable')}
+              <span className={`text-[9px] uppercase tracking-widest font-bold ${isBuffering ? 'text-yellow-500' : (!isOnline && !isOfflineMode ? 'text-red-500' : 'text-emerald-400')}`}>
+                {isOfflineMode ? 'OFFLINE' : (isBuffering ? 'Reconnecting...' : (!isOnline ? 'Unstable' : 'Stable'))}
               </span>
             </div>
 
-            {/* Data Monitor (v3.1.6) */}
+            {/* Data Monitor (v3.1.7) */}
             <DataMonitor isPlaying={isPlaying} quality={quality} />
           </div>
         )}
@@ -804,7 +804,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.1.6, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.1.7, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />

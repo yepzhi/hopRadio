@@ -36,6 +36,10 @@ export const radio = new class RadioEngine {
     }
 
     reconnect() {
+        if (this.isOffline) {
+            console.log("RadioEngine: Skipping reconnect (Offline Mode)");
+            return;
+        }
         console.warn("RadioEngine: Manual/Forced Reconnect");
         if (this.onBufferingChange) this.onBufferingChange(true);
         this.pause();
@@ -95,8 +99,8 @@ export const radio = new class RadioEngine {
         // UI Hook
         if (this.onQualityChange) this.onQualityChange(q);
 
-        // Reconnect stream if playing
-        if (this.isPlaying) {
+        // Reconnect stream if playing AND online
+        if (this.isPlaying && !this.isOffline) {
             this.reconnect();
         }
     }
