@@ -47,24 +47,17 @@ export const radio = new class RadioEngine {
     }
 
     async init() {
-        console.log("RadioEngine: Initializing");
-        // Auto-detect quality preference
         const saved = localStorage.getItem('hop_quality');
         if (saved) {
             this.currentQuality = saved;
-            console.log("Loaded saved quality preference:", saved);
         } else if (navigator.connection && (navigator.connection.saveData || navigator.connection.type === 'cellular' || navigator.connection.effectiveType === '2g' || navigator.connection.effectiveType === '3g')) {
             this.currentQuality = '192';
-            console.log("Auto-switched to Data Saver (192kbps) - Cellular/Slow Network Detected");
         } else {
-            // Default to HQ on WiFi/Good Connection
             this.currentQuality = '320';
-            console.log("WiFi/Fast Connection Detected - Defaulting to HQ (320kbps)");
         }
 
-        // CRITICAL: Always notify UI of the final quality (v3.1.1 Fix)
+        // Always notify UI of the final quality
         if (this.onQualityChange) {
-            console.log("[INIT] Syncing UI to quality:", this.currentQuality);
             this.onQualityChange(this.currentQuality);
         }
 
@@ -315,50 +308,38 @@ export const radio = new class RadioEngine {
         if (this.onLoadStart) this.onLoadStart();
         if (this.onTrackChange) this.onTrackChange(track);
 
-        console.log("[OFFLINE DEBUG] Creating Howl for:", track.title, "BlobURL:", track.blobUrl?.substring(0, 50) + "...");
-
         this.howl = new Howl({
             src: [track.blobUrl],
             format: ['mp3'],
-            html5: true, // Keep consistent for visualizer hook
+            html5: true,
             volume: this.volume,
-            autoplay: false, // Disabled to fix Safari autoplay issues
+            autoplay: false,
             onload: () => {
-                console.log("[OFFLINE DEBUG] Howl LOADED successfully, now playing...");
                 this.howl.play();
             },
             onplay: () => {
-                console.log("[OFFLINE DEBUG] Howl PLAYING:", track.title);
                 this.isPlaying = true;
-                this.offlineErrorCount = 0; // Reset error counter on success
+                this.offlineErrorCount = 0;
                 if (this.onPlay) this.onPlay();
                 this._setupMediaSession(track);
                 this._connectVisualizer();
-                this._startSilenceMonitor(); // Start monitoring
+                this._startSilenceMonitor();
             },
             onplayerror: (id, err) => {
-                console.error("[OFFLINE DEBUG] PLAY ERROR:", err, "Attempting unlock...");
-                // Attempt to unlock audio context (Safari fix)
                 this.howl.once('unlock', () => {
-                    console.log("[OFFLINE DEBUG] Audio unlocked, retrying play...");
                     this.howl.play();
                 });
             },
             onend: () => {
-                console.log("[OFFLINE DEBUG] Track ENDED, playing next...");
                 this.playNextOffline();
             },
             onloaderror: (id, err) => {
-                console.error("[OFFLINE DEBUG] LOAD ERROR:", err, "Track:", track.title);
-
+                console.error("Offline playback error:", track.title);
                 this.offlineErrorCount++;
                 if (this.offlineErrorCount >= this.offlineQueue.length) {
-                    console.error("[OFFLINE DEBUG] All offline tracks failed! Stopping.");
                     this.pause();
                     return;
                 }
-
-                // Delay to prevent "spinning" UI
                 setTimeout(() => this.playNextOffline(), 1000);
             }
         });

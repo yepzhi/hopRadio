@@ -5,7 +5,7 @@ import AdSpace from './components/AdSpace';
 import './App.css';
 
 // Data Monitor Component (v2.6.4)
-// Data Monitor Component (v3.1.1 with TOT)
+// Data Monitor Component (v3.2.0 with TOT)
 const DataMonitor = ({ isPlaying, quality }) => {
   const [totalBytes, setTotalBytes] = useState(0);
 
@@ -188,60 +188,39 @@ function App() {
       const metadata = [];
       const total = queue.length;
 
-      // 2. Download & Cache
-      // Process sequentially to avoid main thread freeze
-      console.log("[OFFLINE DOWNLOAD] Starting download of", total, "tracks");
+      // 2. Download & Cache (Process sequentially)
       for (let i = 0; i < total; i++) {
         const item = queue[i];
         try {
-          console.log(`[OFFLINE DOWNLOAD] ${i + 1}/${total} Fetching:`, item.title, item.download_url);
-
-          const trackRes = await fetch(item.download_url, { cache: 'reload' }); // Force Network
-
-          console.log(`[OFFLINE DOWNLOAD] ${i + 1}/${total} Response:`, trackRes.status, trackRes.headers.get('content-type'));
-
+          const trackRes = await fetch(item.download_url, { cache: 'reload' });
           if (!trackRes.ok) throw new Error(`HTTP ${trackRes.status}`);
 
-          // Read blob directly (consume response body once)
           const blob = await trackRes.blob();
+          if (blob.size < 100000) throw new Error("File too small");
 
-          console.log(`[OFFLINE DOWNLOAD] ${i + 1}/${total} Blob size:`, blob.size, "bytes");
-
-          if (blob.size < 100000) { // 100KB Minimum
-            console.warn("[OFFLINE DOWNLOAD] Skipping too small file:", item.title, blob.size);
-            throw new Error("File too small (Corrupt/Empty)");
-          }
-
-          // Create a FRESH Response from the blob (critical fix - v3.1.1)
-          // This ensures the cached response has a complete, readable body
-          const freshResponse = new Response(blob, {
+          // Store fresh Response with correct MIME type
+          await cache.put(item.download_url, new Response(blob, {
             status: 200,
             headers: { 'Content-Type': 'audio/mpeg' }
-          });
-
-          await cache.put(item.download_url, freshResponse);
-          console.log(`[OFFLINE DOWNLOAD] ${i + 1}/${total} Cached successfully:`, item.title);
+          }));
 
           metadata.push(item);
           completed++;
 
-          // Debounce progress updates (every 2 items or last one)
           if (completed % 2 === 0 || completed === total) {
             setOfflineProgress(Math.round((completed / total) * 100));
           }
 
-          // Small yield to let UI breathe
           await new Promise(r => setTimeout(r, 10));
 
         } catch (e) {
-          console.error("[OFFLINE DOWNLOAD] FAILED:", item.title, e.message);
+          console.error("Download failed:", item.title);
           if (e.name === 'QuotaExceededError') {
             alert("Storage Full! Cannot download more tracks.");
-            break; // Stop completely
+            break;
           }
         }
       }
-      console.log("[OFFLINE DOWNLOAD] Finished. Successfully cached:", completed, "/", total);
 
       // Save Metadata Map
       localStorage.setItem('hopradio-offline-meta', JSON.stringify(metadata));
@@ -320,9 +299,8 @@ function App() {
     // PWA Install Prompt - Removed
 
     // Initialize Audio Engine (async)
-    // Quality Sync Hook - MUST be set BEFORE init() (v3.1.1 Fix)
+    // Quality Sync Hook - MUST be set BEFORE init() (v3.2.0 Fix)
     radio.onQualityChange = (q) => {
-      console.log("[QUALITY FIX] Engine changed quality to:", q, "- Syncing UI");
       setQuality(q);
     };
 
@@ -346,7 +324,6 @@ function App() {
 
     // Hook radio events
     radio.onTrackChange = (newTrack) => {
-      console.log("App: onTrackChange", newTrack);
       setTrack(newTrack);
     };
 
@@ -371,7 +348,7 @@ function App() {
       setNetStats(stats);
     };
 
-    // Quality Sync Hook (moved above initRadio - v3.1.1)
+    // Quality Sync Hook (moved above initRadio - v3.2.0)
 
     // Next Track Update (for "Playing next" indicator)
     radio.onNextTrackUpdate = (next) => {
@@ -498,9 +475,7 @@ function App() {
   };
 
   const toggleQuality = () => {
-    console.log("[QUALITY DEBUG] UI quality:", quality, "| Engine quality:", radio.currentQuality);
     const newQ = quality === '320' ? '192' : '320';
-    console.log("[QUALITY DEBUG] Switching to:", newQ);
     setQuality(newQ);
     radio.setQuality(newQ);
   };
@@ -580,7 +555,7 @@ function App() {
               </span>
             </div>
 
-            {/* Data Monitor (v3.1.1) */}
+            {/* Data Monitor (v3.2.0) */}
             <DataMonitor isPlaying={isPlaying} quality={quality} />
           </div>
         )}
@@ -831,7 +806,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.1.1, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.2.0, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />
