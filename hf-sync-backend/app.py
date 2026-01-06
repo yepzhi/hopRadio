@@ -294,7 +294,7 @@ def broadcast_stream():
         # --- Stream A: 320kbps (HQ) ---
         cmd_320 = [
             'ffmpeg', '-re', '-i', local_path,
-            '-af', 'highpass=f=28,lowshelf=g=6:f=95,equalizer=f=60:width_type=o:width=1:g=4,equalizer=f=800:width_type=o:width=1:g=-2,highshelf=g=9:f=10000,acompressor=threshold=-14dB:ratio=2:attack=8:release=250',
+            '-af', 'highpass=f=28,lowshelf=g=3:f=95,equalizer=f=60:width_type=o:width=1:g=2,equalizer=f=800:width_type=o:width=1:g=-2,highshelf=g=9:f=10000,acompressor=threshold=-14dB:ratio=2:attack=8:release=250',
             '-f', 'mp3', '-b:a', '320k', '-bufsize', '1024k',
             '-ac', '2', '-ar', '44100', '-loglevel', 'error', 'pipe:1'
         ]
@@ -302,7 +302,7 @@ def broadcast_stream():
         # --- Stream B: 192kbps (Data Saver) ---
         cmd_192 = [
             'ffmpeg', '-re', '-i', local_path,
-            '-af', 'highpass=f=28,lowshelf=g=6:f=95,equalizer=f=60:width_type=o:width=1:g=4,equalizer=f=800:width_type=o:width=1:g=-2,highshelf=g=9:f=10000,acompressor=threshold=-14dB:ratio=2:attack=8:release=250',
+            '-af', 'highpass=f=28,lowshelf=g=3:f=95,equalizer=f=60:width_type=o:width=1:g=2,equalizer=f=800:width_type=o:width=1:g=-2,highshelf=g=9:f=10000,acompressor=threshold=-14dB:ratio=2:attack=8:release=250',
             '-f', 'mp3', '-b:a', '192k', '-bufsize', '512k', # Lower bitrate & buffer
             '-ac', '2', '-ar', '44100', '-loglevel', 'error', 'pipe:1'
         ]
