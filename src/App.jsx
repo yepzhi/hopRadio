@@ -101,39 +101,54 @@ function App() {
     try {
       // 1. Get List
       const res = await fetch('https://yepzhi-hopradio-sync.hf.space/api/offline-queue');
+      if (!res.ok) throw new Error('Failed to fetch queue');
       const data = await res.json();
       const queue = data.queue; // Array of { download_url, ... }
 
       const cache = await caches.open('hopradio-v1');
       let completed = 0;
-
       const metadata = [];
+      const total = queue.length;
 
       // 2. Download & Cache
-      // We process sequentially to be nice to the network, or small batches
-      for (const item of queue) {
+      // Process sequentially to avoid main thread freeze
+      for (let i = 0; i < total; i++) {
+        const item = queue[i];
         try {
           // Check if already cached
           const existingMatches = await cache.match(item.download_url);
           if (!existingMatches) {
             const trackRes = await fetch(item.download_url);
-            if (trackRes.ok) {
-              await cache.put(item.download_url, trackRes);
-            }
+            if (!trackRes.ok) throw new Error(`HTTP ${trackRes.status}`);
+            await cache.put(item.download_url, trackRes);
           }
 
           metadata.push(item);
           completed++;
-          setOfflineProgress(Math.round((completed / queue.length) * 100));
+
+          // Debounce progress updates (every 2 items or last one)
+          if (completed % 2 === 0 || completed === total) {
+            setOfflineProgress(Math.round((completed / total) * 100));
+          }
+
+          // Small yield to let UI breathe
+          await new Promise(r => setTimeout(r, 10));
+
         } catch (e) {
           console.error("Download failed for track", item.title, e);
+          if (e.name === 'QuotaExceededError') {
+            alert("Storage Full! Cannot download more tracks.");
+            break; // Stop completely
+          }
         }
       }
 
       // Save Metadata Map
       localStorage.setItem('hopradio-offline-meta', JSON.stringify(metadata));
       setHasOfflineData(true);
-      alert("Download Complete! You can now listen offline.");
+      if (completed > 0) {
+        alert("Download Complete! You can now listen offline.");
+      }
     } catch (e) {
       alert("Download Failed: " + e.message);
     } finally {
