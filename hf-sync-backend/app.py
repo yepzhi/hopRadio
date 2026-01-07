@@ -30,116 +30,116 @@ os.makedirs(TRACKS_DIR, exist_ok=True)
 # Playlist (without Intro.mp3 which 404s)
 # Playlist (Auto-Generated)
 PLAYLIST = [
-    {"id": "t1", "title": "Good Good", "artist": "21 Savage, Summer Walker, Usher", "file": "21 Savage Summer Walker and Usher - Good Good Lyrics.mp3", "weight": 7},
-    {"id": "t2", "title": "30 For 30", "artist": "SZA", "file": "30For30.mp3", "weight": 7},
-    {"id": "t3", "title": "Soak City (Do It)", "artist": "310Babii", "file": "310Babii Soak City (Do It) Clean - DecaturQ.mp3", "weight": 7},
-    {"id": "t4", "title": "679", "artist": "Fetty Wap ft. Monty", "file": "679 - Fetty Wap Monty Lyric Video.mp3", "weight": 7},
-    {"id": "t5", "title": "All Of The Lights", "artist": "Kanye West", "file": "All Of The Lights.mp3", "weight": 7},
-    {"id": "t6", "title": "Throat Baby (Go Baby)", "artist": "BRS Kash", "file": "BRS Kash Throat Baby Go Baby Official Music Video.mp3", "weight": 7},
-    {"id": "t7", "title": "Bitch, Don't Kill My Vibe", "artist": "Kendrick Lamar", "file": "Bh Don't Kill My Vibe (Clean) - Kendrick Lamar - Anthony Lee 69.mp3", "weight": 7},
-    {"id": "t8", "title": "Blame Game", "artist": "Kanye West", "file": "Blame Game.mp3", "weight": 7},
-    {"id": "t9", "title": "Shake Dat Ass", "artist": "Bossman Dlow", "file": "Bossman Dlow - Shake Dat _ss (Twerk Song) [CLEAN].mp3", "weight": 7},
-    {"id": "t10", "title": "Shake Dat Ass (Moskeez)", "artist": "Bossman Dlow", "file": "Bossman Dlow - Shake Dat ss (Twerk Song) [CLEAN] - MOSKEEZ.mp3", "weight": 7},
-    {"id": "t11", "title": "Bottoms Up", "artist": "Trey Songz ft. Nicki Minaj", "file": "Bottoms Up- Trey Songz Ft. Nicki Minaj (Clean) - EdittedSongs🤍.mp3", "weight": 7},
-    {"id": "t12", "title": "Exchange", "artist": "Bryson Tiller", "file": "Bryson Tiller - Exchange Official Video.mp3", "weight": 7},
-    {"id": "t13", "title": "Whatever She Wants", "artist": "Bryson Tiller", "file": "Bryson Tiller - Whatever She Wants (CLEAN) [Lyrics] - Hip Hop_R&B Lyrics.mp3", "weight": 7},
-    {"id": "t14", "title": "Can't Believe It", "artist": "T-Pain", "file": "CantBelieveItTPain.mp3", "weight": 7},
-    {"id": "t15", "title": "Safe", "artist": "Cardi B ft. Kehlani", "file": "Cardi B - Safe feat. Kehlani (Clean Version)  Lyrics - Kids Dance Party.mp3", "weight": 7},
-    {"id": "t16", "title": "Weird", "artist": "CHiNO", "file": "Chino Weird Clean - DecaturQ.mp3", "weight": 7},
-    {"id": "t17", "title": "Heat", "artist": "Chris Brown ft. Gunna", "file": "Chris Brown - Heat Audio ft Gunna.mp3", "weight": 7},
-    {"id": "t18", "title": "Summer Too Hot", "artist": "Chris Brown", "file": "Chris Brown - Summer Too Hot.mp3", "weight": 7},
-    {"id": "t19", "title": "Residuals", "artist": "Chris Brown", "file": "Chris Brown Residuals Clean - DecaturQ.mp3", "weight": 7},
-    {"id": "t20", "title": "Go Crazy", "artist": "Chris Brown & Young Thug", "file": "Chris Brown Young Thug - Go Crazy Lyrics.mp3", "weight": 7},
-    {"id": "t21", "title": "Act Up", "artist": "City Girls", "file": "City Girls - Act Up Audio.mp3", "weight": 7},
-    {"id": "t22", "title": "Players", "artist": "Coi Leray", "file": "Coi Leray - Players [Clean] - Sock With A Glock.mp3", "weight": 7},
-    {"id": "t23", "title": "Laffy Taffy", "artist": "D4L", "file": "D4L - Laffy Taffy (Clean - Lyrics) - Kids Dance Party.mp3", "weight": 7},
-    {"id": "t24", "title": "ROCKSTAR", "artist": "DaBaby ft. Roddy Ricch", "file": "DaBaby - ROCKSTAR (Clean - Lyrics) feat. Roddy Ricch - Polar Records.mp3", "weight": 7},
-    {"id": "t25", "title": "SHAKE SUMN", "artist": "DaBaby", "file": "DaBaby - SHAKE SUMN Official Audio.mp3", "weight": 7},
-    {"id": "t26", "title": "Damn!", "artist": "YoungBloodZ", "file": "Damn! (Radio Edit) - YoungBloodZ.mp3", "weight": 7},
-    {"id": "t27", "title": "Blow My High", "artist": "Dee Mula", "file": "Dee Mula - Blow My High [Clean] - Sock With A Glock.mp3", "weight": 7},
-    {"id": "t28", "title": "Panda", "artist": "Desiigner", "file": "Desiigner - Panda Audio.mp3", "weight": 7},
-
-    {"id": "t30", "title": "What It Is", "artist": "Doechii & Kodak Black", "file": "Doechii & Kodak Black - What It Is (Clean Lyrics) - Clean Recordz.mp3", "weight": 7},
-    {"id": "t31", "title": "What It Is (Solo)", "artist": "Doechii", "file": "Doechii - What It Is Solo Version Lyrics.mp3", "weight": 7},
-    {"id": "t32", "title": "Paint The Town Red", "artist": "Doja Cat", "file": "Doja Cat - Paint The Town Red (Clean - Lyrics) - Polar Records.mp3", "weight": 7},
-    {"id": "t33", "title": "No Pole", "artist": "Don Toliver", "file": "Don Toliver - No Pole (CLEAN) - Clean UK Drill.mp3", "weight": 7},
-    {"id": "t34", "title": "What Did I Miss", "artist": "Drake", "file": "Drake - What Did I Miss (Clean) - XeonBeats.mp3", "weight": 7},
-    {"id": "t35", "title": "Crunk Ain't Dead (Remix)", "artist": "Duke Deuce", "file": "Duke Deuce Crunk Aint Dead Remix ft Lil Jon Juicy J Project Pat.mp3", "weight": 7},
-    {"id": "t36", "title": "U And Dat", "artist": "E-40 ft. T-Pain", "file": "E-40 - U And Dat Featuring T Pain Kandi Girl HD.mp3", "weight": 7},
-    {"id": "t37", "title": "Envy (Remix)", "artist": "hopRadio", "file": "Envy Remix.mp3", "weight": 7},
-    {"id": "t38", "title": "My Way", "artist": "Fetty Wap ft. Monty", "file": "Fetty Wap My Way feat Monty Official Video.mp3", "weight": 7},
-    {"id": "t39", "title": "Life Is Good", "artist": "Future ft. Drake", "file": "Future - Life Is Good Audio ft Drake.mp3", "weight": 7},
-    {"id": "t40", "title": "Like That", "artist": "Future, Metro Boomin ft. Kendrick Lamar", "file": "Future, Metro Boomin - Like That (Clean) feat. Kendrick Lamar - Luke WRLD.mp3", "weight": 7},
-    {"id": "t41", "title": "Went Legit", "artist": "G Herbo", "file": "G Herbo - Went Legit (Best Clean Version) - TheKobe1234 Records.mp3", "weight": 7},
-    {"id": "t42", "title": "Typa", "artist": "GloRilla", "file": "GloRillaTypa.mp3", "weight": 7},
-    {"id": "t43", "title": "Gorgeous", "artist": "Kanye West", "file": "Gorgeous.mp3", "weight": 7},
-    {"id": "t44", "title": "fukumean", "artist": "Gunna", "file": "Gunna - fukumean (Clean)  Lyrics - Throwback Hits.mp3", "weight": 7},
-    {"id": "t45", "title": "Help Me", "artist": "Real Boston Richey", "file": "HelpMe.mp3", "weight": 7},
-    {"id": "t46", "title": "Holy Blindfold", "artist": "hopRadio", "file": "HolyBlindfold.mp3", "weight": 7},
-    {"id": "t47", "title": "I'm Sprung", "artist": "T-Pain", "file": "Im Sprung.mp3", "weight": 7},
-    {"id": "t48", "title": "Sk8", "artist": "JID, Ciara, EARTHGANG", "file": "JID & Ciara & EARTHGANG Sk8 Clean - DecaturQ.mp3", "weight": 7},
-    {"id": "t49", "title": "Lovin On Me", "artist": "Jack Harlow", "file": "Jack Harlow - Lovin On Me (Clean Version) (Lyrics) - Kids Dance Party.mp3", "weight": 7},
-    {"id": "t50", "title": "Jan 31st", "artist": "YFN Lucci", "file": "Jan31st.mp3", "weight": 7},
-    {"id": "t51", "title": "White Girl", "artist": "Young Jeezy", "file": "Joung Jeezy Ft. USDA - White Girl - mandrgalvan.mp3", "weight": 7},
-    {"id": "t52", "title": "Yeah Yeah", "artist": "Juiicy 2xs ft. Lola Brooke", "file": "Juiicy 2xs - Yeah Yeah ft. Lola Brooke (Lyrics) - Bad Bith Bops.mp3", "weight": 7},
-    {"id": "t53", "title": "Just Wanna Rock", "artist": "Lil Uzi Vert", "file": "JustWannaR.mp3", "weight": 7},
-    {"id": "t54", "title": "Can't Tell Me Nothing", "artist": "Kanye West", "file": "Kanye West - Cant Tell Me Nothing.mp3", "weight": 7},
-    {"id": "t55", "title": "Homecoming", "artist": "Kanye West", "file": "Kanye West - Homecoming.mp3", "weight": 7},
+    {"id": "t1", "title": "Good Good", "artist": "21 Savage, Summer Walker, Usher", "file": "21 Savage Summer Walker and Usher - Good Good Lyrics.mp3", "priority": 7},
+    {"id": "t2", "title": "30 For 30", "artist": "SZA", "file": "30For30.mp3", "priority": 7},
+    {"id": "t3", "title": "Soak City (Do It)", "artist": "310Babii", "file": "310Babii Soak City (Do It) Clean - DecaturQ.mp3", "priority": 7},
+    {"id": "t4", "title": "679", "artist": "Fetty Wap ft. Monty", "file": "679 - Fetty Wap Monty Lyric Video.mp3", "priority": 7},
+    {"id": "t5", "title": "All Of The Lights", "artist": "Kanye West", "file": "All Of The Lights.mp3", "priority": 2},
+    {"id": "t6", "title": "Throat Baby (Go Baby)", "artist": "BRS Kash", "file": "BRS Kash Throat Baby Go Baby Official Music Video.mp3", "priority": 6},
+    {"id": "t7", "title": "Bitch, Don't Kill My Vibe", "artist": "Kendrick Lamar", "file": "Bh Don't Kill My Vibe (Clean) - Kendrick Lamar - Anthony Lee 69.mp3", "priority": 1},
+    {"id": "t8", "title": "Blame Game", "artist": "Kanye West", "file": "Blame Game.mp3", "priority": 2},
+    {"id": "t9", "title": "Shake Dat Ass", "artist": "Bossman Dlow", "file": "Bossman Dlow - Shake Dat _ss (Twerk Song) [CLEAN].mp3", "priority": 8},
+    {"id": "t10", "title": "Shake Dat Ass (Moskeez)", "artist": "Bossman Dlow", "file": "Bossman Dlow - Shake Dat ss (Twerk Song) [CLEAN] - MOSKEEZ.mp3", "priority": 8},
+    {"id": "t11", "title": "Bottoms Up", "artist": "Trey Songz ft. Nicki Minaj", "file": "Bottoms Up- Trey Songz Ft. Nicki Minaj (Clean) - EdittedSongs🤍.mp3", "priority": 4},
+    {"id": "t12", "title": "Exchange", "artist": "Bryson Tiller", "file": "Bryson Tiller - Exchange Official Video.mp3", "priority": 3},
+    {"id": "t13", "title": "Whatever She Wants", "artist": "Bryson Tiller", "file": "Bryson Tiller - Whatever She Wants (CLEAN) [Lyrics] - Hip Hop_R&B Lyrics.mp3", "priority": 6},
+    {"id": "t14", "title": "Can't Believe It", "artist": "T-Pain", "file": "CantBelieveItTPain.mp3", "priority": 5},
+    {"id": "t15", "title": "Safe", "artist": "Cardi B ft. Kehlani", "file": "Cardi B - Safe feat. Kehlani (Clean Version)  Lyrics - Kids Dance Party.mp3", "priority": 7},
+    {"id": "t16", "title": "Weird", "artist": "CHiNO", "file": "Chino Weird Clean - DecaturQ.mp3", "priority": 6},
+    {"id": "t17", "title": "Heat", "artist": "Chris Brown ft. Gunna", "file": "Chris Brown - Heat Audio ft Gunna.mp3", "priority": 6},
+    {"id": "t18", "title": "Summer Too Hot", "artist": "Chris Brown", "file": "Chris Brown - Summer Too Hot.mp3", "priority": 6},
+    {"id": "t19", "title": "Residuals", "artist": "Chris Brown", "file": "Chris Brown Residuals Clean - DecaturQ.mp3", "priority": 7},
+    {"id": "t20", "title": "Go Crazy", "artist": "Chris Brown & Young Thug", "file": "Chris Brown Young Thug - Go Crazy Lyrics.mp3", "priority": 4},
+    {"id": "t21", "title": "Act Up", "artist": "City Girls", "file": "City Girls - Act Up Audio.mp3", "priority": 8},
+    {"id": "t22", "title": "Players", "artist": "Coi Leray", "file": "Coi Leray - Players [Clean] - Sock With A Glock.mp3", "priority": 5},
+    {"id": "t23", "title": "Laffy Taffy", "artist": "D4L", "file": "D4L - Laffy Taffy (Clean - Lyrics) - Kids Dance Party.mp3", "priority": 3},
+    {"id": "t24", "title": "ROCKSTAR", "artist": "DaBaby ft. Roddy Ricch", "file": "DaBaby - ROCKSTAR (Clean - Lyrics) feat. Roddy Ricch - Polar Records.mp3", "priority": 5},
+    {"id": "t25", "title": "SHAKE SUMN", "artist": "DaBaby", "file": "DaBaby - SHAKE SUMN Official Audio.mp3", "priority": 6},
+    {"id": "t26", "title": "Damn!", "artist": "YoungBloodZ", "file": "Damn! (Radio Edit) - YoungBloodZ.mp3", "priority": 5},
+    {"id": "t27", "title": "Blow My High", "artist": "Dee Mula", "file": "Dee Mula - Blow My High [Clean] - Sock With A Glock.mp3", "priority": 7},
+    {"id": "t28", "title": "Panda", "artist": "Desiigner", "file": "Desiigner - Panda Audio.mp3", "priority": 1},
+    
+    {"id": "t30", "title": "What It Is", "artist": "Doechii & Kodak Black", "file": "Doechii & Kodak Black - What It Is (Clean Lyrics) - Clean Recordz.mp3", "priority": 7},
+    {"id": "t31", "title": "What It Is (Solo)", "artist": "Doechii", "file": "Doechii - What It Is Solo Version Lyrics.mp3", "priority": 3},
+    {"id": "t32", "title": "Paint The Town Red", "artist": "Doja Cat", "file": "Doja Cat - Paint The Town Red (Clean - Lyrics) - Polar Records.mp3", "priority": 6},
+    {"id": "t33", "title": "No Pole", "artist": "Don Toliver", "file": "Don Toliver - No Pole (CLEAN) - Clean UK Drill.mp3", "priority": 9},
+    {"id": "t34", "title": "What Did I Miss", "artist": "Drake", "file": "Drake - What Did I Miss (Clean) - XeonBeats.mp3", "priority": 7},
+    {"id": "t35", "title": "Crunk Ain't Dead (Remix)", "artist": "Duke Deuce", "file": "Duke Deuce Crunk Aint Dead Remix ft Lil Jon Juicy J Project Pat.mp3", "priority": 3},
+    {"id": "t36", "title": "U And Dat", "artist": "E-40 ft. T-Pain", "file": "E-40 - U And Dat Featuring T Pain Kandi Girl HD.mp3", "priority": 5},
+    {"id": "t37", "title": "Envy (Remix)", "artist": "hopRadio", "file": "Envy Remix.mp3", "priority": 4},
+    {"id": "t38", "title": "My Way", "artist": "Fetty Wap ft. Monty", "file": "Fetty Wap My Way feat Monty Official Video.mp3", "priority": 4},
+    {"id": "t39", "title": "Life Is Good", "artist": "Future ft. Drake", "file": "Future - Life Is Good Audio ft Drake.mp3", "priority": 4},
+    {"id": "t40", "title": "Like That", "artist": "Future, Metro Boomin ft. Kendrick Lamar", "file": "Future, Metro Boomin - Like That (Clean) feat. Kendrick Lamar - Luke WRLD.mp3", "priority": 8},
+    {"id": "t41", "title": "Went Legit", "artist": "G Herbo", "file": "G Herbo - Went Legit (Best Clean Version) - TheKobe1234 Records.mp3", "priority": 8},
+    {"id": "t42", "title": "Typa", "artist": "GloRilla", "file": "GloRillaTypa.mp3", "priority": 8},
+    {"id": "t43", "title": "Gorgeous", "artist": "Kanye West", "file": "Gorgeous.mp3", "priority": 2},
+    {"id": "t44", "title": "fukumean", "artist": "Gunna", "file": "Gunna - fukumean (Clean)  Lyrics - Throwback Hits.mp3", "priority": 4},
+    {"id": "t45", "title": "Help Me", "artist": "Real Boston Richey", "file": "HelpMe.mp3", "priority": 9},
+    {"id": "t46", "title": "Holy Blindfold", "artist": "hopRadio", "file": "HolyBlindfold.mp3", "priority": 10},
+    {"id": "t47", "title": "I'm Sprung", "artist": "T-Pain", "file": "Im Sprung.mp3", "priority": 5},
+    {"id": "t48", "title": "Sk8", "artist": "JID, Ciara, EARTHGANG", "file": "JID & Ciara & EARTHGANG Sk8 Clean - DecaturQ.mp3", "priority": 9},
+    {"id": "t49", "title": "Lovin On Me", "artist": "Jack Harlow", "file": "Jack Harlow - Lovin On Me (Clean Version) (Lyrics) - Kids Dance Party.mp3", "priority": 7},
+    {"id": "t50", "title": "Jan 31st", "artist": "YFN Lucci", "file": "Jan31st.mp3", "priority": 10},
+    {"id": "t51", "title": "White Girl", "artist": "Young Jeezy", "file": "Joung Jeezy Ft. USDA - White Girl - mandrgalvan.mp3", "priority": 1},
+    {"id": "t52", "title": "Yeah Yeah", "artist": "Juiicy 2xs ft. Lola Brooke", "file": "Juiicy 2xs - Yeah Yeah ft. Lola Brooke (Lyrics) - Bad Bith Bops.mp3", "priority": 10},
+    {"id": "t53", "title": "Just Wanna Rock", "artist": "Lil Uzi Vert", "file": "JustWannaR.mp3", "priority": 5},
+    {"id": "t54", "title": "Can't Tell Me Nothing", "artist": "Kanye West", "file": "Kanye West - Cant Tell Me Nothing.mp3", "priority": 1},
+    {"id": "t55", "title": "Homecoming", "artist": "Kanye West", "file": "Kanye West - Homecoming.mp3", "priority": 1},
     # REMOVED: Mercy (mislabeled file - was playing Devil in a New Dress)
-    {"id": "t57", "title": "Not Like Us", "artist": "Kendrick Lamar", "file": "Kendrick Lamar - Not Like Us [Clean] - Sock With A Glock.mp3", "weight": 8},
-    {"id": "t58", "title": "TV Off", "artist": "Kendrick Lamar", "file": "Kendrick Lamar - tv off (Clean) - XeonBeats.mp3", "weight": 7},
-    {"id": "t59", "title": "ZEZE", "artist": "Kodak Black", "file": "Kodak Black - ZEZE (Clean) ft. Travis Scott & Offset - Sir Sammy.mp3", "weight": 7},
-    {"id": "t60", "title": "Like A Wife", "artist": "Tre Savage", "file": "LIKE A WIFE - Tre Savage.mp3", "weight": 7},
-    {"id": "t61", "title": "Big Energy", "artist": "Latto", "file": "Latto - Big Energy (Clean - Lyrics) - TrendingTracks.mp3", "weight": 7},
-    {"id": "t62", "title": "Not Fair", "artist": "Leon Thomas", "file": "Leon Thomas Not Fair Clean - DecaturQ.mp3", "weight": 7},
-    {"id": "t63", "title": "All My Life", "artist": "Lil Durk ft. J. Cole", "file": "Lil Durk - All My Life (Clean - Lyrics) feat. J. Cole - Polar Records.mp3", "weight": 7},
-    {"id": "t64", "title": "XO Tour Llif3", "artist": "Lil Uzi Vert", "file": "Lil Uzi Vert - XO Tour Llif3 Official Lyric Video.mp3", "weight": 7},
-    {"id": "t65", "title": "Love Me", "artist": "Lil Wayne", "file": "Lil Wayne - Love Me (Clean) ft. Drake, Future - LilWayneVEVO.mp3", "weight": 7},
-    {"id": "t66", "title": "3AM", "artist": "Loe Shimmy & Don Toliver", "file": "Loe Shimmy & Don Toliver - 3am [Clean] - Sock With A Glock.mp3", "weight": 7},
-    {"id": "t67", "title": "LIZZO", "artist": "MOONE WALKER", "file": "MOONE WALKER- LIZZO OFFICIAL VIDEO.mp3", "weight": 7},
-    {"id": "t68", "title": "Sure Thing", "artist": "Miguel", "file": "Miguel - Sure Thing Lyrics.mp3", "weight": 7},
-    {"id": "t69", "title": "This Is Why I'm Hot", "artist": "Mims", "file": "Mims - This Is Why I'm Hot (Clean Version) - Clean Radio Promo.mp3", "weight": 7},
-    {"id": "t70", "title": "Made For Me", "artist": "Muni Long", "file": "Muni Long Made For Me Clean - DecaturQ.mp3", "weight": 7},
-    {"id": "t71", "title": "Everybody", "artist": "Nicki Minaj ft. Lil Uzi Vert", "file": "Nicki Minaj - Everybody (Clean - Lyrics) ft. Lil Uzi Vert - Cloudy Hits.mp3", "weight": 7},
-    {"id": "t72", "title": "No Flex Zone", "artist": "Rae Sremmurd", "file": "No Flex Zone.mp3", "weight": 7},
-    {"id": "t73", "title": "No Hands", "artist": "Waka Flocka Flame", "file": "No Hands (Clean) - WaCkYnJaCk328.mp3", "weight": 7},
-    {"id": "t74", "title": "GEEKALEEK", "artist": "OhGeesy", "file": "OhGeesy - GEEKALEEK (Feat. Cash Kidd) [Clean] - Sock With A Glock.mp3", "weight": 7},
-    {"id": "t75", "title": "Orange Soda", "artist": "Baby Keem", "file": "Orange soda - Baby Keem (Clean + Lyrics) (BEST ON YT) - syiix.mp3", "weight": 7},
-    {"id": "t76", "title": "Dior", "artist": "Pop Smoke", "file": "POPSMOKEDIOR.mp3", "weight": 7},
-    {"id": "t77", "title": "PTPOM 2.0", "artist": "Mohead Mike", "file": "PTPOM 2.0 Mohead Mike x MoneyBagg Yo x Big Boogie Official Visualizer (Clean) - Mohead Mike.mp3", "weight": 7},
-    {"id": "t78", "title": "Pills & Automobiles", "artist": "Chris Brown", "file": "Pills Automobiles Official Video.mp3", "weight": 7},
-    {"id": "t79", "title": "Turn Yo Clic Up", "artist": "Quavo & Future", "file": "Quavo & Future - Turn Yo Clic Up [Clean] - Sock With A Glock.mp3", "weight": 7},
-    {"id": "t80", "title": "Redbone", "artist": "Childish Gambino", "file": "Redbone [Clean] - Childish Gambino - relly rel.mp3", "weight": 7},
-    {"id": "t81", "title": "Gimme a Second", "artist": "Rich The Kid & Peso Pluma", "file": "Rich The Kid & Peso Pluma - Gimme a Second [Clean] - Sock With A Glock.mp3", "weight": 7},
-    {"id": "t82", "title": "Loveeeeeee Song", "artist": "Rihanna ft. Future", "file": "Rihanna - Loveeeeeee Song Lyrics Ft Future.mp3", "weight": 7},
-    {"id": "t83", "title": "Ring Ring Ring", "artist": "hopRadio", "file": "RingRingRing.mp3", "weight": 7},
-    {"id": "t84", "title": "WTHELLY", "artist": "Rob49", "file": "Rob49 - WTHELLY [Clean] - Sock With A Glock.mp3", "weight": 7},
-    {"id": "t85", "title": "Heart On Ice", "artist": "Rod Wave", "file": "Rod Wave - Heart On Ice Lyrics.mp3", "weight": 7},
-    {"id": "t86", "title": "The Box", "artist": "Roddy Ricch", "file": "Roddy Ricch - The Box Official Audio.mp3", "weight": 7},
-    {"id": "t87", "title": "Roses", "artist": "SAINt JHN", "file": "SAINt JHN - Roses lyrics.mp3", "weight": 7},
-    {"id": "t88", "title": "Get It Sexyy", "artist": "Sexyy Red", "file": "Sexy Red - Get it Sexyy (clean + lyrics! - Lyrics hours.mp3", "weight": 7},
-    {"id": "t89", "title": "U My Everything", "artist": "Sexyy Red & Drake", "file": "Sexyy Red & Drake - U My Everything (Clean) (Lyrics) - Audio at 192khz - Helfmadian.mp3", "weight": 7},
-    {"id": "t90", "title": "She Ready", "artist": "Lil Yachty", "file": "SheReady.mp3", "weight": 7},
-    {"id": "t91", "title": "Sleazy Flow (Remix)", "artist": "SleazyWorld Go ft. Lil Baby", "file": "SleazyWorld Go - Sleazy Flow Remix ft Lil Baby Official Music Video.mp3", "weight": 7},
-    {"id": "t92", "title": "Slow Jamz", "artist": "Kanye West", "file": "Slow Jamz.mp3", "weight": 7},
-    {"id": "t93", "title": "Buy You A Drank", "artist": "T-Pain", "file": "T-Pain - Buy You A Drank (Shawty Snappin') (Feat. Yung Joc) (Clean) - DJRatAttack.mp3", "weight": 7},
-    {"id": "t94", "title": "THE SCOTTS", "artist": "Travis Scott & Kid Cudi", "file": "THE SCOTTS Travis Scott Kid Cudi - THE SCOTTS Audio.mp3", "weight": 7},
-    {"id": "t95", "title": "Die For You", "artist": "The Weeknd", "file": "The Weeknd  - Die For You (Clean) - Ultron Music and DD2 Arts.mp3", "weight": 7},
-    {"id": "t96", "title": "Heartless", "artist": "The Weeknd", "file": "The Weeknd - Heartless Lyrics.mp3", "weight": 7},
-    {"id": "t97", "title": "Falsetto", "artist": "The-Dream", "file": "The-Dream - Falsetto (Clean_Radio Edit) - Clean Radio Promo.mp3", "weight": 7},
-    {"id": "t98", "title": "FE!N", "artist": "Travis Scott", "file": "Travis Scott - FE!N (Clean - Lyrics) feat. Playboi Carti - Polar Records.mp3", "weight": 7},
-    {"id": "t99", "title": "FE!N", "artist": "Travis Scott", "file": "Travis Scott - FEN Official Audio ft Playboi Carti.mp3", "weight": 7},
-    {"id": "t100", "title": "HIGHEST IN THE ROOM", "artist": "Travis Scott", "file": "Travis Scott - HIGHEST IN THE ROOM Official Music Video.mp3", "weight": 7},
-    {"id": "t101", "title": "Tuesday", "artist": "ILoveMakonnen ft. Drake", "file": "Tuesday feat Drake.mp3", "weight": 7},
-    {"id": "t102", "title": "IS IT", "artist": "Tyla", "file": "Tyla - IS IT (Clean) - XeonBeats.mp3", "weight": 7},
-    {"id": "t103", "title": "Love in This Club", "artist": "Usher ft. Young Jeezy", "file": "Usher - Love in This Club Lyrics ft Young Jeezy.mp3", "weight": 7},
-    {"id": "t104", "title": "Like A Wife", "artist": "Webbie & Tre Savage", "file": "Webbie Tre Savage - Like A Wife Official Music Video.mp3", "weight": 7},
-    {"id": "t105", "title": "Went Legit", "artist": "G Herbo", "file": "WentLegit.mp3", "weight": 7},
-    {"id": "t106", "title": "Jan 31st", "artist": "YFN Lucci", "file": "YFN Lucci - Jan. 31st (My Truth) [Clean] - Sock With A Glock.mp3", "weight": 7},
-    {"id": "t107", "title": "Bed Rock", "artist": "Young Money", "file": "Young Money - Bed Rock Official Music Video.mp3", "weight": 7},
-    {"id": "t108", "title": "Best Friend", "artist": "Young Thug", "file": "Young Thug Best Friend.mp3", "weight": 7},
-    {"id": "t109", "title": "Uh Oh", "artist": "Zeddy Will", "file": "Zeddy Will Uh Oh Clean - DecaturQ.mp3", "weight": 7},
-    {"id": "t110", "title": "Carnival", "artist": "Kanye West & Ty Dolla $ign", "file": "¥, Kanye West & Ty Dolla ign, Rich The Kid & Playboi Carti - Carnival (Clean Lyrics) - Clean Recordz.mp3", "weight": 7},
+    {"id": "t57", "title": "Not Like Us", "artist": "Kendrick Lamar", "file": "Kendrick Lamar - Not Like Us [Clean] - Sock With A Glock.mp3", "priority": 6},
+    {"id": "t58", "title": "TV Off", "artist": "Kendrick Lamar", "file": "Kendrick Lamar - tv off (Clean) - XeonBeats.mp3", "priority": 4},
+    {"id": "t59", "title": "ZEZE", "artist": "Kodak Black", "file": "Kodak Black - ZEZE (Clean) ft. Travis Scott & Offset - Sir Sammy.mp3", "priority": 6},
+    {"id": "t60", "title": "Like A Wife", "artist": "Tre Savage", "file": "LIKE A WIFE - Tre Savage.mp3", "priority": 8},
+    {"id": "t61", "title": "Big Energy", "artist": "Latto", "file": "Latto - Big Energy (Clean - Lyrics) - TrendingTracks.mp3", "priority": 7},
+    {"id": "t62", "title": "Not Fair", "artist": "Leon Thomas", "file": "Leon Thomas Not Fair Clean - DecaturQ.mp3", "priority": 6},
+    {"id": "t63", "title": "All My Life", "artist": "Lil Durk ft. J. Cole", "file": "Lil Durk - All My Life (Clean - Lyrics) feat. J. Cole - Polar Records.mp3", "priority": 8},
+    {"id": "t64", "title": "XO Tour Llif3", "artist": "Lil Uzi Vert", "file": "Lil Uzi Vert - XO Tour Llif3 Official Lyric Video.mp3", "priority": 3},
+    {"id": "t65", "title": "Love Me", "artist": "Lil Wayne", "file": "Lil Wayne - Love Me (Clean) ft. Drake, Future - LilWayneVEVO.mp3", "priority": 6},
+    {"id": "t66", "title": "3AM", "artist": "Loe Shimmy & Don Toliver", "file": "Loe Shimmy & Don Toliver - 3am [Clean] - Sock With A Glock.mp3", "priority": 6},
+    {"id": "t67", "title": "LIZZO", "artist": "MOONE WALKER", "file": "MOONE WALKER- LIZZO OFFICIAL VIDEO.mp3", "priority": 6},
+    {"id": "t68", "title": "Sure Thing", "artist": "Miguel", "file": "Miguel - Sure Thing Lyrics.mp3", "priority": 5},
+    {"id": "t69", "title": "This Is Why I'm Hot", "artist": "Mims", "file": "Mims - This Is Why I'm Hot (Clean Version) - Clean Radio Promo.mp3", "priority": 3},
+    {"id": "t70", "title": "Made For Me", "artist": "Muni Long", "file": "Muni Long Made For Me Clean - DecaturQ.mp3", "priority": 8},
+    {"id": "t71", "title": "Everybody", "artist": "Nicki Minaj ft. Lil Uzi Vert", "file": "Nicki Minaj - Everybody (Clean - Lyrics) ft. Lil Uzi Vert - Cloudy Hits.mp3", "priority": 5},
+    {"id": "t72", "title": "No Flex Zone", "artist": "Rae Sremmurd", "file": "No Flex Zone.mp3", "priority": 4},
+    {"id": "t73", "title": "No Hands", "artist": "Waka Flocka Flame", "file": "No Hands (Clean) - WaCkYnJaCk328.mp3", "priority": 2},
+    {"id": "t74", "title": "GEEKALEEK", "artist": "OhGeesy", "file": "OhGeesy - GEEKALEEK (Feat. Cash Kidd) [Clean] - Sock With A Glock.mp3", "priority": 6},
+    {"id": "t75", "title": "Orange Soda", "artist": "Baby Keem", "file": "Orange soda - Baby Keem (Clean + Lyrics) (BEST ON YT) - syiix.mp3", "priority": 7},
+    {"id": "t76", "title": "Dior", "artist": "Pop Smoke", "file": "POPSMOKEDIOR.mp3", "priority": 6},
+    {"id": "t77", "title": "PTPOM 2.0", "artist": "Mohead Mike", "file": "PTPOM 2.0 Mohead Mike x MoneyBagg Yo x Big Boogie Official Visualizer (Clean) - Mohead Mike.mp3", "priority": 4},
+    {"id": "t78", "title": "Pills & Automobiles", "artist": "Chris Brown", "file": "Pills Automobiles Official Video.mp3", "priority": 6},
+    {"id": "t79", "title": "Turn Yo Clic Up", "artist": "Quavo & Future", "file": "Quavo & Future - Turn Yo Clic Up [Clean] - Sock With A Glock.mp3", "priority": 8},
+    {"id": "t80", "title": "Redbone", "artist": "Childish Gambino", "file": "Redbone [Clean] - Childish Gambino - relly rel.mp3", "priority": 5},
+    {"id": "t81", "title": "Gimme a Second", "artist": "Rich The Kid & Peso Pluma", "file": "Rich The Kid & Peso Pluma - Gimme a Second [Clean] - Sock With A Glock.mp3", "priority": 4},
+    {"id": "t82", "title": "Loveeeeeee Song", "artist": "Rihanna ft. Future", "file": "Rihanna - Loveeeeeee Song Lyrics Ft Future.mp3", "priority": 5},
+    {"id": "t83", "title": "Ring Ring Ring", "artist": "hopRadio", "file": "RingRingRing.mp3", "priority": 9},
+    {"id": "t84", "title": "WTHELLY", "artist": "Rob49", "file": "Rob49 - WTHELLY [Clean] - Sock With A Glock.mp3", "priority": 10},
+    {"id": "t85", "title": "Heart On Ice", "artist": "Rod Wave", "file": "Rod Wave - Heart On Ice Lyrics.mp3", "priority": 6},
+    {"id": "t86", "title": "The Box", "artist": "Roddy Ricch", "file": "Roddy Ricch - The Box Official Audio.mp3", "priority": 3},
+    {"id": "t87", "title": "Roses", "artist": "SAINt JHN", "file": "SAINt JHN - Roses lyrics.mp3", "priority": 2},
+    {"id": "t88", "title": "Get It Sexyy", "artist": "Sexyy Red", "file": "Sexy Red - Get it Sexyy (clean + lyrics! - Lyrics hours.mp3", "priority": 4},
+    {"id": "t89", "title": "U My Everything", "artist": "Sexyy Red & Drake", "file": "Sexyy Red & Drake - U My Everything (Clean) (Lyrics) - Audio at 192khz - Helfmadian.mp3", "priority": 4},
+    {"id": "t90", "title": "She Ready", "artist": "Lil Yachty", "file": "SheReady.mp3", "priority": 7},
+    {"id": "t91", "title": "Sleazy Flow (Remix)", "artist": "SleazyWorld Go ft. Lil Baby", "file": "SleazyWorld Go - Sleazy Flow Remix ft Lil Baby Official Music Video.mp3", "priority": 5},
+    {"id": "t92", "title": "Slow Jamz", "artist": "Kanye West", "file": "Slow Jamz.mp3", "priority": 5},
+    {"id": "t93", "title": "Buy You A Drank", "artist": "T-Pain", "file": "T-Pain - Buy You A Drank (Shawty Snappin') (Feat. Yung Joc) (Clean) - DJRatAttack.mp3", "priority": 4},
+    {"id": "t94", "title": "THE SCOTTS", "artist": "Travis Scott & Kid Cudi", "file": "THE SCOTTS Travis Scott Kid Cudi - THE SCOTTS Audio.mp3", "priority": 4},
+    {"id": "t95", "title": "Die For You", "artist": "The Weeknd", "file": "The Weeknd  - Die For You (Clean) - Ultron Music and DD2 Arts.mp3", "priority": 4},
+    {"id": "t96", "title": "Heartless", "artist": "The Weeknd", "file": "The Weeknd - Heartless Lyrics.mp3", "priority": 4},
+    {"id": "t97", "title": "Falsetto", "artist": "The-Dream", "file": "The-Dream - Falsetto (Clean_Radio Edit) - Clean Radio Promo.mp3", "priority": 5},
+    {"id": "t99", "title": "FE!N", "artist": "Travis Scott", "file": "Travis Scott - FEN Official Audio ft Playboi Carti.mp3", "priority": 7},
+    {"id": "t100", "title": "HIGHEST IN THE ROOM", "artist": "Travis Scott", "file": "Travis Scott - HIGHEST IN THE ROOM Official Music Video.mp3", "priority": 5},
+    {"id": "t101", "title": "Tuesday", "artist": "ILoveMakonnen ft. Drake", "file": "Tuesday feat Drake.mp3", "priority": 5},
+    {"id": "t102", "title": "IS IT", "artist": "Tyla", "file": "Tyla - IS IT (Clean) - XeonBeats.mp3", "priority": 10},
+    {"id": "t103", "title": "Love in This Club", "artist": "Usher ft. Young Jeezy", "file": "Usher - Love in This Club Lyrics ft Young Jeezy.mp3", "priority": 6},
+    {"id": "t104", "title": "Like A Wife", "artist": "Webbie & Tre Savage", "file": "Webbie Tre Savage - Like A Wife Official Music Video.mp3", "priority": 7},
+    {"id": "t105", "title": "Went Legit", "artist": "G Herbo", "file": "WentLegit.mp3", "priority": 6},
+    {"id": "t106", "title": "Jan 31st", "artist": "YFN Lucci", "file": "YFN Lucci - Jan. 31st (My Truth) [Clean] - Sock With A Glock.mp3", "priority": 7},
+    {"id": "t107", "title": "Bed Rock", "artist": "Young Money", "file": "Young Money - Bed Rock Official Music Video.mp3", "priority": 3},
+    {"id": "t108", "title": "Best Friend", "artist": "Young Thug", "file": "Young Thug Best Friend.mp3", "priority": 3},
+    {"id": "t109", "title": "Uh Oh", "artist": "Zeddy Will", "file": "Zeddy Will Uh Oh Clean - DecaturQ.mp3", "priority": 9},
+    {"id": "t110", "title": "Carnival", "artist": "Kanye West & Ty Dolla $ign", "file": "¥, Kanye West & Ty Dolla ign, Rich The Kid & Playboi Carti - Carnival (Clean Lyrics) - Clean Recordz.mp3", "priority": 4},
+
 ]
 
 CLIENTS = []      # 320kbps Clients
@@ -236,19 +236,40 @@ def select_next_track():
     
     # 1. Refill if needed
     if not SHUFFLE_BAG:
-        print("Refilling Shuffle Bag...")
-        SHUFFLE_BAG = list(PLAYLIST)
+        print("Refilling Weighted Shuffle Bag (Priority 1-10)...")
+        new_bag = []
+        for track in PLAYLIST:
+            # Priority 1 = 10 copies, Priority 10 = 1 copy
+            priority = track.get('priority', 5) # Default 5 if missing
+            copies = max(1, 11 - priority)
+            
+            for _ in range(copies):
+                new_bag.append(track)
+                
+        SHUFFLE_BAG = new_bag
         random.shuffle(SHUFFLE_BAG)
-        
-        # Smart Refill: Ensure the top of the NEW bag doesn't match LAST_PLAYED history
-        # If the first song was just played, swap it with a random one in the bag
-        if SHUFFLE_BAG and LAST_PLAYED and SHUFFLE_BAG[-1]['id'] in [t['id'] for t in LAST_PLAYED]:
-             print("Shuffle collision detected! Swapping...")
-             idx = random.randint(0, len(SHUFFLE_BAG) - 2) # Pick random index
-             # Swap last with random
-             SHUFFLE_BAG[-1], SHUFFLE_BAG[idx] = SHUFFLE_BAG[idx], SHUFFLE_BAG[-1]
+        print(f"Bag Refilled! Size: {len(SHUFFLE_BAG)} items")
 
-    # 2. Pop
+    # 2. Pop with Retry (avoid immediate repeats)
+    # Try up to 10 times to find a song not in LAST_PLAYED
+    for _ in range(10):
+        if not SHUFFLE_BAG: break # Should not happen unless bag is tiny
+        
+        candidate = SHUFFLE_BAG[-1]
+        
+        # Check History
+        if LAST_PLAYED and candidate['id'] in [t['id'] for t in LAST_PLAYED]:
+             # Collision! Swap with a random item deeper in the bag
+             if len(SHUFFLE_BAG) > 5:
+                 idx = random.randint(0, len(SHUFFLE_BAG) - 2)
+                 SHUFFLE_BAG[-1], SHUFFLE_BAG[idx] = SHUFFLE_BAG[idx], SHUFFLE_BAG[-1]
+                 continue # Retry loop
+             else:
+                 # Bag too small to care, just play it
+                 break
+        else:
+            break
+            
     track = SHUFFLE_BAG.pop()
     
     # 3. Add to history
