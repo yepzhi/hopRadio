@@ -579,13 +579,15 @@ function App() {
               title="Force Refresh Connection">
               <RefreshCw size={14} />
             </button>
-            {/* Speaker Selection Button (v3.2.5) */}
-            <button
-              onClick={() => radio.selectAudioOutput()}
-              className="p-2 rounded-full bg-gray-900/50 hover:bg-gray-800 text-gray-500 hover:text-white transition-all active:scale-90 border border-white/5 hover:border-white/20 shadow-lg backdrop-blur-md"
-              title="Select Audio Output">
-              <Speaker size={14} />
-            </button>
+            {/* Speaker Selection Button (v3.2.5) - Hidden on iOS (not supported) */}
+            {!/iPhone|iPad|iPod/i.test(navigator.userAgent) && (
+              <button
+                onClick={() => radio.selectAudioOutput()}
+                className="p-2 rounded-full bg-gray-900/50 hover:bg-gray-800 text-gray-500 hover:text-white transition-all active:scale-90 border border-white/5 hover:border-white/20 shadow-lg backdrop-blur-md"
+                title="Select Audio Output">
+                <Speaker size={14} />
+              </button>
+            )}
           </div>
         )}
 
