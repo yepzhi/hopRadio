@@ -33,6 +33,13 @@ export const radio = new class RadioEngine {
         this.onNetworkStats = null;
         this.lastBufferedParams = { end: 0 };
         this.sessionTotalBytes = 0;
+
+        // Audio Output Selection (v2.7.0)
+        this.currentOutputDevice = null;
+        this.onAudioOutputChange = null;
+
+        // Auto-Resume on Device Reconnect (v2.7.0)
+        this.wasPlayingBeforeDisconnect = false;
     }
 
     reconnect() {
@@ -66,6 +73,9 @@ export const radio = new class RadioEngine {
 
         // Dynamic Network Listener
         this._setupNetworkListeners();
+
+        // Audio Device Change Listener (Auto-Resume)
+        this._setupDeviceChangeListener();
     }
 
     _setupNetworkListeners() {
@@ -399,6 +409,12 @@ export const radio = new class RadioEngine {
 
     pause() {
         console.log("RadioEngine: Stopping Audio");
+
+        // Store state for auto-resume on device reconnect
+        if (this.isPlaying) {
+            this.wasPlayingBeforeDisconnect = true;
+        }
+
         this.isPlaying = false;
 
         if (this.howl) {
@@ -489,6 +505,94 @@ export const radio = new class RadioEngine {
 
             navigator.mediaSession.setActionHandler('play', () => this.play());
             navigator.mediaSession.setActionHandler('pause', () => this.pause());
+        }
+    }
+
+    // --- Audio Output Selection (v2.7.0) ---
+
+    /**
+     * Get list of available audio output devices
+     * @returns {Promise<Array>} List of audio output devices
+     */
+    async getAudioOutputs() {
+        try {
+            // Request permission first (needed to get full device list)
+            await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => { });
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            return devices.filter(d => d.kind === 'audiooutput');
+        } catch (err) {
+            console.warn('RadioEngine: Cannot enumerate audio devices:', err);
+            return [];
+        }
+    }
+
+    /**
+     * Set audio output device by deviceId
+     * @param {string} deviceId - The device ID to switch to
+     */
+    async setAudioOutput(deviceId) {
+        try {
+            if (Howler.ctx && typeof Howler.ctx.setSinkId === 'function') {
+                await Howler.ctx.setSinkId(deviceId);
+                this.currentOutputDevice = deviceId;
+                console.log('RadioEngine: Audio output changed to:', deviceId);
+                if (this.onAudioOutputChange) this.onAudioOutputChange(deviceId);
+                localStorage.setItem('hop_audio_output', deviceId);
+            } else {
+                console.warn('RadioEngine: setSinkId not supported');
+            }
+        } catch (err) {
+            console.error('RadioEngine: Failed to set audio output:', err);
+        }
+    }
+
+    /**
+     * Prompt user to select audio output device (requires user gesture)
+     */
+    async selectAudioOutput() {
+        try {
+            if (navigator.mediaDevices.selectAudioOutput) {
+                const device = await navigator.mediaDevices.selectAudioOutput();
+                if (device) {
+                    await this.setAudioOutput(device.deviceId);
+                    return device;
+                }
+            } else {
+                console.warn('RadioEngine: selectAudioOutput not supported');
+            }
+        } catch (err) {
+            console.error('RadioEngine: Audio output selection cancelled or failed:', err);
+        }
+        return null;
+    }
+
+    /**
+     * Setup device change listener for auto-resume
+     */
+    _setupDeviceChangeListener() {
+        if (navigator.mediaDevices) {
+            navigator.mediaDevices.addEventListener('devicechange', async () => {
+                console.log('RadioEngine: Audio device change detected');
+
+                // Check if we should auto-resume
+                if (this.wasPlayingBeforeDisconnect && !this.isPlaying) {
+                    console.log('RadioEngine: Auto-resuming playback after device reconnect');
+                    setTimeout(() => {
+                        this.play();
+                        this.wasPlayingBeforeDisconnect = false;
+                    }, 500); // Small delay for device to stabilize
+                }
+
+                // Try to restore saved audio output
+                const savedOutput = localStorage.getItem('hop_audio_output');
+                if (savedOutput) {
+                    const devices = await this.getAudioOutputs();
+                    const found = devices.find(d => d.deviceId === savedOutput);
+                    if (found) {
+                        await this.setAudioOutput(savedOutput);
+                    }
+                }
+            });
         }
     }
 };
