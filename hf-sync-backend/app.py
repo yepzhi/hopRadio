@@ -66,7 +66,7 @@ PLAYLIST = [
     {"id": "t33", "title": "No Pole", "artist": "Don Toliver", "file": "Don Toliver - No Pole (CLEAN) - Clean UK Drill.mp3", "priority": 2},
     {"id": "t34", "title": "What Did I Miss", "artist": "Drake", "file": "Drake - What Did I Miss (Clean) - XeonBeats.mp3", "priority": 4},
     {"id": "t35", "title": "Crunk Ain't Dead (Remix)", "artist": "Duke Deuce", "file": "Duke Deuce Crunk Aint Dead Remix ft Lil Jon Juicy J Project Pat.mp3", "priority": 8},
-    {"id": "t36", "title": "U And Dat", "artist": "E-40 ft. T-Pain", "file": "E-40 - U And Dat Featuring T Pain Kandi Girl HD.mp3", "priority": 6},
+
     {"id": "t37", "title": "Envy (Remix)", "artist": "hopRadio", "file": "Envy Remix.mp3", "priority": 7},
     {"id": "t38", "title": "My Way", "artist": "Fetty Wap ft. Monty", "file": "Fetty Wap My Way feat Monty Official Video.mp3", "priority": 7},
     {"id": "t39", "title": "Life Is Good", "artist": "Future ft. Drake", "file": "Future - Life Is Good Audio ft Drake.mp3", "priority": 7},
@@ -128,13 +128,13 @@ PLAYLIST = [
     {"id": "t95", "title": "Die For You", "artist": "The Weeknd", "file": "The Weeknd  - Die For You (Clean) - Ultron Music and DD2 Arts.mp3", "priority": 7},
     {"id": "t96", "title": "Heartless", "artist": "The Weeknd", "file": "The Weeknd - Heartless Lyrics.mp3", "priority": 7},
     {"id": "t97", "title": "Falsetto", "artist": "The-Dream", "file": "The-Dream - Falsetto (Clean_Radio Edit) - Clean Radio Promo.mp3", "priority": 6},
-    {"id": "t99", "title": "FE!N", "artist": "Travis Scott", "file": "Travis Scott - FEN Official Audio ft Playboi Carti.mp3", "priority": 4},
+
     {"id": "t100", "title": "HIGHEST IN THE ROOM", "artist": "Travis Scott", "file": "Travis Scott - HIGHEST IN THE ROOM Official Music Video.mp3", "priority": 6},
     {"id": "t101", "title": "Tuesday", "artist": "ILoveMakonnen ft. Drake", "file": "Tuesday feat Drake.mp3", "priority": 6},
     {"id": "t102", "title": "IS IT", "artist": "Tyla", "file": "Tyla - IS IT (Clean) - XeonBeats.mp3", "priority": 1},
     {"id": "t103", "title": "Love in This Club", "artist": "Usher ft. Young Jeezy", "file": "Usher - Love in This Club Lyrics ft Young Jeezy.mp3", "priority": 5},
     {"id": "t104", "title": "Like A Wife", "artist": "Webbie & Tre Savage", "file": "Webbie Tre Savage - Like A Wife Official Music Video.mp3", "priority": 4},
-    {"id": "t105", "title": "Went Legit", "artist": "G Herbo", "file": "WentLegit.mp3", "priority": 5},
+
     {"id": "t106", "title": "Jan 31st", "artist": "YFN Lucci", "file": "YFN Lucci - Jan. 31st (My Truth) [Clean] - Sock With A Glock.mp3", "priority": 4},
     {"id": "t107", "title": "Bed Rock", "artist": "Young Money", "file": "Young Money - Bed Rock Official Music Video.mp3", "priority": 8},
     {"id": "t108", "title": "Best Friend", "artist": "Young Thug", "file": "Young Thug Best Friend.mp3", "priority": 8},
