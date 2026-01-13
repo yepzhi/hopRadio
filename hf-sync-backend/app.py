@@ -27,9 +27,9 @@ app.add_middleware(
 TRACKS_DIR = "tracks"
 os.makedirs(TRACKS_DIR, exist_ok=True)
 
-# Playlist (without Intro.mp3 which 404s)
-# Playlist (Auto-Generated)
-# PRIORITY INVERTED: Higher number = plays MORE often
+# Playlist
+# SIMPLE SYSTEM: The number = how many times it plays
+# 9 = plays 9x | 7 = plays 7x | 1 = plays 1x (rare)
 PLAYLIST = [
     {"id": "t1", "title": "Good Good", "artist": "21 Savage, Summer Walker, Usher", "file": "21 Savage Summer Walker and Usher - Good Good Lyrics.mp3", "priority": 4},
     {"id": "t2", "title": "30 For 30", "artist": "SZA", "file": "30For30.mp3", "priority": 4},
@@ -240,12 +240,13 @@ def select_next_track():
     
     # 1. Refill if needed
     if not SHUFFLE_BAG:
-        print("Refilling Weighted Shuffle Bag (Priority 1-10)...")
+        print("Refilling Weighted Shuffle Bag...")
         new_bag = []
         for track in PLAYLIST:
-            # Priority 10 = 1 copy (rare), Priority 1 = 10 copies (frequent)
-            priority = track.get('priority', 5) # Default 5 if missing
-            copies = max(1, 11 - priority)  # Inverted: lower priority = more copies
+            # SIMPLE: The number IS how many copies go in the bag
+            # Priority 9 = 9 copies = plays 9x more often
+            # Priority 1 = 1 copy = plays rarely
+            copies = track.get('priority', 5)  # Default 5 if missing
             
             for _ in range(copies):
                 new_bag.append(track)
