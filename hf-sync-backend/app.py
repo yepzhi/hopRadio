@@ -241,9 +241,9 @@ def select_next_track():
         print("Refilling Weighted Shuffle Bag (Priority 1-10)...")
         new_bag = []
         for track in PLAYLIST:
-            # Higher priority = more copies (priority 10 = 10 copies, priority 1 = 1 copy)
+            # Priority 10 = 1 copy (rare), Priority 1 = 10 copies (frequent)
             priority = track.get('priority', 5) # Default 5 if missing
-            copies = max(1, priority)  # Priority IS the number of copies
+            copies = max(1, 11 - priority)  # Inverted: lower priority = more copies
             
             for _ in range(copies):
                 new_bag.append(track)
