@@ -140,6 +140,8 @@ PLAYLIST = [
     {"id": "t108", "title": "Best Friend", "artist": "Young Thug", "file": "Young Thug Best Friend.mp3", "priority": 8},
     {"id": "t109", "title": "Uh Oh", "artist": "Zeddy Will", "file": "Zeddy Will Uh Oh Clean - DecaturQ.mp3", "priority": 2},
     {"id": "t110", "title": "Carnival", "artist": "Kanye West & Ty Dolla $ign", "file": "¥, Kanye West & Ty Dolla ign, Rich The Kid & Playboi Carti - Carnival (Clean Lyrics) - Clean Recordz.mp3", "priority": 7},
+    {"id": "t111", "title": "WGFT", "artist": "Gunna feat. Burna Boy", "file": "WGFT - Gunna feat Burna Boy.mp3", "priority": 9},
+    {"id": "t112", "title": "Burning Blue", "artist": "Mariah the Scientist", "file": "Mariah the Scientist - Burning Blue.mp3", "priority": 7},
 
 ]
 
