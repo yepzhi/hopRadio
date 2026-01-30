@@ -291,12 +291,29 @@ function App() {
   useEffect(() => {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: track ? track.title : "hopRadio Live",
-        artist: track ? track.artist : `${listeners} listeners`,
+        title: track ? track.title : (isOfflineMode ? "Offline Stream" : "hopRadio Live"),
+        artist: track ? track.artist : (isOfflineMode ? "hopRadio" : `${listeners} listeners`),
         artwork: [{ src: 'https://yepzhi.com/hopRadio/logo.svg', sizes: '512x512', type: 'image/svg+xml' }]
       });
+
+      // KEY FIX: iOS Background Audio
+      // If we are offline, tell the OS this is a LIVE stream (Infinity duration)
+      // This prevents the OS from suspending the app when weightless/offline track ends or when backgrounded.
+      if (isOfflineMode) {
+        try {
+          navigator.mediaSession.setPositionState({
+            duration: Infinity,
+            playbackRate: 1,
+            position: 0
+          });
+        } catch (e) {
+          console.warn("MediaSession setPositionState failed:", e);
+        }
+      }
+
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
     }
-  }, [listeners, track]);
+  }, [listeners, track, isOfflineMode, isPlaying]);
 
 
   useEffect(() => {
@@ -827,7 +844,7 @@ function App() {
         <div className="text-center mt-4 px-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
           <div className="flex flex-col items-center gap-1">
             <p className="text-[9px] text-gray-600 leading-relaxed max-w-sm mx-auto">
-              v3.2.5, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
+              v3.2.6, Made by @yepzhi, design and music selection by @yepzhi for hopRadio, SERGRadio mixes by @SERG.
               <br />
               hopRadio/SERGRadio are property of @yepzhi. All Rights Reserved 2025.
               <br />

@@ -499,8 +499,22 @@ export const radio = new class RadioEngine {
             if (track) {
                 // Offline Controls
                 navigator.mediaSession.setActionHandler('nexttrack', () => this.playNextOffline());
+                navigator.mediaSession.setActionHandler('previoustrack', () => this.playPrevOffline());
+
+                // IOS LIVE STREAM HACK for Offline Mode
+                // Force infinite duration so the OS treats it as a radio stream
+                try {
+                    navigator.mediaSession.setPositionState({
+                        duration: Infinity,
+                        playbackRate: 1,
+                        position: 0
+                    });
+                } catch (e) {
+                    console.warn("MediaSession setPositionState failed:", e);
+                }
             } else {
                 navigator.mediaSession.setActionHandler('nexttrack', null);
+                navigator.mediaSession.setActionHandler('previoustrack', null);
             }
 
             navigator.mediaSession.setActionHandler('play', () => this.play());
