@@ -10,6 +10,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from queue import Queue, Full, Empty
 
+from urllib.parse import quote
 from collections import deque
 
 app = FastAPI()
@@ -139,7 +140,7 @@ PLAYLIST = [
     {"id": "t107", "title": "Bed Rock", "artist": "Young Money", "file": "Young Money - Bed Rock Official Music Video.mp3", "priority": 3},
     {"id": "t108", "title": "Best Friend", "artist": "Young Thug", "file": "Young Thug Best Friend.mp3", "priority": 3},
     {"id": "t109", "title": "Uh Oh", "artist": "Zeddy Will", "file": "Zeddy Will Uh Oh Clean - DecaturQ.mp3", "priority": 9},
-    {"id": "t110", "title": "Carnival", "artist": "Kanye West & Ty Dolla $ign", "file": "¥, Kanye West & Ty Dolla ign, Rich The Kid & Playboi Carti - Carnival (Clean Lyrics) - Clean Recordz.mp3", "priority": 4},
+    {"id": "t110", "title": "Carnival", "artist": "Kanye West & Ty Dolla $ign", "file": "Kanye West & Ty Dolla ign, Rich The Kid & Playboi Carti - Carnival (Clean Lyrics) - Clean Recordz.mp3", "priority": 4},
     {"id": "t111", "title": "WGFT", "artist": "Gunna feat. Burna Boy", "file": "WGFT - Gunna feat Burna Boy.mp3", "priority": 9},
     {"id": "t112", "title": "Burning Blue", "artist": "Mariah the Scientist", "file": "Mariah the Scientist - Burning Blue.mp3", "priority": 7},
 
@@ -173,7 +174,8 @@ def get_track_duration(file_path):
 
 
 def download_track(filename):
-    url = f"https://yepzhi.com/hopRadio/tracks/{filename}"
+    encoded_filename = quote(filename)
+    url = f"https://yepzhi.com/hopRadio/tracks/{encoded_filename}"
     local_path = os.path.join(TRACKS_DIR, filename)
     
     # Check if exists and valid
