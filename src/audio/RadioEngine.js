@@ -177,12 +177,33 @@ export const radio = new class RadioEngine {
             }
         });
 
-        // 3. Inject CORS *before* request starts (Critical for Chrome/Firefox Visualizer)
+        // 3. Inject CORS & Event Listeners *before* request starts
         if (this.howl._sounds.length > 0 && this.howl._sounds[0]._node) {
-            this.howl._sounds[0]._node.crossOrigin = "anonymous";
+            const node = this.howl._sounds[0]._node;
+            node.crossOrigin = "anonymous";
+
+            // Prevent native HTML5 element stalls/pauses from stopping audio permanently
+            node.onpause = () => {
+                if (this.isPlaying && !this.isOffline) {
+                    console.log("RadioEngine: HTML5 audio node paused unexpectedly, resuming...");
+                    node.play().catch(e => console.warn("Auto-play node resume failed:", e));
+                }
+            };
+            node.onerror = (e) => {
+                console.error("RadioEngine: HTML5 audio node error", e);
+                if (this.isPlaying && !this.isOffline) {
+                    node.load();
+                    node.play().catch(() => {});
+                }
+            };
+            node.onstalled = () => {
+                console.warn("RadioEngine: HTML5 audio node stalled");
+                if (this.isPlaying && !this.isOffline) {
+                    node.play().catch(() => {});
+                }
+            };
         }
 
-        // 4. Start
         // 4. Start
         this.howl.play();
 
@@ -201,10 +222,20 @@ export const radio = new class RadioEngine {
         this.watchdogInterval = setInterval(() => {
             if (!this.howl || this.isOffline || !this.isPlaying) return;
 
+            // Auto-resume AudioContext if suspended by browser policy
+            if (Howler.ctx && Howler.ctx.state === 'suspended' && this.isPlaying) {
+                Howler.ctx.resume().catch(() => {});
+            }
+
             const sound = this.howl._sounds[0];
             const node = sound ? sound._node : null;
 
-            if (!node || node.paused) return; // Don't check if intentionally paused
+            if (!node) return;
+
+            // If audio node paused while we are supposed to be playing, attempt soft resume
+            if (node.paused && this.isPlaying) {
+                node.play().catch(() => {});
+            }
 
             const currentTime = node.currentTime;
 
@@ -234,14 +265,10 @@ export const radio = new class RadioEngine {
                     if (this.lastBufferedParams.end > 0) {
                         const delta = bufferedEnd - this.lastBufferedParams.end;
                         if (delta > 0) {
-                            // Dynamic Bitrate Calculation
-                            // 320kbps ~= 40KB/s
-                            // 192kbps ~= 24KB/s
                             const bytesPerSecond = this.currentQuality === '192' ? 24000 : 40000;
                             const bytes = delta * bytesPerSecond;
                             this.sessionTotalBytes += bytes;
 
-                            // Speed = bytes per second (since interval is 1s)
                             if (this.onNetworkStats) this.onNetworkStats({ speed: bytes, total: this.sessionTotalBytes });
                         } else {
                             if (this.onNetworkStats) this.onNetworkStats({ speed: 0, total: this.sessionTotalBytes });
@@ -252,15 +279,17 @@ export const radio = new class RadioEngine {
             }
             // ------------------------------------------
 
-            // TRIGGER: Force Reconnect if stuck > 5s
+            // TRIGGER: Soft play attempt if stuck > 5s before full hard reconnect
             if (stuckTime > 5000) {
-                console.warn("RadioEngine: Watchdog triggered! Stream stuck > 5s. force reconnecting...");
+                console.warn("RadioEngine: Watchdog triggered! Soft resuming audio node...");
                 stuckTime = 0;
-
-                // CRITICAL: Clean stop to reset isPlaying state so play() works
-                this.pause();
-
-                setTimeout(() => this.play(), 100); // Re-init
+                if (node) {
+                    node.play().catch(() => {
+                        this.reconnect();
+                    });
+                } else {
+                    this.reconnect();
+                }
             }
         }, 1000);
     }
@@ -385,7 +414,8 @@ export const radio = new class RadioEngine {
                         if (this.isOffline) {
                             this.playNextOffline(); // Skip track
                         } else {
-                            this.reconnect(); // Reconnect stream
+                            // Hard reconnect on silence disabled to prevent browser autoplay policy blocking stream (v3.2.8)
+                            // HTML5 node self-healing handles reconnects without resetting AudioContext
                         }
                         return;
                     }
