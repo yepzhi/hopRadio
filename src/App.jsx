@@ -554,31 +554,50 @@ function App() {
     <div className="container min-h-[100dvh] flex flex-col items-center justify-center p-4 md:p-5 pb-16 md:pb-20 relative z-10 w-full max-w-4xl mx-auto">
 
       {/* Loading Screen - Waking Radio */}
+      {/* Loading Screen - Waking Radio */}
       {!isReady && (
-        <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50 p-6 text-center">
-          <h1 className="logo-text text-5xl md:text-6xl font-black tracking-tighter mb-4 text-white">hopRadio</h1>
+        <div className="fixed inset-0 bg-[#0a0505] flex flex-col items-center justify-center z-50 p-6 text-center font-mono">
           
-          {/* 15 sec countdown badge */}
-          <div className="flex items-center gap-2 mb-2 bg-yellow-500/10 border border-yellow-500/30 px-3 py-1 rounded-full animate-pulse">
-            <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-            <span className="text-xs uppercase font-bold tracking-widest text-yellow-400">15 sec. countdown</span>
+          {/* Animated SVG Radar / Server Connection */}
+          <div className="relative w-32 h-32 mb-8">
+            <div className="absolute inset-0 rounded-full border-[3px] border-[#ff3333]/20 animate-ping" style={{ animationDuration: '2.5s' }}></div>
+            <div className="absolute inset-2 rounded-full border-2 border-[#ff3333]/40 border-t-transparent animate-spin" style={{ animationDuration: '3s' }}></div>
+            <div className="absolute inset-6 rounded-full border-2 border-[#ff3333]/80 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+            <div className="absolute inset-0 flex items-center justify-center text-[#ff3333]">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-10 h-10 animate-pulse">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
+              </svg>
+            </div>
           </div>
-
-          <div className="text-red-500 font-bold text-xl md:text-2xl mb-2 animate-pulse">Waking up server</div>
           
-          <div className="text-2xl md:text-3xl font-black font-mono text-white mb-6 tracking-tight">
-            <span className="text-red-500 font-bold">{sleepCountdown}</span> to live Jamz!
-          </div>
+          <h1 className="logo-text text-4xl md:text-5xl font-black tracking-tighter mb-8 text-white drop-shadow-lg">
+            <span className="text-white">hop</span>
+            <span className="text-[#ff3333]" style={{ color: '#ff3333', textShadow: '0 0 15px rgba(255,51,51,0.4)' }}>Radio</span>
+          </h1>
 
-          <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-8"></div>
+          <div className="flex flex-col items-center gap-3 mb-10 w-full max-w-sm">
+            <div className="flex items-center gap-3 w-full">
+              <span className="w-2 h-2 rounded-full bg-[#ff3333] animate-pulse"></span>
+              <div className="h-px flex-1 bg-gradient-to-r from-[#ff3333]/50 to-transparent"></div>
+              <span className="text-[#ff3333] font-bold text-sm md:text-base uppercase tracking-widest whitespace-nowrap">
+                Contacting Server
+              </span>
+              <div className="h-px flex-1 bg-gradient-to-l from-[#ff3333]/50 to-transparent"></div>
+              <span className="w-2 h-2 rounded-full bg-[#ff3333] animate-pulse"></span>
+            </div>
+            
+            <div className="text-gray-400 text-xs md:text-sm font-medium tracking-wide mt-2">
+              Powering up audio engines. Please wait <span className="text-white font-bold">{sleepCountdown}s</span>...
+            </div>
+          </div>
 
           {/* Failsafe Button - shows after 3s */}
           <button
             onClick={() => setIsReady(true)}
-            className="text-gray-500 text-xs hover:text-white underline animate-in fade-in duration-1000 delay-3000 opacity-0 fill-mode-forwards"
+            className="mt-4 px-4 py-2 rounded-md border border-gray-800 text-gray-500 hover:bg-gray-800/50 hover:text-[#ff3333] hover:border-[#ff3333]/30 transition-all duration-300 text-xs uppercase tracking-[0.2em] font-bold animate-in fade-in duration-1000 delay-3000 opacity-0 fill-mode-forwards"
             style={{ animationDelay: '3s', animationFillMode: 'forwards' }}
           >
-            Taking too long? Start anyway
+            [ Force Start ]
           </button>
         </div>
       )}
