@@ -593,10 +593,12 @@ function App() {
             </div>
             
             <div className="text-gray-400 text-xs md:text-sm font-medium tracking-wide mt-2">
-              Powering up audio engines. Please wait <span className="text-white font-bold">{sleepCountdown}s</span>...
+              <span>Powering up audio engines. Please wait </span>
+              <span className="text-white font-bold">{sleepCountdown}s</span>
+              <span>...</span>
             </div>
             <div className="text-red-400 text-xs font-semibold tracking-wide mt-1">
-              Please refresh site
+              <span>Please refresh site</span>
             </div>
           </div>
 
@@ -694,7 +696,7 @@ function App() {
         <div className="absolute top-6 right-6 z-20 flex flex-col items-end gap-1">
           <div className={`text-xs uppercase tracking-[2px] font-bold flex items-center gap-2 leading-none ${isLive ? 'text-red-500' : 'text-gray-500'}`}>
             {isPlaying && isLive && <span className="w-2 h-2 rounded-full bg-red-600 live-dot-anim relative top-[0.5px]"></span>}
-            {isOfflineMode ? 'OFFLINE MODE' : (isPlaying ? (isServerSleeping ? 'WAKING UP...' : (isBuffering ? 'BUFFERING...' : 'LIVE')) : '')}
+            <span>{isOfflineMode ? 'OFFLINE MODE' : (isPlaying ? (isServerSleeping ? 'WAKING UP...' : (isBuffering ? 'BUFFERING...' : 'LIVE')) : '')}</span>
           </div>
           {/* HD Radio Logo - Top Right */}
           <img src="/hopRadio/hd-logo.png" alt="HD Radio" className={`h-5 opacity-90 mt-1 ${isOfflineMode ? 'grayscale brightness-50' : ''}`} />
@@ -739,7 +741,8 @@ function App() {
             </h3>
             
             <div className="text-lg md:text-xl font-black text-white font-mono tracking-tight my-1">
-              <span className="text-red-500 text-2xl font-bold">{sleepCountdown}</span> to live Jamz!
+              <span className="text-red-500 text-2xl font-bold">{sleepCountdown}</span>
+              <span> to live Jamz!</span>
             </div>
 
             <p className="text-xs text-amber-300 font-semibold tracking-wide mt-1">
