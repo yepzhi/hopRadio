@@ -406,6 +406,7 @@ function App() {
     };
 
     radio.onPlay = () => {
+      setIsPlaying(true);
       setIsBuffering(false);
       setIsLive(true);
       setIsServerSleeping(false);
@@ -414,11 +415,6 @@ function App() {
     // Watchdog Buffering Hook
     radio.onBufferingChange = (state) => {
       setIsBuffering(state);
-    };
-
-    // Network Stats Hook (v2.6.4)
-    radio.onNetworkStats = (stats) => {
-      setNetStats(stats);
     };
 
     // Quality Sync Hook (moved above initRadio - v3.2.3)

@@ -1,5 +1,6 @@
 import os
 import time
+import asyncio
 import threading
 import glob
 import random
@@ -153,10 +154,10 @@ CLIENTS_192 = []  # 192kbps Clients
 # Global Circular Buffers
 # BURST_BUFFER: Pre-fills new clients for instant playback
 # Adjusted for ~20 seconds of audio to keep start times aligned across qualities
-# 320k: ~40KB/s -> 20s = 800KB. Chunks=16KB -> 50 chunks
-# 192k: ~24KB/s -> 20s = 480KB. Chunks=16KB -> 30 chunks
-BURST_BUFFER = deque(maxlen=50)      # 320kbps
-BURST_BUFFER_192 = deque(maxlen=30)  # 192kbps
+# 320k: ~40KB/s -> 20s = 800KB. Chunks=32KB -> 25 chunks
+# 192k: ~24KB/s -> 20s = 480KB. Chunks=32KB -> 15 chunks
+BURST_BUFFER = deque(maxlen=25)      # 320kbps
+BURST_BUFFER_192 = deque(maxlen=15)  # 192kbps
 
 CURRENT_TRACK_INFO = {"title": "Connecting...", "artist": "hopRadio"}
 
@@ -289,7 +290,7 @@ def broadcast_stream():
     global CURRENT_TRACK_INFO
     print("Starting Dual-Broadcast Loop (320k + 192k)...")
     
-    CHUNK_SIZE = 16384 
+    CHUNK_SIZE = 32768 
     
     while True:
         # Get next ready track
@@ -300,49 +301,44 @@ def broadcast_stream():
         print(f"Now Playing: {track['title']}")
         
         # DELAYED METADATA UPDATE (Sync with Audio Buffer)
-        # Buffer is ~20s deep, but we want the UI to update when audio arrives?
-        # Actually, with the burst buffer reducation (20s), a 5s delay is a good safe zone
-        # to ensure the previous track has finished playing on the client.
-        def update_meta_delayed():
+        def update_meta_delayed(t_ref=track, p_ref=local_path):
              global CURRENT_TRACK_INFO
              
              # Calculate Duration (Accurate)
-             dur = get_track_duration(local_path)
-             if dur == 0: dur = os.path.getsize(local_path) / 40000 
+             dur = t_ref.get('duration') or get_track_duration(p_ref)
+             if dur == 0:
+                 dur = os.path.getsize(p_ref) / 40000 
              
-             track['duration'] = dur
-             track['started_at'] = time.time()
-             
-             CURRENT_TRACK_INFO = track
-             print(f"METADATA UPDATED: {track['title']} (Duration: {dur/60:.1f}m)")
+             CURRENT_TRACK_INFO = {
+                 **t_ref,
+                 'duration': dur,
+                 'started_at': time.time()
+             }
+             print(f"METADATA UPDATED: {t_ref['title']} (Duration: {dur/60:.1f}m)")
         
         # 5 second delay to match buffer flush
         threading.Timer(5.0, update_meta_delayed).start()
         
         # --- Stream A: 320kbps (HQ) ---
         cmd_320 = [
-            'ffmpeg', '-re', '-i', local_path,
+            'ffmpeg', '-re', '-i', local_path, '-vn',
             '-af', 'highpass=f=28,lowshelf=g=3:f=95,equalizer=f=60:width_type=o:width=1:g=2,equalizer=f=800:width_type=o:width=1:g=-2,highshelf=g=9:f=10000,acompressor=threshold=-14dB:ratio=2:attack=8:release=250',
-            '-f', 'mp3', '-b:a', '320k', '-bufsize', '1024k',
+            '-f', 'mp3', '-b:a', '320k', '-bufsize', '4096k',
             '-ac', '2', '-ar', '44100', '-loglevel', 'error', 'pipe:1'
         ]
 
         # --- Stream B: 192kbps (Data Saver) ---
         cmd_192 = [
-            'ffmpeg', '-re', '-i', local_path,
+            'ffmpeg', '-re', '-i', local_path, '-vn',
             '-af', 'highpass=f=28,lowshelf=g=3:f=95,equalizer=f=60:width_type=o:width=1:g=2,equalizer=f=800:width_type=o:width=1:g=-2,highshelf=g=9:f=10000,acompressor=threshold=-14dB:ratio=2:attack=8:release=250',
-            '-f', 'mp3', '-b:a', '192k', '-bufsize', '512k', # Lower bitrate & buffer
+            '-f', 'mp3', '-b:a', '192k', '-bufsize', '2048k',
             '-ac', '2', '-ar', '44100', '-loglevel', 'error', 'pipe:1'
         ]
         
         try:
-            # Start BOTH encoders
-            p320 = subprocess.Popen(cmd_320, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            p192 = subprocess.Popen(cmd_192, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            
-            # We need to read both stdout streams concurrently without blocking
-            # Simple approach: Use threads or just alternating non-blocking reads.
-            # However, simpler for Python is threads to read and push to queues.
+            # Start BOTH encoders (use DEVNULL for stderr to prevent 64KB OS pipe deadlock)
+            p320 = subprocess.Popen(cmd_320, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            p192 = subprocess.Popen(cmd_192, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
             
             def stream_reader(process, buffer_deque, clients_list, name):
                 try:
@@ -352,18 +348,18 @@ def broadcast_stream():
                         
                         buffer_deque.append(chunk) # Update Burst
                         
-                        # Dispatch
+                        # Dispatch to active clients; evict stalled/zombie queues
                         dead = []
-                        for q in clients_list:
+                        for q in list(clients_list):
                             try:
-                                if q.full():
-                                    try: q.get_nowait()
-                                    except Empty: pass
                                 q.put_nowait(chunk)
-                            except:
+                            except Full:
+                                dead.append(q)
+                            except Exception:
                                 dead.append(q)
                         for d in dead:
-                            if d in clients_list: clients_list.remove(d)
+                            if d in clients_list:
+                                clients_list.remove(d)
                 except Exception as e:
                     print(f"Reader {name} error: {e}")
 
@@ -388,7 +384,7 @@ threading.Thread(target=track_manager_loop, daemon=True).start()
 threading.Thread(target=broadcast_stream, daemon=True).start()
 
 @app.get("/")
-def index():
+async def index():
     next_track = None
     if not READY_TRACKS.empty():
         try:
@@ -401,20 +397,21 @@ def index():
     return {
         "status": "radio_active", 
         "quality": "320kbps CBR",
-        "listeners": len(CLIENTS),
+        "listeners": len(CLIENTS) + len(CLIENTS_192),
+        "listeners_320": len(CLIENTS),
+        "listeners_192": len(CLIENTS_192),
         "now_playing": CURRENT_TRACK_INFO,
         "next_playing": next_track,
         "queue": READY_TRACKS.qsize()
     }
 
 @app.get("/api/offline-queue")
-def get_offline_queue():
+async def get_offline_queue():
     """Returns a list of 15 random tracks for client-side offline buffering"""
     # Select 15 random tracks (approx 1 hour)
     queue = random.sample(PLAYLIST, min(len(PLAYLIST), 15))
     
     # Enrich with direct download URLs
-    # Assuming the frontend can access the same source URLs
     response_queue = []
     for track in queue:
         t = track.copy()
@@ -424,7 +421,7 @@ def get_offline_queue():
     return {"queue": response_queue}
 
 @app.get("/stream")
-def stream_audio(q: str = "320"):
+async def stream_audio(q: str = "320"):
     # Select Queue based on quality param
     if q == "192":
         target_clients = CLIENTS_192
@@ -435,33 +432,42 @@ def stream_audio(q: str = "320"):
         target_burst = BURST_BUFFER
         print("New Client: 320kbps")
 
-    def event_stream():
-        # Large Client Queue to absorb jitters
-        client_q = Queue(maxsize=500) 
-        
-        # BURST: Pre-fill
+    async def event_stream():
+        # Client queue (~2 minutes max lag before auto-eviction of dead connections)
+        client_q = Queue(maxsize=150) 
         backlog = list(target_burst)
-        for chunk in backlog:
-            try:
-                client_q.put_nowait(chunk)
-            except Full:
-                break
-                
         target_clients.append(client_q)
         
         try:
+            # Instant single-write burst flush (~20s of audio in first packet)
+            if backlog:
+                yield b"".join(backlog)
+
             while True:
-                chunk = client_q.get()
-                yield chunk
-        except Exception as e:
-            pass # Disconnect
+                while client_q.empty():
+                    if client_q not in target_clients:
+                        return
+                    await asyncio.sleep(0.04)
+
+                chunks = []
+                while not client_q.empty():
+                    try:
+                        chunks.append(client_q.get_nowait())
+                    except Empty:
+                        break
+                if chunks:
+                    yield b"".join(chunks)
+        except (asyncio.CancelledError, GeneratorExit, Exception):
+            pass
         finally:
             if client_q in target_clients:
                 target_clients.remove(client_q)
 
-    # Headers to prevent buffering AND Enable CORS for AudioContext
+    # Headers to prevent proxy buffering AND Enable CORS for AudioContext
     headers = {
-        "Cache-Control": "no-cache",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
         "X-Accel-Buffering": "no",
         "Connection": "keep-alive",
         "Access-Control-Allow-Origin": "*",
